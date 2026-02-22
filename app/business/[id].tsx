@@ -3,9 +3,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sampleBusinesses } from '@/data/mockData';
-import Colors from '@/constants/colors';
+import Colors, { shadows } from '@/constants/colors';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function BusinessDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -30,7 +31,11 @@ export default function BusinessDetailScreen() {
   return (
     <View style={[styles.container]}>
       <View style={[styles.hero, { backgroundColor: business.color, paddingTop: topInset }]}>
-        <View style={styles.heroOverlay}>
+        <LinearGradient
+          colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.6)']}
+          locations={[0, 0.4, 1]}
+          style={styles.heroOverlay}
+        >
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={22} color="#FFF" />
           </Pressable>
@@ -49,10 +54,10 @@ export default function BusinessDetailScreen() {
             </View>
             <Text style={styles.heroCategory}>{business.category} - {business.priceRange}</Text>
           </View>
-        </View>
+        </LinearGradient>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 130 }}>
         <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.ratingSection}>
           <View style={styles.ratingRow}>
             <View style={styles.starsRow}>
@@ -79,32 +84,50 @@ export default function BusinessDetailScreen() {
           <Text style={styles.description}>{business.description}</Text>
         </Animated.View>
 
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
+
         <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Services</Text>
           <View style={styles.servicesGrid}>
             {business.services.map((service, idx) => (
               <View key={idx} style={styles.serviceCard}>
-                <Ionicons name="checkmark-circle" size={18} color={Colors.secondary} />
+                <View style={styles.serviceIconBg}>
+                  <Ionicons name="checkmark-circle" size={18} color={Colors.secondary} />
+                </View>
                 <Text style={styles.serviceCardText}>{service}</Text>
               </View>
             ))}
           </View>
         </Animated.View>
 
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
+
         <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Contact</Text>
           <View style={styles.contactCard}>
             <View style={styles.contactRow}>
-              <Ionicons name="location-outline" size={18} color={Colors.textSecondary} />
+              <View style={[styles.contactIconBg, { backgroundColor: Colors.primary + '12' }]}>
+                <Ionicons name="location-outline" size={18} color={Colors.primary} />
+              </View>
               <Text style={styles.contactText}>{business.location}</Text>
             </View>
             <View style={styles.contactDivider} />
             <View style={styles.contactRow}>
-              <Ionicons name="call-outline" size={18} color={Colors.textSecondary} />
+              <View style={[styles.contactIconBg, { backgroundColor: Colors.secondary + '12' }]}>
+                <Ionicons name="call-outline" size={18} color={Colors.secondary} />
+              </View>
               <Text style={styles.contactText}>{business.phone}</Text>
             </View>
           </View>
         </Animated.View>
+
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
 
         <Animated.View entering={FadeInDown.delay(500).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Reviews</Text>
@@ -146,9 +169,9 @@ export default function BusinessDetailScreen() {
         </Animated.View>
       </ScrollView>
 
-      <View style={[styles.bottomBar, { paddingBottom: bottomInset + 12 }]}>
+      <View style={[styles.bottomBar, { paddingBottom: bottomInset + 14 }]}>
         <Pressable
-          style={({ pressed }) => [styles.callButton, pressed && { opacity: 0.8 }]}
+          style={({ pressed }) => [styles.callButton, pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] }]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             Linking.openURL(`tel:${business.phone}`);
@@ -158,7 +181,7 @@ export default function BusinessDetailScreen() {
           <Text style={styles.callText}>Call</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.bookButton, pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }]}
+          style={({ pressed }) => [styles.bookButton, pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] }]}
           onPress={() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)}
         >
           <Ionicons name="calendar" size={20} color="#FFF" />
@@ -173,26 +196,26 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   errorText: { fontSize: 16, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   backLink: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.primary, marginTop: 12 },
-  hero: { height: 240 },
+  hero: { height: 280 },
   heroOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.25)',
     padding: 16,
+    paddingBottom: 20,
     justifyContent: 'space-between',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroBottom: { gap: 6 },
+  heroBottom: { gap: 8 },
   heroIconWrap: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -205,17 +228,18 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   heroTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontFamily: 'Poppins_700Bold',
     color: '#FFF',
+    lineHeight: 32,
   },
   verifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 12,
   },
   verifiedText: {
@@ -226,7 +250,7 @@ const styles = StyleSheet.create({
   heroCategory: {
     fontSize: 14,
     fontFamily: 'Poppins_500Medium',
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(255,255,255,0.85)',
   },
   ratingSection: {
     paddingHorizontal: 20,
@@ -235,12 +259,11 @@ const styles = StyleSheet.create({
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    gap: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 16,
+    ...shadows.small,
   },
   starsRow: { flexDirection: 'row', gap: 2 },
   ratingNum: {
@@ -256,13 +279,24 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 20,
-    marginTop: 24,
+    marginTop: 28,
   },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Poppins_700Bold',
     color: Colors.text,
-    marginBottom: 10,
+    marginBottom: 12,
+  },
+  sectionDivider: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  accentBar: {
+    width: 40,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: Colors.primary + '25',
   },
   description: {
     fontSize: 14,
@@ -271,17 +305,24 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   servicesGrid: {
-    gap: 8,
+    gap: 10,
   },
   serviceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: Colors.card,
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    gap: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 16,
+    ...shadows.small,
+  },
+  serviceIconBg: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: Colors.secondary + '10',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   serviceCardText: {
     fontSize: 14,
@@ -289,17 +330,23 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   contactCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
     overflow: 'hidden',
+    ...shadows.small,
   },
   contactRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    padding: 14,
+    padding: 16,
+  },
+  contactIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   contactText: {
     fontSize: 14,
@@ -310,16 +357,15 @@ const styles = StyleSheet.create({
   contactDivider: {
     height: 1,
     backgroundColor: Colors.divider,
-    marginLeft: 44,
+    marginLeft: 64,
   },
   reviewCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-    gap: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 12,
+    gap: 10,
+    ...shadows.small,
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -327,9 +373,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   reviewAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: Colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -359,10 +405,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     paddingHorizontal: 20,
-    paddingTop: 14,
-    backgroundColor: Colors.card,
+    paddingTop: 16,
+    backgroundColor: Colors.surface,
     borderTopWidth: 1,
-    borderTopColor: Colors.cardBorder,
+    borderTopColor: Colors.border + '40',
+    ...shadows.medium,
   },
   callButton: {
     flexDirection: 'row',
@@ -370,9 +417,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     backgroundColor: Colors.secondary + '12',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 26,
     borderWidth: 1,
     borderColor: Colors.secondary + '30',
   },
@@ -388,8 +435,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     backgroundColor: Colors.primary,
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingVertical: 16,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
   },
   bookText: {
     fontSize: 16,

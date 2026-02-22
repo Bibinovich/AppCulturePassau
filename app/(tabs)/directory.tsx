@@ -130,12 +130,12 @@ function DirectoryCard({ profile, index }: { profile: Profile; index: number }) 
           <View style={styles.quickActions}>
             {(profile as any).phone ? (
               <View style={[styles.quickActionCircle, { backgroundColor: Colors.secondary + '15' }]}>
-                <Ionicons name="call" size={15} color={Colors.secondary} />
+                <Ionicons name="call" size={18} color={Colors.secondary} />
               </View>
             ) : null}
             {(profile as any).address ? (
               <View style={[styles.quickActionCircle, { backgroundColor: '#3498DB15' }]}>
-                <Ionicons name="location" size={15} color="#3498DB" />
+                <Ionicons name="location" size={18} color="#3498DB" />
               </View>
             ) : null}
           </View>
@@ -259,7 +259,7 @@ export default function DirectoryScreen() {
 
       {/* Search bar */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color={Colors.textTertiary} />
+        <Ionicons name="search" size={22} color={Colors.textTertiary} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search directory..."
@@ -270,7 +270,7 @@ export default function DirectoryScreen() {
         />
         {search.length > 0 && (
           <Pressable onPress={() => setSearch('')} hitSlop={8}>
-            <Ionicons name="close-circle" size={20} color={Colors.textTertiary} />
+            <Ionicons name="close-circle" size={22} color={Colors.textTertiary} />
           </Pressable>
         )}
       </View>
@@ -334,16 +334,16 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     marginHorizontal: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
     borderWidth: 0.5,
     borderColor: Colors.cardBorder,
-    marginBottom: 6,
-    ...Colors.shadow.small,
+    marginBottom: 8,
+    ...Colors.shadow.medium,
   },
   searchInput: {
     flex: 1,
@@ -354,19 +354,19 @@ const styles = StyleSheet.create({
   },
   categorySection: { paddingTop: 8, paddingBottom: 4 },
   resultCount: {
-    fontSize: 13,
-    fontFamily: 'Poppins_500Medium',
+    fontSize: 15,
+    fontFamily: 'Poppins_700Bold',
     color: Colors.textSecondary,
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  list: { paddingHorizontal: 20, paddingTop: 4 },
+  list: { paddingHorizontal: 20, paddingTop: 6 },
   card: {
     backgroundColor: Colors.card,
-    borderRadius: 18,
-    padding: 18,
+    borderRadius: 22,
+    padding: 20,
     borderWidth: 0.5,
     borderColor: Colors.cardBorder,
-    gap: 10,
+    gap: 12,
     marginBottom: 14,
     ...Colors.shadow.medium,
   },
@@ -425,9 +425,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quickActionCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -446,13 +446,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    marginTop: 4,
-    borderRadius: 12,
+    gap: 8,
+    paddingVertical: 13,
+    marginTop: 6,
+    borderRadius: 14,
     backgroundColor: Colors.primaryGlow,
+    borderWidth: 1,
+    borderColor: Colors.primary + '20',
   },
-  cardActionText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  cardActionText: { fontSize: 14, fontFamily: 'Poppins_700Bold', color: Colors.primary },
   emptyState: { alignItems: 'center', paddingVertical: 80, gap: 14 },
   emptyTitle: {
     fontSize: 18,

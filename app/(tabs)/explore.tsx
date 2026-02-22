@@ -171,7 +171,7 @@ export default function ExploreScreen() {
 
       {/* Search bar */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color={Colors.textTertiary} />
+        <Ionicons name="search" size={22} color={Colors.textTertiary} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search events, venues, communities..."
@@ -182,7 +182,7 @@ export default function ExploreScreen() {
         />
         {search.length > 0 && (
           <Pressable onPress={() => setSearch('')} hitSlop={8}>
-            <Ionicons name="close-circle" size={20} color={Colors.textTertiary} />
+            <Ionicons name="close-circle" size={22} color={Colors.textTertiary} />
           </Pressable>
         )}
       </View>
@@ -254,7 +254,7 @@ export default function ExploreScreen() {
         {filteredEvents.length === 0 && (
           <View style={styles.empty}>
             <View style={styles.emptyIconWrap}>
-              <Ionicons name="search" size={56} color={Colors.textTertiary} />
+              <Ionicons name="search" size={42} color={Colors.textTertiary} />
             </View>
             <Text style={styles.emptyTitle}>No events found</Text>
             <Text style={styles.emptySubtext}>Try adjusting your search or filters</Text>
@@ -382,7 +382,7 @@ function EventCard({ event, index, isSaved, onToggleSave, onShare }: EventCardPr
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
+  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 6 },
   title: { fontSize: 28, fontFamily: 'Poppins_700Bold', color: Colors.text },
   subtitle: {
     fontSize: 14,
@@ -393,17 +393,17 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     marginHorizontal: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
     borderWidth: 0.5,
     borderColor: Colors.cardBorder,
-    marginBottom: 12,
-    marginTop: 8,
-    ...Colors.shadow.small,
+    marginBottom: 14,
+    marginTop: 10,
+    ...Colors.shadow.medium,
   },
   searchInput: {
     flex: 1,
@@ -412,25 +412,25 @@ const styles = StyleSheet.create({
     color: Colors.text,
     padding: 0,
   },
-  results: { paddingHorizontal: 20, paddingTop: 4 },
+  results: { paddingHorizontal: 20, paddingTop: 6 },
   resultCount: {
     fontSize: 14,
     fontFamily: 'Poppins_600SemiBold',
     color: Colors.textSecondary,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   resultCard: {
     flexDirection: 'row',
     backgroundColor: Colors.card,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: 12,
+    marginBottom: 14,
     borderWidth: 0.5,
     borderColor: Colors.cardBorder,
-    ...Colors.shadow.small,
+    ...Colors.shadow.medium,
   },
   resultImage: {
-    width: 100,
+    width: 110,
     position: 'relative',
   },
   councilBadge: {
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  resultContent: { flex: 1, padding: 12, gap: 4 },
+  resultContent: { flex: 1, padding: 14, gap: 6 },
   resultTags: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   tag: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
   tagText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold' },
@@ -496,40 +496,43 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.backgroundSecondary,
   },
-  empty: { alignItems: 'center', paddingVertical: 80, gap: 12 },
+  empty: { alignItems: 'center', paddingVertical: 90, gap: 14 },
   emptyIconWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     backgroundColor: Colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  emptyTitle: { fontSize: 20, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  emptyTitle: { fontSize: 22, fontFamily: 'Poppins_600SemiBold', color: Colors.text, textAlign: 'center' as const },
   emptySubtext: {
     fontSize: 15,
     fontFamily: 'Poppins_400Regular',
     color: Colors.textSecondary,
+    textAlign: 'center' as const,
+    paddingHorizontal: 32,
   },
   emptyHint: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Poppins_600SemiBold',
     color: Colors.textTertiary,
-    marginTop: 16,
+    marginTop: 20,
   },
   quickSearchRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 8,
+    gap: 12,
+    marginTop: 10,
   },
   quickSearchPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 24,
     backgroundColor: Colors.primaryGlow,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.primary + '30',
+    ...Colors.shadow.small,
   },
   quickSearchText: {
     fontSize: 14,
@@ -539,23 +542,25 @@ const styles = StyleSheet.create({
   sortRow: {
     flexDirection: 'row' as const,
     paddingHorizontal: 20,
-    gap: 8,
-    paddingBottom: 10,
+    gap: 10,
+    paddingBottom: 12,
   },
   sortPill: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
+    gap: 6,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 24,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
     borderColor: Colors.cardBorder,
+    ...Colors.shadow.small,
   },
   sortPillActive: {
     backgroundColor: Colors.secondary,
     borderColor: Colors.secondary,
+    ...Colors.shadow.medium,
   },
   sortPillText: {
     fontSize: 13,

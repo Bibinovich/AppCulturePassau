@@ -13,10 +13,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSaved } from '@/contexts/SavedContext';
 import { sampleEvents } from '@/data/mockData';
-import Colors from '@/constants/colors';
+import Colors, { shadows } from '@/constants/colors';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type SampleEvent = (typeof sampleEvents)[number];
 
@@ -157,11 +158,15 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
       <View
         style={[
           styles.heroSection,
-          { height: 280 + topInset },
+          { height: 320 + topInset },
         ]}
       >
         <Image source={{ uri: event.imageUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} />
-        <View style={[styles.heroOverlay, { paddingTop: topInset }]}>
+        <LinearGradient
+          colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.35)', 'rgba(0,0,0,0.75)']}
+          locations={[0, 0.4, 1]}
+          style={[styles.heroOverlay, { paddingTop: topInset }]}
+        >
           <View style={styles.heroNav}>
             <Pressable style={styles.navButton} onPress={() => router.back()}>
               <Ionicons name="arrow-back" size={22} color="#FFF" />
@@ -195,12 +200,12 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
             <Text style={styles.heroTitle}>{event.title}</Text>
             <Text style={styles.heroOrganizer}>by {event.organizer}</Text>
           </View>
-        </View>
+        </LinearGradient>
       </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 130 }}
       >
         {countdown && (
           <Animated.View entering={FadeInDown.delay(50).duration(400)} style={styles.countdownContainer}>
@@ -255,7 +260,9 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
           </View>
         </Animated.View>
 
-        <View style={styles.sectionDivider} />
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
 
         <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.section}>
           <View style={styles.capacityRow}>
@@ -282,14 +289,18 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
           </View>
         </Animated.View>
 
-        <View style={styles.sectionDivider} />
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
 
         <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.description}>{event.description}</Text>
         </Animated.View>
 
-        <View style={styles.sectionDivider} />
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
 
         <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Tickets</Text>
@@ -306,7 +317,9 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
           ))}
         </Animated.View>
 
-        <View style={styles.sectionDivider} />
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
 
         <Animated.View entering={FadeInDown.delay(500).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Event Details</Text>
@@ -334,7 +347,9 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
           </View>
         </Animated.View>
 
-        <View style={styles.sectionDivider} />
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
 
         <Animated.View entering={FadeInDown.delay(550).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Who's Going</Text>
@@ -364,7 +379,9 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
 
         {relatedEvents.length > 0 && (
           <>
-            <View style={styles.sectionDivider} />
+            <View style={styles.sectionDivider}>
+              <View style={styles.accentBar} />
+            </View>
             <Animated.View entering={FadeInDown.delay(600).duration(500)} style={styles.section}>
               <Text style={styles.sectionTitle}>You Might Also Like</Text>
               {relatedEvents.map(re => (
@@ -387,7 +404,7 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
         )}
       </ScrollView>
 
-      <View style={[styles.bottomBar, { paddingBottom: bottomInset + 12 }]}>
+      <View style={[styles.bottomBar, { paddingBottom: bottomInset + 14 }]}>
         <View style={styles.priceSection}>
           <Text style={styles.priceFrom}>From</Text>
           <Text style={styles.priceBig}>{event.priceLabel}</Text>
@@ -395,7 +412,7 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
         <Pressable
           style={({ pressed }) => [
             styles.buyButton,
-            pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+            pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
           ]}
           onPress={handleGetTickets}
         >
@@ -423,9 +440,9 @@ const styles = StyleSheet.create({
   heroSection: {},
   heroOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'space-between',
     padding: 16,
+    paddingBottom: 20,
   },
   heroNav: {
     flexDirection: 'row',
@@ -433,15 +450,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   navButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   heroActions: { flexDirection: 'row', gap: 8 },
-  heroContent: { gap: 6 },
+  heroContent: { gap: 8 },
   heroBadges: { flexDirection: 'row', gap: 8 },
   heroBadge: {
     flexDirection: 'row',
@@ -454,39 +471,38 @@ const styles = StyleSheet.create({
   },
   heroBadgeText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
   heroTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontFamily: 'Poppins_700Bold',
     color: '#FFF',
-    lineHeight: 30,
+    lineHeight: 32,
   },
   heroOrganizer: {
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(255,255,255,0.85)',
   },
   countdownContainer: {
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 20,
     paddingBottom: 4,
   },
   countdownRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
   },
   countdownBox: {
-    backgroundColor: Colors.card,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
     alignItems: 'center',
-    minWidth: 68,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    minWidth: 72,
+    ...shadows.small,
   },
   countdownNumber: {
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: 'Poppins_700Bold',
     color: Colors.primary,
   },
@@ -496,9 +512,10 @@ const styles = StyleSheet.create({
     color: Colors.textTertiary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    marginTop: 2,
   },
   countdownSeparator: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: 'Poppins_700Bold',
     color: Colors.textTertiary,
   },
@@ -508,8 +525,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 12,
-    paddingVertical: 12,
+    borderRadius: 16,
+    paddingVertical: 14,
     paddingHorizontal: 20,
   },
   countdownEndedText: {
@@ -517,21 +534,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_600SemiBold',
     color: Colors.textSecondary,
   },
-  infoCards: { paddingHorizontal: 20, paddingTop: 20, gap: 10 },
+  infoCards: { paddingHorizontal: 20, paddingTop: 20, gap: 12 },
   infoCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 16,
     gap: 14,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    ...shadows.small,
   },
   infoIconBg: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 46,
+    height: 46,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -543,19 +559,24 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   infoValue: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  infoSub: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  infoSub: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginTop: 1 },
   sectionDivider: {
-    height: 1,
-    backgroundColor: Colors.accent + '30',
-    marginHorizontal: 20,
-    marginTop: 24,
+    paddingHorizontal: 20,
+    marginTop: 28,
+    alignItems: 'center',
   },
-  section: { paddingHorizontal: 20, marginTop: 24 },
+  accentBar: {
+    width: 40,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: Colors.primary + '25',
+  },
+  section: { paddingHorizontal: 20, marginTop: 20 },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Poppins_700Bold',
     color: Colors.text,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   capacityRow: {
     flexDirection: 'row',
@@ -572,7 +593,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundSecondary,
     borderRadius: 4,
     overflow: 'hidden',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   capacityFill: { height: '100%', borderRadius: 4 },
   capacityDetails: { flexDirection: 'row', justifyContent: 'space-between' },
@@ -591,12 +612,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 10,
+    ...shadows.small,
   },
   tierInfo: { gap: 2 },
   tierName: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
@@ -606,7 +626,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   detailText: {
     fontSize: 14,
@@ -631,7 +651,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: Colors.card,
+    borderColor: Colors.surface,
   },
   whosGoingInfo: {
     gap: 2,
@@ -649,18 +669,17 @@ const styles = StyleSheet.create({
   relatedCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 10,
     gap: 12,
+    ...shadows.small,
   },
   relatedSwatch: {
-    width: 48,
-    height: 48,
-    borderRadius: 10,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
   },
   relatedInfo: {
     flex: 1,
@@ -684,16 +703,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.card,
+    backgroundColor: Colors.surface,
     paddingHorizontal: 20,
-    paddingTop: 14,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: Colors.cardBorder,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 8,
+    borderTopColor: Colors.border + '40',
+    ...shadows.medium,
   },
   priceSection: {},
   priceFrom: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
@@ -703,9 +718,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     backgroundColor: Colors.primary,
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 28,
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,

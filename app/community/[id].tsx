@@ -7,7 +7,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import Colors from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import Colors, { shadows } from '@/constants/colors';
 import { useSaved } from '@/contexts/SavedContext';
 import { sampleCommunities, sampleEvents } from '@/data/mockData';
 
@@ -48,33 +49,46 @@ export default function CommunityDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.hero, { height: 240 + topInset }]}>
+      <View style={[styles.hero, { height: 280 + topInset }]}>
         <Image source={{ uri: community.imageUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} />
-        <View style={[styles.heroOverlay, { paddingTop: topInset + 8 }]}>
+        <LinearGradient
+          colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.7)']}
+          locations={[0, 0.4, 1]}
+          style={[styles.heroOverlay, { paddingTop: topInset + 8 }]}
+        >
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={22} color="#FFF" />
           </Pressable>
           <View style={styles.heroBottom}>
-            <View style={[styles.heroIconWrap, { backgroundColor: community.color + '40' }]}>
+            <View style={[styles.heroIconWrap, { backgroundColor: community.color + '50' }]}>
               <Ionicons name={community.icon as any} size={28} color="#FFF" />
             </View>
             <Text style={styles.heroTitle}>{community.name}</Text>
             <Text style={styles.heroCategory}>{community.category}</Text>
           </View>
-        </View>
+        </LinearGradient>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
         <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.statsRow}>
           <View style={styles.statCard}>
+            <View style={[styles.statIconBg, { backgroundColor: Colors.primary + '12' }]}>
+              <Ionicons name="people" size={18} color={Colors.primary} />
+            </View>
             <Text style={styles.statNum}>{formatNumber(community.members)}</Text>
             <Text style={styles.statLabel}>Members</Text>
           </View>
           <View style={styles.statCard}>
+            <View style={[styles.statIconBg, { backgroundColor: Colors.secondary + '12' }]}>
+              <Ionicons name="calendar" size={18} color={Colors.secondary} />
+            </View>
             <Text style={styles.statNum}>{community.events}</Text>
             <Text style={styles.statLabel}>Events</Text>
           </View>
           <View style={styles.statCard}>
+            <View style={[styles.statIconBg, { backgroundColor: Colors.accent + '15' }]}>
+              <Ionicons name="star" size={18} color={Colors.accent} />
+            </View>
             <Text style={styles.statNum}>{community.leaders.length}</Text>
             <Text style={styles.statLabel}>Leaders</Text>
           </View>
@@ -88,6 +102,10 @@ export default function CommunityDetailScreen() {
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.description}>{community.description}</Text>
         </Animated.View>
+
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
 
         <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Community Leaders</Text>
@@ -105,29 +123,40 @@ export default function CommunityDetailScreen() {
         </Animated.View>
 
         {communityEvents.length > 0 && (
-          <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.section}>
-            <Text style={styles.sectionTitle}>Upcoming Events</Text>
-            {communityEvents.map(event => (
-              <Pressable
-                key={event.id}
-                style={styles.eventCard}
-                onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}
-              >
-                <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
-                <View style={styles.eventInfo}>
-                  <Text style={styles.eventTitle} numberOfLines={1}>{event.title}</Text>
-                  <Text style={styles.eventDate}>{formatDate(event.date)} - {event.time}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
-              </Pressable>
-            ))}
-          </Animated.View>
+          <>
+            <View style={styles.sectionDivider}>
+              <View style={styles.accentBar} />
+            </View>
+            <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.section}>
+              <Text style={styles.sectionTitle}>Upcoming Events</Text>
+              {communityEvents.map(event => (
+                <Pressable
+                  key={event.id}
+                  style={styles.eventCard}
+                  onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}
+                >
+                  <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
+                  <View style={styles.eventInfo}>
+                    <Text style={styles.eventTitle} numberOfLines={1}>{event.title}</Text>
+                    <Text style={styles.eventDate}>{formatDate(event.date)} - {event.time}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
+                </Pressable>
+              ))}
+            </Animated.View>
+          </>
         )}
+
+        <View style={styles.sectionDivider}>
+          <View style={styles.accentBar} />
+        </View>
 
         <Animated.View entering={FadeInDown.delay(500).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Wellbeing & Support</Text>
           <View style={styles.wellbeingCard}>
-            <Ionicons name="heart-circle" size={28} color={Colors.secondary} style={{ marginTop: 2 }} />
+            <View style={styles.wellbeingIconBg}>
+              <Ionicons name="heart-circle" size={28} color={Colors.secondary} />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.wellbeingTitle}>Mental Health & Belonging</Text>
               <Text style={styles.wellbeingDesc}>
@@ -138,9 +167,13 @@ export default function CommunityDetailScreen() {
         </Animated.View>
       </ScrollView>
 
-      <View style={[styles.bottomBar, { paddingBottom: bottomInset + 12 }]}>
+      <View style={[styles.bottomBar, { paddingBottom: bottomInset + 14 }]}>
         <Pressable
-          style={[styles.joinButton, joined && styles.joinedButton]}
+          style={({ pressed }) => [
+            styles.joinButton,
+            joined && styles.joinedButton,
+            pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+          ]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             toggleJoinCommunity(community.id);
@@ -167,29 +200,29 @@ const styles = StyleSheet.create({
   hero: { overflow: 'hidden' },
   heroOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
     padding: 16,
+    paddingBottom: 20,
     justifyContent: 'space-between',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroBottom: { gap: 4 },
+  heroBottom: { gap: 6 },
   heroIconWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
+    width: 58,
+    height: 58,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
   },
-  heroTitle: { fontSize: 24, fontFamily: 'Poppins_700Bold', color: '#FFF' },
-  heroCategory: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: 'rgba(255,255,255,0.8)' },
+  heroTitle: { fontSize: 26, fontFamily: 'Poppins_700Bold', color: '#FFF', lineHeight: 32 },
+  heroCategory: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: 'rgba(255,255,255,0.85)' },
   statsRow: {
     flexDirection: 'row',
     paddingHorizontal: 20,
@@ -199,57 +232,77 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    gap: 4,
+    ...shadows.small,
+  },
+  statIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
   },
   statNum: { fontSize: 20, fontFamily: 'Poppins_700Bold', color: Colors.text },
   statLabel: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  section: { paddingHorizontal: 20, marginTop: 24 },
-  sectionTitle: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 10 },
+  section: { paddingHorizontal: 20, marginTop: 28 },
+  sectionTitle: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 12 },
+  sectionDivider: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  accentBar: {
+    width: 40,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: Colors.secondary + '25',
+  },
   description: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 22 },
   leaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: Colors.card,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 10,
+    ...shadows.small,
   },
-  leaderAvatar: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  leaderAvatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   leaderName: { flex: 1, fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  leaderBadge: { backgroundColor: Colors.secondary + '15', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  leaderBadge: { backgroundColor: Colors.secondary + '15', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10 },
   leaderRole: { fontSize: 11, fontFamily: 'Poppins_600SemiBold', color: Colors.secondary },
   eventCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 10,
     gap: 12,
+    ...shadows.small,
   },
-  eventImage: { width: 44, height: 44, borderRadius: 12 },
+  eventImage: { width: 48, height: 48, borderRadius: 14 },
   eventInfo: { flex: 1, gap: 2 },
   eventTitle: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   eventDate: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
   wellbeingCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: 14,
     backgroundColor: Colors.secondary + '08',
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: 20,
+    padding: 18,
     borderWidth: 1,
     borderColor: Colors.secondary + '20',
+  },
+  wellbeingIconBg: {
+    marginTop: 2,
   },
   wellbeingTitle: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text, marginBottom: 4 },
   wellbeingDesc: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 20 },
@@ -259,25 +312,33 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 20,
-    paddingTop: 14,
-    backgroundColor: Colors.card,
+    paddingTop: 16,
+    backgroundColor: Colors.surface,
     borderTopWidth: 1,
-    borderTopColor: Colors.cardBorder,
+    borderTopColor: Colors.border + '40',
+    ...shadows.medium,
   },
   joinButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
     backgroundColor: Colors.primary,
-    borderRadius: 14,
-    paddingVertical: 16,
+    borderRadius: 16,
+    paddingVertical: 18,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
   },
   joinedButton: {
     backgroundColor: Colors.secondary + '12',
     borderWidth: 1,
     borderColor: Colors.secondary + '30',
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  joinText: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  joinText: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: '#FFF' },
   joinedText: { color: Colors.secondary },
 });
