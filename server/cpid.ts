@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { eq } from "drizzle-orm";
-import { cpidRegistry, users, profiles, sponsors } from "@shared/schema";
+import { cpidRegistry, users, profiles, sponsors, perks, tickets } from "@shared/schema";
 
 const CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
@@ -16,7 +16,6 @@ export async function generateCpid(
   targetId: string,
   entityType: string
 ): Promise<string> {
-  // Check if CPID already exists for target
   const [existing] = await db
     .select()
     .from(cpidRegistry)
@@ -32,34 +31,26 @@ export async function generateCpid(
     const cpid = `CP-${randomCpid(length)}`;
 
     try {
-      // Attempt insert directly (rely on DB unique constraint)
       await db.insert(cpidRegistry).values({
         culturePassId: cpid,
         targetId,
         entityType,
       });
 
-      // Update respective table
       if (entityType === "user") {
-        await db
-          .update(users)
-          .set({ culturePassId: cpid })
-          .where(eq(users.id, targetId));
+        await db.update(users).set({ culturePassId: cpid }).where(eq(users.id, targetId));
       } else if (entityType === "sponsor") {
-        await db
-          .update(sponsors)
-          .set({ culturePassId: cpid })
-          .where(eq(sponsors.id, targetId));
+        await db.update(sponsors).set({ culturePassId: cpid }).where(eq(sponsors.id, targetId));
+      } else if (entityType === "perk") {
+        await db.update(perks).set({ culturePassId: cpid }).where(eq(perks.id, targetId));
+      } else if (entityType === "ticket") {
+        await db.update(tickets).set({ culturePassId: cpid }).where(eq(tickets.id, targetId));
       } else {
-        await db
-          .update(profiles)
-          .set({ culturePassId: cpid })
-          .where(eq(profiles.id, targetId));
+        await db.update(profiles).set({ culturePassId: cpid }).where(eq(profiles.id, targetId));
       }
 
       return cpid;
     } catch (err: any) {
-      // If duplicate key → retry
       if (err.code === "23505") {
         attempts++;
         continue;

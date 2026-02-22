@@ -311,6 +311,10 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
         <Animated.View entering={FadeInDown.delay(500).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Event Details</Text>
           <View style={styles.detailRow}>
+            <Ionicons name="finger-print-outline" size={16} color={Colors.secondary} />
+            <Text style={[styles.detailText, { color: Colors.secondary, fontFamily: 'Poppins_600SemiBold' }]}>CPID: {event.cpid}</Text>
+          </View>
+          <View style={styles.detailRow}>
             <Ionicons name="pricetag-outline" size={16} color={Colors.textSecondary} />
             <Text style={styles.detailText}>Category: {event.category}</Text>
           </View>

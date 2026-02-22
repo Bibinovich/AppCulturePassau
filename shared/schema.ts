@@ -394,6 +394,7 @@ export const perks = pgTable(
     status: text("status").default("active"),
     category: text("category"),
     imageUrl: text("image_url"),
+    culturePassId: varchar("culture_pass_id").unique(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -451,6 +452,7 @@ export const tickets = pgTable(
     status: text("status").default("confirmed"),
     ticketCode: text("ticket_code"),
     imageColor: text("image_color"),
+    culturePassId: varchar("culture_pass_id").unique(),
     createdAt: timestamp("created_at").defaultNow(),
   }
 );

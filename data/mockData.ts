@@ -1,5 +1,6 @@
 export interface EventData {
   id: string;
+  cpid: string;
   title: string;
   description: string;
   date: string;
@@ -24,6 +25,7 @@ export interface EventData {
 
 export interface CommunityData {
   id: string;
+  cpid: string;
   name: string;
   description: string;
   members: number;
@@ -37,6 +39,7 @@ export interface CommunityData {
 
 export interface BusinessData {
   id: string;
+  cpid: string;
   name: string;
   category: string;
   description: string;
@@ -54,6 +57,7 @@ export interface BusinessData {
 
 export interface MovieData {
   id: string;
+  cpid: string;
   title: string;
   genre: string[];
   language: string;
@@ -73,6 +77,7 @@ export interface MovieData {
 
 export interface RestaurantData {
   id: string;
+  cpid: string;
   name: string;
   cuisine: string;
   description: string;
@@ -95,6 +100,7 @@ export interface RestaurantData {
 
 export interface ActivityData {
   id: string;
+  cpid: string;
   name: string;
   category: string;
   description: string;
@@ -114,6 +120,7 @@ export interface ActivityData {
 
 export interface ShoppingData {
   id: string;
+  cpid: string;
   name: string;
   category: string;
   description: string;
@@ -172,7 +179,7 @@ export const communityIcons: Record<string, string> = {
 
 export const sampleEvents: EventData[] = [
   {
-    id: 'e1', title: 'Onam Grand Celebration 2026',
+    id: 'e1', cpid: 'CP-EVT-001', title: 'Onam Grand Celebration 2026',
     description: 'Join us for the biggest Onam celebration in Sydney featuring traditional Onasadya, Thiruvathirakali dance performances, boat races, and cultural programs.',
     date: '2026-03-15', time: '5:00 PM', venue: 'Sydney Olympic Park', address: '7 Olympic Blvd, Sydney NSW 2127',
     price: 45, priceLabel: 'From $45', category: 'Festivals', communityTag: 'Malayalee',
@@ -182,7 +189,7 @@ export const sampleEvents: EventData[] = [
     tiers: [{ name: 'General', price: 45, available: 344 }, { name: 'VIP', price: 85, available: 120 }, { name: 'Family (4)', price: 150, available: 80 }],
   },
   {
-    id: 'e2', title: 'Tamil Pongal Festival',
+    id: 'e2', cpid: 'CP-EVT-002', title: 'Tamil Pongal Festival',
     description: 'Celebrate the harvest festival of Pongal with traditional cooking demonstrations, Kolam competitions, folk music, and Bharatanatyam performances.',
     date: '2026-03-20', time: '10:00 AM', venue: 'Parramatta Park', address: 'Pitt St, Parramatta NSW 2150',
     price: 0, priceLabel: 'Free', category: 'Festivals', communityTag: 'Tamil', councilTag: 'City of Parramatta',
@@ -192,7 +199,7 @@ export const sampleEvents: EventData[] = [
     tiers: [{ name: 'Free Entry', price: 0, available: 1800 }],
   },
   {
-    id: 'e3', title: 'Multicultural Food & Music Night',
+    id: 'e3', cpid: 'CP-EVT-003', title: 'Multicultural Food & Music Night',
     description: 'An evening celebrating the diversity of our community through food stalls from 20+ cultures, live music performances, and interactive cooking workshops.',
     date: '2026-03-22', time: '6:00 PM', venue: 'Melbourne Convention Centre', address: '1 Convention Centre Pl, Melbourne VIC 3006',
     price: 25, priceLabel: 'From $25', category: 'Food & Cooking', communityTag: 'Multicultural', councilTag: 'City of Melbourne',
@@ -202,7 +209,7 @@ export const sampleEvents: EventData[] = [
     tiers: [{ name: 'Entry', price: 25, available: 900 }, { name: 'VIP Tasting', price: 65, available: 200 }],
   },
   {
-    id: 'e4', title: 'Bollywood Dance Workshop',
+    id: 'e4', cpid: 'CP-EVT-004', title: 'Bollywood Dance Workshop',
     description: 'Learn the latest Bollywood dance moves with professional choreographers. All skill levels welcome.',
     date: '2026-03-25', time: '7:00 PM', venue: 'Blacktown Arts Centre', address: '78 Flushcombe Rd, Blacktown NSW 2148',
     price: 20, priceLabel: '$20', category: 'Dance', communityTag: 'Punjabi',
@@ -212,7 +219,7 @@ export const sampleEvents: EventData[] = [
     tiers: [{ name: 'Single', price: 20, available: 12 }],
   },
   {
-    id: 'e5', title: 'Auckland Diwali Festival',
+    id: 'e5', cpid: 'CP-EVT-005', title: 'Auckland Diwali Festival',
     description: 'The biggest Diwali celebration in New Zealand! Fireworks, food stalls, live music, dance performances, and market stalls.',
     date: '2026-04-01', time: '4:00 PM', venue: 'Aotea Square', address: 'Queen St, Auckland 1010',
     price: 0, priceLabel: 'Free', category: 'Festivals', communityTag: 'Multicultural', councilTag: 'Auckland Council',
@@ -222,7 +229,7 @@ export const sampleEvents: EventData[] = [
     tiers: [{ name: 'Free Entry', price: 0, available: 2500 }],
   },
   {
-    id: 'e6', title: 'Community Yoga & Wellness Morning',
+    id: 'e6', cpid: 'CP-EVT-006', title: 'Community Yoga & Wellness Morning',
     description: 'Start your weekend with community yoga, guided meditation, and Ayurvedic wellness talks. Light breakfast included.',
     date: '2026-03-28', time: '7:30 AM', venue: 'Centennial Park', address: 'Grand Dr, Centennial Park NSW 2021',
     price: 15, priceLabel: '$15', category: 'Wellness', communityTag: 'Multicultural',
@@ -232,7 +239,7 @@ export const sampleEvents: EventData[] = [
     tiers: [{ name: 'Single', price: 15, available: 28 }],
   },
   {
-    id: 'e7', title: 'Youth Business Pitch Night',
+    id: 'e7', cpid: 'CP-EVT-007', title: 'Youth Business Pitch Night',
     description: 'Young entrepreneurs from multicultural backgrounds pitch their startup ideas to a panel of experienced mentors and investors.',
     date: '2026-04-05', time: '6:30 PM', venue: 'WeWork George Street', address: '100 Harris St, Pyrmont NSW 2009',
     price: 10, priceLabel: '$10', category: 'Business', communityTag: 'Youth',
@@ -242,7 +249,7 @@ export const sampleEvents: EventData[] = [
     tiers: [{ name: 'Attendee', price: 10, available: 40 }, { name: 'Pitcher', price: 0, available: 5 }],
   },
   {
-    id: 'e8', title: 'Classical Carnatic Music Concert',
+    id: 'e8', cpid: 'CP-EVT-008', title: 'Classical Carnatic Music Concert',
     description: 'An evening of sublime Carnatic music featuring renowned artists from India performing ragas and kritis.',
     date: '2026-04-10', time: '7:00 PM', venue: 'Sydney Town Hall', address: '483 George St, Sydney NSW 2000',
     price: 55, priceLabel: 'From $55', category: 'Music', communityTag: 'Tamil',
@@ -254,30 +261,30 @@ export const sampleEvents: EventData[] = [
 ];
 
 export const sampleCommunities: CommunityData[] = [
-  { id: 'c1', name: 'Malayalee Community', description: 'Connecting Kerala diaspora across Australia and New Zealand. Cultural events, language classes, and community support.', members: 12500, events: 45, color: '#E85D3A', icon: 'globe', category: 'Cultural', leaders: ['Arun Kumar', 'Lekha Nair', 'Rajesh Menon'], imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80' },
-  { id: 'c2', name: 'Tamil Cultural Forum', description: 'Preserving and celebrating Tamil heritage through language, arts, music, and festivals.', members: 9800, events: 38, color: '#1A7A6D', icon: 'globe', category: 'Cultural', leaders: ['Priya Raman', 'Karthik Subramanian'], imageUrl: 'https://images.unsplash.com/photo-1506869640319-fe1a24fd76cb?w=800&q=80' },
-  { id: 'c3', name: 'Punjabi Association', description: 'Bhangra, music, food, and festivities bringing the vibrant Punjabi culture to the Southern Hemisphere.', members: 7200, events: 28, color: '#F2A93B', icon: 'globe', category: 'Cultural', leaders: ['Harpreet Singh', 'Jasmine Kaur'], imageUrl: 'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=800&q=80' },
-  { id: 'c4', name: 'Multicultural Victoria', description: 'Celebrating the diversity of Melbourne and Victoria through inclusive community programs and events.', members: 25000, events: 120, color: '#3498DB', icon: 'earth', category: 'Regional', leaders: ['Sarah Chen', 'Ahmed Hassan'], imageUrl: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80' },
-  { id: 'c5', name: 'Indian Community NZ', description: 'Supporting the Indian diaspora in New Zealand with cultural events, networking, and wellbeing programs.', members: 15000, events: 55, color: '#E74C3C', icon: 'globe', category: 'Cultural', leaders: ['Vikram Patel', 'Anita Sharma'], imageUrl: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=800&q=80' },
-  { id: 'c6', name: 'Bengali Association', description: 'Durga Puja, Rabindra Sangeet, and Bengali cultural celebrations bringing the warmth of Bengal to Australia.', members: 4500, events: 22, color: '#9B59B6', icon: 'globe', category: 'Cultural', leaders: ['Dipankar Roy', 'Soma Ghosh'], imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80' },
-  { id: 'c7', name: 'Youth Network', description: 'Empowering young multicultural Australians through mentorship, career development, and social events.', members: 8000, events: 35, color: '#2ECC71', icon: 'rocket', category: 'Youth', leaders: ['Zara Ahmed', 'Jason Li'], imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80' },
-  { id: 'c8', name: 'Filipino Community', description: 'Bringing Filipino traditions, food, music, and community spirit to Australian shores.', members: 11000, events: 42, color: '#1ABC9C', icon: 'globe', category: 'Cultural', leaders: ['Maria Santos', 'Carlo Reyes'], imageUrl: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&q=80' },
+  { id: 'c1', cpid: 'CP-COM-001', name: 'Malayalee Community', description: 'Connecting Kerala diaspora across Australia and New Zealand. Cultural events, language classes, and community support.', members: 12500, events: 45, color: '#E85D3A', icon: 'globe', category: 'Cultural', leaders: ['Arun Kumar', 'Lekha Nair', 'Rajesh Menon'], imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80' },
+  { id: 'c2', cpid: 'CP-COM-002', name: 'Tamil Cultural Forum', description: 'Preserving and celebrating Tamil heritage through language, arts, music, and festivals.', members: 9800, events: 38, color: '#1A7A6D', icon: 'globe', category: 'Cultural', leaders: ['Priya Raman', 'Karthik Subramanian'], imageUrl: 'https://images.unsplash.com/photo-1506869640319-fe1a24fd76cb?w=800&q=80' },
+  { id: 'c3', cpid: 'CP-COM-003', name: 'Punjabi Association', description: 'Bhangra, music, food, and festivities bringing the vibrant Punjabi culture to the Southern Hemisphere.', members: 7200, events: 28, color: '#F2A93B', icon: 'globe', category: 'Cultural', leaders: ['Harpreet Singh', 'Jasmine Kaur'], imageUrl: 'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=800&q=80' },
+  { id: 'c4', cpid: 'CP-COM-004', name: 'Multicultural Victoria', description: 'Celebrating the diversity of Melbourne and Victoria through inclusive community programs and events.', members: 25000, events: 120, color: '#3498DB', icon: 'earth', category: 'Regional', leaders: ['Sarah Chen', 'Ahmed Hassan'], imageUrl: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80' },
+  { id: 'c5', cpid: 'CP-COM-005', name: 'Indian Community NZ', description: 'Supporting the Indian diaspora in New Zealand with cultural events, networking, and wellbeing programs.', members: 15000, events: 55, color: '#E74C3C', icon: 'globe', category: 'Cultural', leaders: ['Vikram Patel', 'Anita Sharma'], imageUrl: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=800&q=80' },
+  { id: 'c6', cpid: 'CP-COM-006', name: 'Bengali Association', description: 'Durga Puja, Rabindra Sangeet, and Bengali cultural celebrations bringing the warmth of Bengal to Australia.', members: 4500, events: 22, color: '#9B59B6', icon: 'globe', category: 'Cultural', leaders: ['Dipankar Roy', 'Soma Ghosh'], imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80' },
+  { id: 'c7', cpid: 'CP-COM-007', name: 'Youth Network', description: 'Empowering young multicultural Australians through mentorship, career development, and social events.', members: 8000, events: 35, color: '#2ECC71', icon: 'rocket', category: 'Youth', leaders: ['Zara Ahmed', 'Jason Li'], imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80' },
+  { id: 'c8', cpid: 'CP-COM-008', name: 'Filipino Community', description: 'Bringing Filipino traditions, food, music, and community spirit to Australian shores.', members: 11000, events: 42, color: '#1ABC9C', icon: 'globe', category: 'Cultural', leaders: ['Maria Santos', 'Carlo Reyes'], imageUrl: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&q=80' },
 ];
 
 export const sampleBusinesses: BusinessData[] = [
-  { id: 'b1', name: 'Spice Route Kitchen', category: 'Restaurants', description: 'Authentic South Indian and Kerala cuisine. Catering available for events up to 500 guests.', rating: 4.8, reviews: 324, location: 'Parramatta, NSW', phone: '+61 2 9876 5432', services: ['Dine-in', 'Catering', 'Event Packages', 'Delivery'], color: '#E85D3A', icon: 'restaurant', isVerified: true, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80' },
-  { id: 'b2', name: 'Ranga Photography', category: 'Photographers', description: 'Specializing in cultural events, weddings, and portraits. Cinematic videography also available.', rating: 4.9, reviews: 189, location: 'Sydney CBD, NSW', phone: '+61 4 1234 5678', services: ['Event Photography', 'Wedding', 'Portrait', 'Videography'], color: '#1A7A6D', icon: 'camera', isVerified: true, priceRange: '$$$', imageUrl: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=800&q=80' },
-  { id: 'b3', name: 'Shakti Events & Decor', category: 'Event Planners', description: 'Full-service event planning for cultural celebrations, weddings, and corporate events.', rating: 4.7, reviews: 156, location: 'Melbourne, VIC', phone: '+61 3 9876 1234', services: ['Wedding Planning', 'Decor', 'Stage Design', 'Floral'], color: '#F2A93B', icon: 'flower', isVerified: true, priceRange: '$$$', imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80' },
-  { id: 'b4', name: 'Natyam Dance Academy', category: 'Musicians', description: 'Classical and contemporary dance training. Bharatanatyam, Kuchipudi, and Bollywood styles.', rating: 4.9, reviews: 212, location: 'Blacktown, NSW', phone: '+61 2 9876 7890', services: ['Dance Classes', 'Performance', 'Choreography', 'Workshops'], color: '#9B59B6', icon: 'musical-notes', isVerified: false, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1547153760-18fc86c1ae69?w=800&q=80' },
-  { id: 'b5', name: 'The Grand Pavilion', category: 'Venues', description: 'Premium event venue with capacity for 1000 guests. Full AV setup and catering partnerships.', rating: 4.6, reviews: 98, location: 'Homebush, NSW', phone: '+61 2 9876 4321', services: ['Venue Hire', 'AV Setup', 'Catering', 'Valet Parking'], color: '#3498DB', icon: 'business', isVerified: true, priceRange: '$$$$', imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80' },
-  { id: 'b6', name: 'Mehndi by Fatima', category: 'Decorators', description: 'Bridal and event mehndi artistry. Traditional and modern designs for all occasions.', rating: 4.8, reviews: 276, location: 'Auburn, NSW', phone: '+61 4 9876 2345', services: ['Bridal Mehndi', 'Party Mehndi', 'Corporate Events', 'Workshops'], color: '#E74C3C', icon: 'color-palette', isVerified: false, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&q=80' },
-  { id: 'b7', name: 'Curry Leaf Catering', category: 'Restaurants', description: 'Premium Sri Lankan and South Indian catering for events of all sizes. Vegetarian specialists.', rating: 4.7, reviews: 145, location: 'Wentworthville, NSW', phone: '+61 2 9876 8765', services: ['Event Catering', 'Meal Prep', 'Cooking Classes', 'Corporate Lunches'], color: '#2ECC71', icon: 'restaurant', isVerified: true, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&q=80' },
-  { id: 'b8', name: 'Auckland Indian Bazaar', category: 'Venues', description: 'Multi-purpose event and market space in the heart of Auckland. Perfect for cultural markets and festivals.', rating: 4.5, reviews: 67, location: 'Auckland, NZ', phone: '+64 9 123 4567', services: ['Market Stalls', 'Event Space', 'Pop-up Shop', 'Food Court'], color: '#1ABC9C', icon: 'storefront', isVerified: true, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&q=80' },
+  { id: 'b1', cpid: 'CP-BIZ-001', name: 'Spice Route Kitchen', category: 'Restaurants', description: 'Authentic South Indian and Kerala cuisine. Catering available for events up to 500 guests.', rating: 4.8, reviews: 324, location: 'Parramatta, NSW', phone: '+61 2 9876 5432', services: ['Dine-in', 'Catering', 'Event Packages', 'Delivery'], color: '#E85D3A', icon: 'restaurant', isVerified: true, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80' },
+  { id: 'b2', cpid: 'CP-BIZ-002', name: 'Ranga Photography', category: 'Photographers', description: 'Specializing in cultural events, weddings, and portraits. Cinematic videography also available.', rating: 4.9, reviews: 189, location: 'Sydney CBD, NSW', phone: '+61 4 1234 5678', services: ['Event Photography', 'Wedding', 'Portrait', 'Videography'], color: '#1A7A6D', icon: 'camera', isVerified: true, priceRange: '$$$', imageUrl: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=800&q=80' },
+  { id: 'b3', cpid: 'CP-BIZ-003', name: 'Shakti Events & Decor', category: 'Event Planners', description: 'Full-service event planning for cultural celebrations, weddings, and corporate events.', rating: 4.7, reviews: 156, location: 'Melbourne, VIC', phone: '+61 3 9876 1234', services: ['Wedding Planning', 'Decor', 'Stage Design', 'Floral'], color: '#F2A93B', icon: 'flower', isVerified: true, priceRange: '$$$', imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80' },
+  { id: 'b4', cpid: 'CP-BIZ-004', name: 'Natyam Dance Academy', category: 'Musicians', description: 'Classical and contemporary dance training. Bharatanatyam, Kuchipudi, and Bollywood styles.', rating: 4.9, reviews: 212, location: 'Blacktown, NSW', phone: '+61 2 9876 7890', services: ['Dance Classes', 'Performance', 'Choreography', 'Workshops'], color: '#9B59B6', icon: 'musical-notes', isVerified: false, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1547153760-18fc86c1ae69?w=800&q=80' },
+  { id: 'b5', cpid: 'CP-BIZ-005', name: 'The Grand Pavilion', category: 'Venues', description: 'Premium event venue with capacity for 1000 guests. Full AV setup and catering partnerships.', rating: 4.6, reviews: 98, location: 'Homebush, NSW', phone: '+61 2 9876 4321', services: ['Venue Hire', 'AV Setup', 'Catering', 'Valet Parking'], color: '#3498DB', icon: 'business', isVerified: true, priceRange: '$$$$', imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80' },
+  { id: 'b6', cpid: 'CP-BIZ-006', name: 'Mehndi by Fatima', category: 'Decorators', description: 'Bridal and event mehndi artistry. Traditional and modern designs for all occasions.', rating: 4.8, reviews: 276, location: 'Auburn, NSW', phone: '+61 4 9876 2345', services: ['Bridal Mehndi', 'Party Mehndi', 'Corporate Events', 'Workshops'], color: '#E74C3C', icon: 'color-palette', isVerified: false, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&q=80' },
+  { id: 'b7', cpid: 'CP-BIZ-007', name: 'Curry Leaf Catering', category: 'Restaurants', description: 'Premium Sri Lankan and South Indian catering for events of all sizes. Vegetarian specialists.', rating: 4.7, reviews: 145, location: 'Wentworthville, NSW', phone: '+61 2 9876 8765', services: ['Event Catering', 'Meal Prep', 'Cooking Classes', 'Corporate Lunches'], color: '#2ECC71', icon: 'restaurant', isVerified: true, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&q=80' },
+  { id: 'b8', cpid: 'CP-BIZ-008', name: 'Auckland Indian Bazaar', category: 'Venues', description: 'Multi-purpose event and market space in the heart of Auckland. Perfect for cultural markets and festivals.', rating: 4.5, reviews: 67, location: 'Auckland, NZ', phone: '+64 9 123 4567', services: ['Market Stalls', 'Event Space', 'Pop-up Shop', 'Food Court'], color: '#1ABC9C', icon: 'storefront', isVerified: true, priceRange: '$$', imageUrl: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&q=80' },
 ];
 
 export const sampleMovies: MovieData[] = [
   {
-    id: 'm1', title: 'Aadujeevitham (The Goat Life)', genre: ['Drama', 'Survival'], language: 'Malayalam',
+    id: 'm1', cpid: 'CP-MOV-001', title: 'Aadujeevitham (The Goat Life)', genre: ['Drama', 'Survival'], language: 'Malayalam',
     duration: '2h 52m', rating: 'MA15+', imdbScore: 7.4,
     description: 'A harrowing true story of an Indian immigrant worker who is trapped in the Middle Eastern desert and forced to herd goats under brutal conditions.',
     director: 'Blessy', cast: ['Prithviraj Sukumaran', 'Amala Paul', 'K.R. Gokul'],
@@ -290,7 +297,7 @@ export const sampleMovies: MovieData[] = [
     isTrending: true,
   },
   {
-    id: 'm2', title: 'Pushpa 2: The Rule', genre: ['Action', 'Thriller'], language: 'Telugu',
+    id: 'm2', cpid: 'CP-MOV-002', title: 'Pushpa 2: The Rule', genre: ['Action', 'Thriller'], language: 'Telugu',
     duration: '3h 20m', rating: 'MA15+', imdbScore: 7.1,
     description: 'Pushpa Raj continues his rise in the smuggling syndicate, facing new enemies and alliances in this action-packed sequel.',
     director: 'Sukumar', cast: ['Allu Arjun', 'Rashmika Mandanna', 'Fahadh Faasil'],
@@ -302,7 +309,7 @@ export const sampleMovies: MovieData[] = [
     isTrending: true,
   },
   {
-    id: 'm3', title: 'Jailer 2', genre: ['Action', 'Comedy'], language: 'Tamil',
+    id: 'm3', cpid: 'CP-MOV-003', title: 'Jailer 2', genre: ['Action', 'Comedy'], language: 'Tamil',
     duration: '2h 45m', rating: 'M', imdbScore: 6.8,
     description: 'Rajinikanth returns as the retired jailer who must once again take on a criminal empire threatening his family.',
     director: 'Nelson Dilipkumar', cast: ['Rajinikanth', 'Mohanlal', 'Shiva Rajkumar'],
@@ -314,7 +321,7 @@ export const sampleMovies: MovieData[] = [
     isTrending: true,
   },
   {
-    id: 'm4', title: 'Devara: Part 2', genre: ['Action', 'Drama'], language: 'Telugu',
+    id: 'm4', cpid: 'CP-MOV-004', title: 'Devara: Part 2', genre: ['Action', 'Drama'], language: 'Telugu',
     duration: '2h 38m', rating: 'MA15+', imdbScore: 7.0,
     description: 'The continuation of the epic saga set in a coastal village, where power, loyalty, and family collide.',
     director: 'Koratala Siva', cast: ['Jr NTR', 'Janhvi Kapoor', 'Saif Ali Khan'],
@@ -325,7 +332,7 @@ export const sampleMovies: MovieData[] = [
     isTrending: false,
   },
   {
-    id: 'm5', title: 'Stree 3', genre: ['Horror', 'Comedy'], language: 'Hindi',
+    id: 'm5', cpid: 'CP-MOV-005', title: 'Stree 3', genre: ['Horror', 'Comedy'], language: 'Hindi',
     duration: '2h 30m', rating: 'M', imdbScore: 7.3,
     description: 'The beloved horror-comedy franchise returns with new supernatural threats and even bigger laughs in a small Indian town.',
     director: 'Amar Kaushik', cast: ['Rajkummar Rao', 'Shraddha Kapoor', 'Pankaj Tripathi'],
@@ -337,7 +344,7 @@ export const sampleMovies: MovieData[] = [
     isTrending: false,
   },
   {
-    id: 'm6', title: 'Thandel', genre: ['Drama', 'Romance'], language: 'Telugu',
+    id: 'm6', cpid: 'CP-MOV-006', title: 'Thandel', genre: ['Drama', 'Romance'], language: 'Telugu',
     duration: '2h 25m', rating: 'M', imdbScore: 7.6,
     description: 'Based on true events of fishermen from Srikakulam who accidentally cross into Pakistani waters and face the consequences.',
     director: 'Chandoo Mondeti', cast: ['Naga Chaitanya', 'Sai Pallavi'],
@@ -351,7 +358,7 @@ export const sampleMovies: MovieData[] = [
 
 export const sampleRestaurants: RestaurantData[] = [
   {
-    id: 'r1', name: 'Cinnamon Club', cuisine: 'South Indian', description: 'Award-winning South Indian restaurant featuring authentic dosas, idlis, and Kerala-style seafood curries.',
+    id: 'r1', cpid: 'CP-RST-001', name: 'Cinnamon Club', cuisine: 'South Indian', description: 'Award-winning South Indian restaurant featuring authentic dosas, idlis, and Kerala-style seafood curries.',
     rating: 4.8, reviews: 542, priceRange: '$$', location: 'Harris Park, NSW', address: '22 Wigram St, Harris Park NSW 2150',
     phone: '+61 2 9687 1234', hours: '11:00 AM - 10:00 PM', features: ['Outdoor Seating', 'BYO', 'Vegan Options', 'Family Friendly'],
     color: '#E85D3A', icon: 'restaurant', isOpen: true, deliveryAvailable: true, reservationAvailable: true,
@@ -359,7 +366,7 @@ export const sampleRestaurants: RestaurantData[] = [
     imageUrl: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
   },
   {
-    id: 'r2', name: 'Punjab Palace', cuisine: 'North Indian', description: 'Authentic Punjabi flavours with tandoori specialties, rich curries, and freshly baked naan bread.',
+    id: 'r2', cpid: 'CP-RST-002', name: 'Punjab Palace', cuisine: 'North Indian', description: 'Authentic Punjabi flavours with tandoori specialties, rich curries, and freshly baked naan bread.',
     rating: 4.6, reviews: 389, priceRange: '$$', location: 'Parramatta, NSW', address: '165 Church St, Parramatta NSW 2150',
     phone: '+61 2 9891 5678', hours: '11:30 AM - 11:00 PM', features: ['Buffet Lunch', 'Catering', 'Halal', 'Live Music Fri-Sat'],
     color: '#F2A93B', icon: 'restaurant', isOpen: true, deliveryAvailable: true, reservationAvailable: true,
@@ -367,7 +374,7 @@ export const sampleRestaurants: RestaurantData[] = [
     imageUrl: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=800&q=80',
   },
   {
-    id: 'r3', name: 'Sakura Garden', cuisine: 'Japanese-Fusion', description: 'Creative Japanese-Asian fusion cuisine with fresh sushi, ramen, and innovative cocktails.',
+    id: 'r3', cpid: 'CP-RST-003', name: 'Sakura Garden', cuisine: 'Japanese-Fusion', description: 'Creative Japanese-Asian fusion cuisine with fresh sushi, ramen, and innovative cocktails.',
     rating: 4.7, reviews: 276, priceRange: '$$$', location: 'Sydney CBD, NSW', address: '88 George St, Sydney NSW 2000',
     phone: '+61 2 9252 1234', hours: '12:00 PM - 10:30 PM', features: ['Sake Bar', 'Omakase', 'Private Dining', 'City Views'],
     color: '#E74C3C', icon: 'restaurant', isOpen: true, deliveryAvailable: false, reservationAvailable: true,
@@ -375,7 +382,7 @@ export const sampleRestaurants: RestaurantData[] = [
     imageUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&q=80',
   },
   {
-    id: 'r4', name: 'Chai & Chaat', cuisine: 'Street Food', description: 'Vibrant Indian street food experience with authentic chaats, chai varieties, and quick bites.',
+    id: 'r4', cpid: 'CP-RST-004', name: 'Chai & Chaat', cuisine: 'Street Food', description: 'Vibrant Indian street food experience with authentic chaats, chai varieties, and quick bites.',
     rating: 4.5, reviews: 198, priceRange: '$', location: 'Wentworthville, NSW', address: '45 Dunmore St, Wentworthville NSW 2145',
     phone: '+61 2 9631 9876', hours: '8:00 AM - 9:00 PM', features: ['Takeaway', 'Breakfast Menu', 'Vegan Options', 'Quick Service'],
     color: '#2ECC71', icon: 'cafe', isOpen: true, deliveryAvailable: true, reservationAvailable: false,
@@ -383,7 +390,7 @@ export const sampleRestaurants: RestaurantData[] = [
     imageUrl: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80',
   },
   {
-    id: 'r5', name: 'The Colombo Kitchen', cuisine: 'Sri Lankan', description: 'Traditional Sri Lankan cuisine with fiery curries, hoppers, and signature sambols in a cozy setting.',
+    id: 'r5', cpid: 'CP-RST-005', name: 'The Colombo Kitchen', cuisine: 'Sri Lankan', description: 'Traditional Sri Lankan cuisine with fiery curries, hoppers, and signature sambols in a cozy setting.',
     rating: 4.9, reviews: 312, priceRange: '$$', location: 'Auburn, NSW', address: '12 South Parade, Auburn NSW 2144',
     phone: '+61 2 9646 5432', hours: '11:00 AM - 10:00 PM', features: ['BYOB', 'Gluten Free Options', 'Catering', 'Authentic Spices'],
     color: '#9B59B6', icon: 'restaurant', isOpen: true, deliveryAvailable: true, reservationAvailable: true,
@@ -391,7 +398,7 @@ export const sampleRestaurants: RestaurantData[] = [
     imageUrl: 'https://images.unsplash.com/photo-1567337710282-00832b415979?w=800&q=80',
   },
   {
-    id: 'r6', name: 'Naan & Kabab', cuisine: 'Afghan', description: 'Traditional Afghan grills and kebabs cooked over charcoal, served with fresh naan and aromatic rice.',
+    id: 'r6', cpid: 'CP-RST-006', name: 'Naan & Kabab', cuisine: 'Afghan', description: 'Traditional Afghan grills and kebabs cooked over charcoal, served with fresh naan and aromatic rice.',
     rating: 4.4, reviews: 167, priceRange: '$$', location: 'Merrylands, NSW', address: '280 Merrylands Rd, Merrylands NSW 2160',
     phone: '+61 2 9637 4321', hours: '10:00 AM - 11:00 PM', features: ['Halal', 'Family Platters', 'Outdoor Dining', 'Late Night'],
     color: '#1A7A6D', icon: 'restaurant', isOpen: true, deliveryAvailable: true, reservationAvailable: false,
@@ -402,49 +409,49 @@ export const sampleRestaurants: RestaurantData[] = [
 
 export const sampleActivities: ActivityData[] = [
   {
-    id: 'a1', name: 'Luna Park Sydney', category: 'Theme Parks', description: 'Iconic harbourside amusement park with thrilling rides, games, and spectacular views of the Sydney Harbour Bridge.',
+    id: 'a1', cpid: 'CP-ACT-001', name: 'Luna Park Sydney', category: 'Theme Parks', description: 'Iconic harbourside amusement park with thrilling rides, games, and spectacular views of the Sydney Harbour Bridge.',
     location: 'Milsons Point, NSW', price: 55, priceLabel: 'From $55', rating: 4.5, reviews: 2340,
     duration: 'Full Day', color: '#E85D3A', icon: 'happy', highlights: ['Harbour Views', 'Family Rides', 'Roller Coasters', 'Night Events'],
     ageGroup: 'All Ages', isPopular: true,
     imageUrl: 'https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?w=800&q=80',
   },
   {
-    id: 'a2', name: 'Escape Room Challenge', category: 'Gaming', description: 'Themed escape rooms with cultural puzzles and mysteries. Perfect for team building and family fun.',
+    id: 'a2', cpid: 'CP-ACT-002', name: 'Escape Room Challenge', category: 'Gaming', description: 'Themed escape rooms with cultural puzzles and mysteries. Perfect for team building and family fun.',
     location: 'Parramatta, NSW', price: 35, priceLabel: '$35/person', rating: 4.7, reviews: 456,
     duration: '60 min', color: '#9B59B6', icon: 'key', highlights: ['Cultural Themes', 'Team Building', 'Multiple Difficulty Levels', 'Private Bookings'],
     ageGroup: '12+', isPopular: true,
     imageUrl: 'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=800&q=80',
   },
   {
-    id: 'a3', name: 'Pottery & Chai Workshop', category: 'Workshops', description: 'Learn traditional Indian pottery techniques while enjoying authentic chai and cultural stories.',
+    id: 'a3', cpid: 'CP-ACT-003', name: 'Pottery & Chai Workshop', category: 'Workshops', description: 'Learn traditional Indian pottery techniques while enjoying authentic chai and cultural stories.',
     location: 'Newtown, NSW', price: 75, priceLabel: '$75/person', rating: 4.9, reviews: 128,
     duration: '3 hours', color: '#F2A93B', icon: 'color-palette', highlights: ['Hands-on', 'Materials Included', 'Take Home Creation', 'Chai Included'],
     ageGroup: 'Adults', isPopular: false,
     imageUrl: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80',
   },
   {
-    id: 'a4', name: 'Taronga Zoo Cultural Trail', category: 'Nature', description: 'Explore the zoo with a guided cultural trail connecting Australian wildlife to Indigenous and multicultural stories.',
+    id: 'a4', cpid: 'CP-ACT-004', name: 'Taronga Zoo Cultural Trail', category: 'Nature', description: 'Explore the zoo with a guided cultural trail connecting Australian wildlife to Indigenous and multicultural stories.',
     location: 'Mosman, NSW', price: 49, priceLabel: '$49', rating: 4.6, reviews: 1890,
     duration: 'Half Day', color: '#2ECC71', icon: 'leaf', highlights: ['Guided Tours', 'Wildlife Shows', 'Cultural Stories', 'Ferry Access'],
     ageGroup: 'All Ages', isPopular: true,
     imageUrl: 'https://images.unsplash.com/photo-1534567153574-2b12153a87f0?w=800&q=80',
   },
   {
-    id: 'a5', name: 'Bollywood Dance Fitness', category: 'Fitness', description: 'High-energy Bollywood-inspired dance workout combining cardio with Bollywood and Bhangra moves.',
+    id: 'a5', cpid: 'CP-ACT-005', name: 'Bollywood Dance Fitness', category: 'Fitness', description: 'High-energy Bollywood-inspired dance workout combining cardio with Bollywood and Bhangra moves.',
     location: 'Blacktown, NSW', price: 25, priceLabel: '$25/class', rating: 4.8, reviews: 267,
     duration: '1 hour', color: '#E74C3C', icon: 'fitness', highlights: ['Cardio Workout', 'No Experience Needed', 'All Fitness Levels', 'Music & Fun'],
     ageGroup: '16+', isPopular: true,
     imageUrl: 'https://images.unsplash.com/photo-1524594152303-9fd13543fe6e?w=800&q=80',
   },
   {
-    id: 'a6', name: 'Cooking Masterclass: Biryani', category: 'Workshops', description: 'Learn the art of making authentic Hyderabadi Biryani from a professional chef. Includes all ingredients and a meal.',
+    id: 'a6', cpid: 'CP-ACT-006', name: 'Cooking Masterclass: Biryani', category: 'Workshops', description: 'Learn the art of making authentic Hyderabadi Biryani from a professional chef. Includes all ingredients and a meal.',
     location: 'Harris Park, NSW', price: 89, priceLabel: '$89/person', rating: 4.9, reviews: 98,
     duration: '3 hours', color: '#1A7A6D', icon: 'restaurant', highlights: ['Professional Chef', 'All Ingredients', 'Recipe Book', 'Lunch Included'],
     ageGroup: 'Adults', isPopular: false,
     imageUrl: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80',
   },
   {
-    id: 'a7', name: 'Laser Tag Arena', category: 'Gaming', description: 'Indoor laser tag arena with themed battlegrounds. Perfect for birthday parties and group events.',
+    id: 'a7', cpid: 'CP-ACT-007', name: 'Laser Tag Arena', category: 'Gaming', description: 'Indoor laser tag arena with themed battlegrounds. Perfect for birthday parties and group events.',
     location: 'Liverpool, NSW', price: 20, priceLabel: '$20/game', rating: 4.3, reviews: 512,
     duration: '30 min', color: '#3498DB', icon: 'flash', highlights: ['Birthday Packages', 'Group Discounts', 'Multiple Arenas', 'Arcade Games'],
     ageGroup: '8+', isPopular: false,
@@ -454,42 +461,42 @@ export const sampleActivities: ActivityData[] = [
 
 export const sampleShopping: ShoppingData[] = [
   {
-    id: 's1', name: 'Spice World Indian Groceries', category: 'Groceries', description: 'Largest Indian grocery store in Western Sydney with spices, fresh produce, and imported goods from across South Asia.',
+    id: 's1', cpid: 'CP-SHP-001', name: 'Spice World Indian Groceries', category: 'Groceries', description: 'Largest Indian grocery store in Western Sydney with spices, fresh produce, and imported goods from across South Asia.',
     location: 'Harris Park, NSW', rating: 4.6, reviews: 678, color: '#E85D3A', icon: 'cart',
     deals: [{ title: 'Basmati Rice 10kg', discount: '20% Off', validTill: '2026-04-01' }, { title: 'Fresh Curry Leaves', discount: 'Buy 2 Get 1', validTill: '2026-03-31' }],
     isOpen: true, deliveryAvailable: true,
     imageUrl: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&q=80',
   },
   {
-    id: 's2', name: 'Silk & Sari Boutique', category: 'Fashion', description: 'Premium collection of silk sarees, lehengas, and ethnic wear for all occasions. Custom tailoring available.',
+    id: 's2', cpid: 'CP-SHP-002', name: 'Silk & Sari Boutique', category: 'Fashion', description: 'Premium collection of silk sarees, lehengas, and ethnic wear for all occasions. Custom tailoring available.',
     location: 'Parramatta, NSW', rating: 4.8, reviews: 234, color: '#9B59B6', icon: 'shirt',
     deals: [{ title: 'Wedding Collection', discount: '30% Off', validTill: '2026-04-15' }, { title: 'Kids Ethnic Wear', discount: 'Flat $20 Off', validTill: '2026-03-30' }],
     isOpen: true, deliveryAvailable: false,
     imageUrl: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&q=80',
   },
   {
-    id: 's3', name: 'Golden Jewellers', category: 'Jewellery', description: 'Traditional and contemporary Indian gold and diamond jewellery. BIS hallmarked. EMI available.',
+    id: 's3', cpid: 'CP-SHP-003', name: 'Golden Jewellers', category: 'Jewellery', description: 'Traditional and contemporary Indian gold and diamond jewellery. BIS hallmarked. EMI available.',
     location: 'Toongabbie, NSW', rating: 4.7, reviews: 189, color: '#F2A93B', icon: 'diamond',
     deals: [{ title: 'Making Charges', discount: '50% Off', validTill: '2026-04-10' }],
     isOpen: true, deliveryAvailable: false,
     imageUrl: 'https://images.unsplash.com/photo-1515562141589-67f0d569b986?w=800&q=80',
   },
   {
-    id: 's4', name: 'Desi Electronics Hub', category: 'Electronics', description: 'Refurbished phones, accessories, and electronics. Repair services and screen replacement available.',
+    id: 's4', cpid: 'CP-SHP-004', name: 'Desi Electronics Hub', category: 'Electronics', description: 'Refurbished phones, accessories, and electronics. Repair services and screen replacement available.',
     location: 'Auburn, NSW', rating: 4.3, reviews: 312, color: '#3498DB', icon: 'phone-portrait',
     deals: [{ title: 'Screen Protectors', discount: 'Buy 1 Get 1', validTill: '2026-03-31' }, { title: 'Phone Cases', discount: '40% Off', validTill: '2026-04-05' }],
     isOpen: true, deliveryAvailable: true,
     imageUrl: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=800&q=80',
   },
   {
-    id: 's5', name: 'Ayurveda Health Store', category: 'Health & Wellness', description: 'Authentic Ayurvedic products, herbal supplements, essential oils, and natural skincare from India.',
+    id: 's5', cpid: 'CP-SHP-005', name: 'Ayurveda Health Store', category: 'Health & Wellness', description: 'Authentic Ayurvedic products, herbal supplements, essential oils, and natural skincare from India.',
     location: 'Wentworthville, NSW', rating: 4.5, reviews: 145, color: '#2ECC71', icon: 'leaf',
     deals: [{ title: 'Immunity Boosters', discount: '25% Off', validTill: '2026-04-20' }],
     isOpen: true, deliveryAvailable: true,
     imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800&q=80',
   },
   {
-    id: 's6', name: 'Bindiya Books & Gifts', category: 'Books & Gifts', description: 'Books in Hindi, Tamil, Malayalam, and more. Cultural gifts, handicrafts, and spiritual items.',
+    id: 's6', cpid: 'CP-SHP-006', name: 'Bindiya Books & Gifts', category: 'Books & Gifts', description: 'Books in Hindi, Tamil, Malayalam, and more. Cultural gifts, handicrafts, and spiritual items.',
     location: 'Blacktown, NSW', rating: 4.4, reviews: 98, color: '#E74C3C', icon: 'book',
     deals: [{ title: 'Children Books Set', discount: '3 for $25', validTill: '2026-03-28' }],
     isOpen: true, deliveryAvailable: true,

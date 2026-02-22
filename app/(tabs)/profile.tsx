@@ -139,8 +139,6 @@ export default function ProfileScreen() {
   const topInset = Platform.OS === 'web' ? 67 : insets.top;
   const { state, resetOnboarding } = useOnboarding();
   const { savedEvents, joinedCommunities } = useSaved();
-  const [pushNotifs, setPushNotifs] = useState(true);
-  const [emailNotifs, setEmailNotifs] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -590,51 +588,56 @@ export default function ProfileScreen() {
               badge={unreadCount}
               onPress={() => router.push('/notifications')}
             />
-            <ToggleItem
-              icon="megaphone-outline"
-              label="Push Notifications"
-              value={pushNotifs}
-              onToggle={setPushNotifs}
+            <MenuItem
+              icon="options-outline"
+              label="Notification Preferences"
               color="#FF2D55"
-            />
-            <ToggleItem
-              icon="mail-outline"
-              label="Email Updates"
-              value={emailNotifs}
-              onToggle={setEmailNotifs}
-              color="#5856D6"
+              onPress={() => router.push('/settings/notifications')}
               showDivider={false}
             />
           </View>
         </Animated.View>
 
-        {/* Help & Support */}
+        {/* Settings */}
         <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.section}>
+          <SectionTitle title="Settings" />
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="shield-checkmark-outline"
+              label="Privacy"
+              color="#5856D6"
+              onPress={() => router.push('/settings/privacy')}
+            />
+            <MenuItem
+              icon="add-circle-outline"
+              label="Submit a Listing"
+              color={Colors.secondary}
+              onPress={() => router.push('/submit')}
+            />
+          </View>
+        </Animated.View>
+
+        {/* Help & Support */}
+        <Animated.View entering={FadeInDown.delay(550).duration(400)} style={styles.section}>
           <SectionTitle title="Help & Support" />
           <View style={styles.menuCard}>
             <MenuItem
               icon="help-buoy-outline"
               label="Help Centre"
               color="#34C759"
-              onPress={() => router.push('/help')}
-            />
-            <MenuItem
-              icon="chatbubble-outline"
-              label="Contact Support"
-              color="#007AFF"
-              onPress={() => router.push('/help')}
+              onPress={() => router.push('/settings/help')}
             />
             <MenuItem
               icon="document-text-outline"
               label="Terms & Privacy"
               color="#8E8E93"
-              onPress={() => router.push('/help')}
+              onPress={() => router.push('/legal/terms')}
             />
             <MenuItem
               icon="information-circle-outline"
               label="About CulturePass"
               color={Colors.primary}
-              onPress={() => router.push('/help')}
+              onPress={() => router.push('/settings/about')}
               showDivider={false}
             />
           </View>

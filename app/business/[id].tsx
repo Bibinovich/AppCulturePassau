@@ -71,6 +71,10 @@ export default function BusinessDetailScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.section}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <Ionicons name="finger-print-outline" size={14} color={Colors.secondary} />
+            <Text style={{ fontFamily: 'Poppins_600SemiBold', fontSize: 12, color: Colors.secondary }}>{business.cpid}</Text>
+          </View>
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.description}>{business.description}</Text>
         </Animated.View>
