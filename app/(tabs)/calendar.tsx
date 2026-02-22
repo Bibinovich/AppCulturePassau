@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
-import { EVENTS, getEventsByDate } from '@/lib/data';
+import { sampleEvents } from '@/data/mockData';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -36,7 +36,7 @@ export default function CalendarScreen() {
 
   const eventDates = useMemo(() => {
     const dates = new Set<string>();
-    EVENTS.forEach(e => dates.add(e.date));
+    sampleEvents.forEach(e => dates.add(e.date));
     return dates;
   }, []);
 
@@ -46,7 +46,7 @@ export default function CalendarScreen() {
   for (let i = 0; i < firstDay; i++) days.push(null);
   for (let i = 1; i <= daysInMonth; i++) days.push(i);
 
-  const selectedEvents = selectedDate ? getEventsByDate(selectedDate) : [];
+  const selectedEvents = selectedDate ? sampleEvents.filter(e => e.date === selectedDate) : [];
 
   function prevMonth() {
     Haptics.selectionAsync();
@@ -155,7 +155,7 @@ export default function CalendarScreen() {
                   <Image source={{ uri: event.imageUrl }} style={styles.eventRowImage} contentFit="cover" />
                   <View style={styles.eventRowInfo}>
                     <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
-                    <Text style={styles.eventRowTime}>{event.time} - {event.endTime}</Text>
+                    <Text style={styles.eventRowTime}>{event.time}</Text>
                     <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
                   </View>
                   <View style={styles.eventRowPrice}>
@@ -172,7 +172,7 @@ export default function CalendarScreen() {
         {!selectedDate && (
           <View style={styles.eventsSection}>
             <Text style={styles.eventsSectionTitle}>Upcoming Events</Text>
-            {EVENTS.slice(0, 4).map(event => (
+            {sampleEvents.slice(0, 4).map(event => (
               <Pressable
                 key={event.id}
                 onPress={() => {
@@ -187,7 +187,7 @@ export default function CalendarScreen() {
                   <Text style={styles.eventRowTime}>
                     {new Date(event.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} {event.time}
                   </Text>
-                  <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}, {event.city}</Text>
+                  <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
               </Pressable>
