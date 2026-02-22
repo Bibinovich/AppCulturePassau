@@ -74,18 +74,6 @@ function RootLayoutNav() {
       <Stack.Screen name="legal/terms" />
       <Stack.Screen name="legal/privacy" />
       <Stack.Screen name="legal/cookies" />
-
-      {/* Settings */}
-      <Stack.Screen name="settings/notifications" />
-      <Stack.Screen name="settings/privacy" />
-      <Stack.Screen name="settings/help" />
-      <Stack.Screen name="settings/about" />
-
-      {/* Submit */}
-      <Stack.Screen name="submit/index" />
-
-      {/* All Events */}
-      <Stack.Screen name="allevents" />
     </Stack>
   );
 }

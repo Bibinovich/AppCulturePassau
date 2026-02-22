@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
-import { sampleEvents } from '@/data/mockData';
+import { EVENTS, getEventsByDate } from '@/lib/data';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -26,10 +26,6 @@ function formatDateKey(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
-function getEventsByDate(dateKey: string) {
-  return sampleEvents.filter(e => e.date === dateKey);
-}
-
 export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
@@ -40,7 +36,7 @@ export default function CalendarScreen() {
 
   const eventDates = useMemo(() => {
     const dates = new Set<string>();
-    sampleEvents.forEach(e => dates.add(e.date));
+    EVENTS.forEach(e => dates.add(e.date));
     return dates;
   }, []);
 
@@ -74,27 +70,19 @@ export default function CalendarScreen() {
     setSelectedDate(null);
   }
 
-  const eventsThisMonth = useMemo(() => {
-    return sampleEvents.filter(e => {
-      const [y, m] = e.date.split('-').map(Number);
-      return y === currentYear && m === currentMonth + 1;
-    });
-  }, [currentMonth, currentYear]);
-
   return (
     <View style={[styles.container, { paddingTop: insets.top + webTopInset }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         <Text style={styles.headerTitle}>Calendar</Text>
-        <Text style={styles.headerSub}>Find events by date</Text>
 
         <View style={styles.calendarCard}>
           <View style={styles.monthNav}>
-            <Pressable onPress={prevMonth} hitSlop={12} style={styles.navBtn}>
-              <Ionicons name="chevron-back" size={22} color={Colors.text} />
+            <Pressable onPress={prevMonth} hitSlop={12}>
+              <Ionicons name="chevron-back" size={24} color={Colors.text} />
             </Pressable>
             <Text style={styles.monthText}>{MONTHS[currentMonth]} {currentYear}</Text>
-            <Pressable onPress={nextMonth} hitSlop={12} style={styles.navBtn}>
-              <Ionicons name="chevron-forward" size={22} color={Colors.text} />
+            <Pressable onPress={nextMonth} hitSlop={12}>
+              <Ionicons name="chevron-forward" size={24} color={Colors.text} />
             </Pressable>
           </View>
 
@@ -129,9 +117,14 @@ export default function CalendarScreen() {
                     styles.dayText,
                     isSelected && styles.dayTextSelected,
                     isToday && !isSelected && styles.dayTextToday,
-                  ]}>{day}</Text>
+                  ]}>
+                    {day}
+                  </Text>
                   {hasEvent && (
-                    <View style={[styles.eventDot, isSelected && styles.eventDotSelected]} />
+                    <View style={[
+                      styles.eventDot,
+                      isSelected && styles.eventDotSelected,
+                    ]} />
                   )}
                 </Pressable>
               );
@@ -139,77 +132,66 @@ export default function CalendarScreen() {
           </View>
         </View>
 
-        {selectedDate && selectedEvents.length > 0 && (
+        {selectedDate && (
           <View style={styles.eventsSection}>
             <Text style={styles.eventsSectionTitle}>
-              {selectedEvents.length} event{selectedEvents.length > 1 ? 's' : ''} on this day
+              Events on {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long' })}
             </Text>
-            {selectedEvents.map(event => (
-              <Pressable
-                key={event.id}
-                style={styles.eventRow}
-                onPress={() => router.push(`/event/${event.id}`)}
-              >
-                <Image
-                  source={{ uri: event.imageUrl }}
-                  style={styles.eventRowImage}
-                  contentFit="cover"
-                />
-                <View style={styles.eventRowInfo}>
-                  <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
-                  <Text style={styles.eventRowTime}>{event.time}</Text>
-                  <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
-                </View>
-                <View style={styles.eventRowPrice}>
-                  <Text style={styles.eventRowPriceText}>{event.priceLabel}</Text>
-                </View>
-              </Pressable>
-            ))}
+            {selectedEvents.length === 0 ? (
+              <View style={styles.noEvents}>
+                <Ionicons name="calendar-outline" size={40} color={Colors.textTertiary} />
+                <Text style={styles.noEventsText}>No events on this day</Text>
+              </View>
+            ) : (
+              selectedEvents.map(event => (
+                <Pressable
+                  key={event.id}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push({ pathname: '/event/[id]', params: { id: event.id } });
+                  }}
+                  style={styles.eventRow}
+                >
+                  <Image source={{ uri: event.imageUrl }} style={styles.eventRowImage} contentFit="cover" />
+                  <View style={styles.eventRowInfo}>
+                    <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
+                    <Text style={styles.eventRowTime}>{event.time} - {event.endTime}</Text>
+                    <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
+                  </View>
+                  <View style={styles.eventRowPrice}>
+                    <Text style={styles.eventRowPriceText}>
+                      {event.price === 0 ? 'Free' : `$${event.price}`}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))
+            )}
           </View>
         )}
 
-        {selectedDate && selectedEvents.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="calendar-outline" size={40} color={Colors.textTertiary} />
-            <Text style={styles.emptyText}>No events on this date</Text>
-            <Text style={styles.emptySubtext}>Try selecting another day with a dot</Text>
-          </View>
-        )}
-
-        {!selectedDate && eventsThisMonth.length > 0 && (
+        {!selectedDate && (
           <View style={styles.eventsSection}>
-            <Text style={styles.eventsSectionTitle}>
-              {eventsThisMonth.length} event{eventsThisMonth.length > 1 ? 's' : ''} this month
-            </Text>
-            {eventsThisMonth.map(event => (
+            <Text style={styles.eventsSectionTitle}>Upcoming Events</Text>
+            {EVENTS.slice(0, 4).map(event => (
               <Pressable
                 key={event.id}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push({ pathname: '/event/[id]', params: { id: event.id } });
+                }}
                 style={styles.eventRow}
-                onPress={() => router.push(`/event/${event.id}`)}
               >
-                <Image
-                  source={{ uri: event.imageUrl }}
-                  style={styles.eventRowImage}
-                  contentFit="cover"
-                />
+                <Image source={{ uri: event.imageUrl }} style={styles.eventRowImage} contentFit="cover" />
                 <View style={styles.eventRowInfo}>
                   <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
-                  <Text style={styles.eventRowTime}>{event.date} · {event.time}</Text>
-                  <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
+                  <Text style={styles.eventRowTime}>
+                    {new Date(event.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} {event.time}
+                  </Text>
+                  <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}, {event.city}</Text>
                 </View>
-                <View style={styles.eventRowPrice}>
-                  <Text style={styles.eventRowPriceText}>{event.priceLabel}</Text>
-                </View>
+                <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
               </Pressable>
             ))}
-          </View>
-        )}
-
-        {!selectedDate && eventsThisMonth.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="calendar-outline" size={40} color={Colors.textTertiary} />
-            <Text style={styles.emptyText}>No events this month</Text>
-            <Text style={styles.emptySubtext}>Use the arrows to browse other months</Text>
           </View>
         )}
       </ScrollView>
@@ -221,43 +203,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingHorizontal: 20,
   },
   headerTitle: {
     fontFamily: 'Poppins_700Bold',
-    fontSize: 26,
+    fontSize: 28,
     color: Colors.text,
-    marginTop: 12,
-  },
-  headerSub: {
-    fontFamily: 'Poppins_400Regular',
-    fontSize: 14,
-    color: Colors.textTertiary,
-    marginBottom: 16,
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
   calendarCard: {
     backgroundColor: Colors.card,
-    borderRadius: 18,
+    marginHorizontal: 20,
+    borderRadius: 20,
     padding: 16,
-    ...Colors.shadow.medium,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
   },
   monthNav: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  navBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.surfaceSecondary,
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 16,
   },
   monthText: {
     fontFamily: 'Poppins_600SemiBold',
-    fontSize: 17,
+    fontSize: 18,
     color: Colors.text,
   },
   dayHeaders: {
@@ -267,7 +241,7 @@ const styles = StyleSheet.create({
   dayHeaderText: {
     flex: 1,
     textAlign: 'center',
-    fontFamily: 'Poppins_600SemiBold',
+    fontFamily: 'Poppins_500Medium',
     fontSize: 12,
     color: Colors.textTertiary,
   },
@@ -276,18 +250,17 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   dayCell: {
-    width: '14.285%' as any,
+    width: '14.28%',
     aspectRatio: 1,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
   },
   dayCellSelected: {
     backgroundColor: Colors.primary,
-    borderRadius: 20,
   },
   dayCellToday: {
-    backgroundColor: Colors.primaryGlow,
-    borderRadius: 20,
+    backgroundColor: Colors.surfaceSecondary,
   },
   dayText: {
     fontFamily: 'Poppins_500Medium',
@@ -295,31 +268,39 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   dayTextSelected: {
-    color: '#FFF',
-    fontFamily: 'Poppins_700Bold',
+    color: '#fff',
   },
   dayTextToday: {
     color: Colors.primary,
-    fontFamily: 'Poppins_700Bold',
   },
   eventDot: {
     width: 5,
     height: 5,
-    borderRadius: 3,
+    borderRadius: 2.5,
     backgroundColor: Colors.primary,
     marginTop: 2,
   },
   eventDotSelected: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff',
   },
   eventsSection: {
-    marginTop: 20,
+    padding: 24,
   },
   eventsSectionTitle: {
     fontFamily: 'Poppins_600SemiBold',
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.text,
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  noEvents: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    gap: 8,
+  },
+  noEventsText: {
+    fontFamily: 'Poppins_400Regular',
+    fontSize: 14,
+    color: Colors.textTertiary,
   },
   eventRow: {
     flexDirection: 'row',
@@ -328,7 +309,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 12,
     marginBottom: 10,
-    ...Colors.shadow.small,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
     gap: 12,
   },
   eventRowImage: {
@@ -366,20 +351,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_600SemiBold',
     fontSize: 12,
     color: Colors.primary,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 40,
-    gap: 8,
-  },
-  emptyText: {
-    fontFamily: 'Poppins_600SemiBold',
-    fontSize: 16,
-    color: Colors.text,
-  },
-  emptySubtext: {
-    fontFamily: 'Poppins_400Regular',
-    fontSize: 13,
-    color: Colors.textTertiary,
   },
 });
