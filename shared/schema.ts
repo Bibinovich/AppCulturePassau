@@ -5,6 +5,7 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  culturePassId: varchar("culture_pass_id").unique(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   displayName: text("display_name"),
@@ -32,6 +33,7 @@ export const users = pgTable("users", {
 
 export const profiles = pgTable("profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  culturePassId: varchar("culture_pass_id").unique(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   entityType: text("entity_type").notNull(),
@@ -129,6 +131,7 @@ export const wallets = pgTable("wallets", {
 
 export const sponsors = pgTable("sponsors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  culturePassId: varchar("culture_pass_id").unique(),
   name: text("name").notNull(),
   description: text("description"),
   logoUrl: text("logo_url"),
@@ -235,6 +238,14 @@ export const tickets = pgTable("tickets", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const cpidRegistry = pgTable("cpid_registry", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  culturePassId: varchar("culture_pass_id").notNull().unique(),
+  targetId: varchar("target_id").notNull(),
+  entityType: text("entity_type").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export interface SocialLinks {
   facebook?: string;
   instagram?: string;
@@ -336,3 +347,4 @@ export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Ticket = typeof tickets.$inferSelect;
 export type InsertTicket = z.infer<typeof insertTicketSchema>;
+export type CpidRegistry = typeof cpidRegistry.$inferSelect;
