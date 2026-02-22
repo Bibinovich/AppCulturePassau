@@ -21,6 +21,7 @@ import { queryClient } from '@/lib/query-client';
 import { useState, useMemo, useCallback } from 'react';
 import type { Profile } from '@shared/schema';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { FilterChipRow, FilterItem } from '@/components/FilterChip';
 
 const TYPE_COLORS: Record<string, string> = {
   community: '#E85D3A',
@@ -286,6 +287,16 @@ export default function CommunitiesScreen() {
     setSelectedType(id);
   }, []);
 
+  const filterItems = useMemo(() => {
+    return QUICK_MENU.map(item => ({
+      id: item.id,
+      label: item.label,
+      icon: item.icon,
+      color: item.id === 'all' ? Colors.primary : (TYPE_COLORS[item.id] ?? Colors.primary),
+      count: typeCounts[item.id] ?? 0,
+    })) as FilterItem[];
+  }, [typeCounts]);
+
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
       {/* Header */}
@@ -314,40 +325,7 @@ export default function CommunitiesScreen() {
       </View>
 
       {/* Type filter pills */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.quickRow}
-        style={{ flexGrow: 0 }}
-      >
-        {QUICK_MENU.map(item => {
-          const isActive = selectedType === item.id;
-          const color =
-            item.id === 'all' ? Colors.primary : (TYPE_COLORS[item.id] ?? Colors.primary);
-          return (
-            <Pressable
-              key={item.id}
-              style={[
-                styles.quickPill,
-                isActive && [{ backgroundColor: color, borderColor: color }, styles.quickPillActive],
-              ]}
-              onPress={() => handleTypeSelect(item.id)}
-            >
-              <Ionicons name={item.icon as any} size={15} color={isActive ? '#FFF' : color} />
-              <Text style={[styles.quickPillLabel, isActive && { color: '#FFF' }]}>
-                {item.label}
-              </Text>
-              {(typeCounts[item.id] ?? 0) > 0 && (
-                <View style={[styles.countBadge, isActive && { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
-                  <Text style={[styles.countBadgeText, isActive && { color: '#FFF' }]}>
-                    {typeCounts[item.id]}
-                  </Text>
-                </View>
-              )}
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      <FilterChipRow items={filterItems} selectedId={selectedType} onSelect={handleTypeSelect} />
 
       {/* Content */}
       {isLoading ? (
@@ -415,20 +393,6 @@ const styles = StyleSheet.create({
     color: Colors.text,
     padding: 0,
   },
-  quickRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 14 },
-  quickPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 24,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  quickPillLabel: { fontSize: 11.5, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  quickPillActive: { ...Colors.shadow.small },
   resultCount: {
     fontSize: 13,
     fontFamily: 'Poppins_500Medium',
@@ -537,19 +501,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  countBadge: {
-    backgroundColor: Colors.backgroundSecondary,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 8,
-    minWidth: 20,
-    alignItems: 'center',
-  },
-  countBadgeText: {
-    fontSize: 10,
-    fontFamily: 'Poppins_600SemiBold',
-    color: Colors.textSecondary,
   },
   joinButton: {
     flex: 1,

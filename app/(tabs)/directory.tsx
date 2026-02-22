@@ -19,6 +19,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/query-client';
 import type { Profile } from '@shared/schema';
+import { FilterChipRow, FilterItem } from '@/components/FilterChip';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -233,10 +234,20 @@ export default function DirectoryScreen() {
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
-  const handleFilterSelect = useCallback((label: string) => {
+  const handleFilterSelect = useCallback((id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedType(label);
+    setSelectedType(id);
   }, []);
+
+  const filterItems = useMemo<FilterItem[]>(() => {
+    return ENTITY_FILTERS.map(filter => ({
+      id: filter.label,
+      label: filter.display,
+      icon: filter.icon,
+      color: filter.color,
+      count: typeCounts[filter.label],
+    }));
+  }, [typeCounts]);
 
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
@@ -266,56 +277,7 @@ export default function DirectoryScreen() {
 
       {/* Category filter chips */}
       <View style={styles.categorySection}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryRow}
-        >
-          {ENTITY_FILTERS.map(filter => {
-            const isActive = selectedType === filter.label;
-            return (
-              <Pressable
-                key={filter.label}
-                style={[
-                  styles.categoryChip,
-                  isActive && {
-                    backgroundColor: filter.color,
-                    borderColor: filter.color,
-                    ...styles.categoryChipActive,
-                  },
-                ]}
-                onPress={() => handleFilterSelect(filter.label)}
-              >
-                <View
-                  style={[
-                    styles.categoryIconWrap,
-                    isActive
-                      ? { backgroundColor: 'rgba(255,255,255,0.25)' }
-                      : { backgroundColor: filter.color + '12' },
-                  ]}
-                >
-                  <Ionicons
-                    name={filter.icon as any}
-                    size={18}
-                    color={isActive ? '#FFF' : filter.color}
-                  />
-                </View>
-                <Text
-                  style={[styles.categoryText, isActive && styles.categoryTextActive]}
-                >
-                  {filter.display}
-                </Text>
-                {(typeCounts[filter.label] ?? 0) > 0 && (
-                  <View style={[styles.countBadge, isActive && { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
-                    <Text style={[styles.countBadgeText, isActive && { color: '#FFF' }]}>
-                      {typeCounts[filter.label]}
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <FilterChipRow items={filterItems} selectedId={selectedType} onSelect={handleFilterSelect} />
       </View>
 
       {/* Content */}
@@ -391,41 +353,6 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   categorySection: { paddingTop: 8, paddingBottom: 4 },
-  categoryRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 14 },
-  categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 24,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  categoryChipActive: { ...Colors.shadow.small },
-  categoryIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  categoryText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  categoryTextActive: { color: '#FFF' },
-  countBadge: {
-    backgroundColor: Colors.backgroundSecondary,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 8,
-    minWidth: 20,
-    alignItems: 'center',
-  },
-  countBadgeText: {
-    fontSize: 10,
-    fontFamily: 'Poppins_600SemiBold',
-    color: Colors.textSecondary,
-  },
   resultCount: {
     fontSize: 13,
     fontFamily: 'Poppins_500Medium',

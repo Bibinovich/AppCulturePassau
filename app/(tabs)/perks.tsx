@@ -8,6 +8,7 @@ import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/query-client';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { FilterChipRow, FilterItem } from '@/components/FilterChip';
 
 interface Perk {
   id: string;
@@ -52,6 +53,12 @@ const CATEGORIES = [
   { id: 'shopping', label: 'Shopping', icon: 'bag' },
   { id: 'wallet', label: 'Wallet', icon: 'wallet' },
 ];
+
+const filterItems: FilterItem[] = CATEGORIES.map(cat => ({
+  id: cat.id,
+  label: cat.label,
+  icon: cat.icon,
+}));
 
 export default function PerksTabScreen() {
   const insets = useSafeAreaInsets();
@@ -154,18 +161,7 @@ export default function PerksTabScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
-            {CATEGORIES.map(cat => {
-              const isActive = selectedCategory === cat.id;
-              return (
-                <Pressable key={cat.id} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSelectedCategory(cat.id); }}
-                  style={[styles.catPill, isActive && styles.catPillActive]}>
-                  <Ionicons name={cat.icon as any} size={16} color={isActive ? '#FFF' : Colors.textSecondary} />
-                  <Text style={[styles.catPillText, isActive && styles.catPillTextActive]}>{cat.label}</Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          <FilterChipRow items={filterItems} selectedId={selectedCategory} onSelect={setSelectedCategory} size="small" />
         </Animated.View>
 
         <View style={styles.list}>
@@ -287,11 +283,6 @@ const styles = StyleSheet.create({
   heroStatNum: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: '#FFF' },
   heroStatLabel: { fontSize: 10, fontFamily: 'Poppins_400Regular', color: 'rgba(255,255,255,0.7)' },
   heroStatDivider: { width: 1, height: 28, backgroundColor: 'rgba(255,255,255,0.2)' },
-  catRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 16 },
-  catPill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.cardBorder },
-  catPillActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  catPillText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary },
-  catPillTextActive: { color: '#FFF' },
   list: { paddingHorizontal: 20 },
   emptyState: { alignItems: 'center', paddingTop: 60, gap: 12 },
   emptyText: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },

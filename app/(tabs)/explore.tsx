@@ -19,6 +19,7 @@ import Colors from '@/constants/colors';
 import { useState, useMemo, useCallback } from 'react';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { FilterChipRow, FilterItem } from '@/components/FilterChip';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -88,6 +89,20 @@ export default function ExploreScreen() {
     }
     return counts;
   }, []);
+
+  const filterItems = useMemo(
+    () =>
+      exploreCategories.map(
+        (cat): FilterItem => ({
+          id: cat.label,
+          label: cat.label,
+          icon: cat.icon,
+          color: Colors.primary,
+          count: categoryCounts[cat.label],
+        })
+      ),
+    [categoryCounts]
+  );
 
   const filteredEvents = useMemo(() => {
     let events = sampleEvents as SampleEvent[];
@@ -173,44 +188,7 @@ export default function ExploreScreen() {
       </View>
 
       {/* Category filter chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoryRow}
-        style={{ flexGrow: 0 }}
-      >
-        {exploreCategories.map(cat => {
-          const isActive = selectedCategory === cat.label;
-          return (
-            <Pressable
-              key={cat.label}
-              style={[styles.categoryChip, isActive && styles.categoryChipActive]}
-              onPress={() => handleCategorySelect(cat.label)}
-            >
-              <View
-                style={[
-                  styles.catIconWrap,
-                  isActive && { backgroundColor: 'rgba(255,255,255,0.25)' },
-                ]}
-              >
-                <Ionicons
-                  name={cat.icon as any}
-                  size={18}
-                  color={isActive ? '#FFF' : Colors.primary}
-                />
-              </View>
-              <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
-                {cat.label}
-              </Text>
-              <View style={[styles.categoryBadge, isActive && styles.categoryBadgeActive]}>
-                <Text style={[styles.categoryBadgeText, isActive && styles.categoryBadgeTextActive]}>
-                  {categoryCounts[cat.label] ?? 0}
-                </Text>
-              </View>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      <FilterChipRow items={filterItems} selectedId={selectedCategory} onSelect={handleCategorySelect} />
 
       <View style={styles.sortRow}>
         <Pressable
@@ -434,38 +412,6 @@ const styles = StyleSheet.create({
     color: Colors.text,
     padding: 0,
   },
-  categoryRow: { paddingHorizontal: 20, gap: 10, paddingBottom: 14 },
-  categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 24,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-    ...Colors.shadow.small,
-  },
-  categoryChipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-    shadowColor: Colors.primary,
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
-  },
-  catIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: Colors.primaryGlow,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  categoryLabel: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  categoryLabelActive: { color: '#FFF' },
   results: { paddingHorizontal: 20, paddingTop: 4 },
   resultCount: {
     fontSize: 14,
@@ -589,26 +535,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins_600SemiBold',
     color: Colors.primary,
-  },
-  categoryBadge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: Colors.backgroundSecondary,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    paddingHorizontal: 5,
-  },
-  categoryBadgeActive: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-  },
-  categoryBadgeText: {
-    fontSize: 11,
-    fontFamily: 'Poppins_600SemiBold',
-    color: Colors.textSecondary,
-  },
-  categoryBadgeTextActive: {
-    color: '#FFF',
   },
   sortRow: {
     flexDirection: 'row' as const,
