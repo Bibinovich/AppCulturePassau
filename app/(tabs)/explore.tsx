@@ -67,29 +67,37 @@ export default function ExploreScreen() {
         contentContainerStyle={styles.categoryRow}
         style={{ flexGrow: 0 }}
       >
-        {exploreCategories.map(cat => (
-          <Pressable
-            key={cat.label}
-            style={[
-              styles.categoryChip,
-              selectedCategory === cat.label && styles.categoryChipActive,
-            ]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedCategory(cat.label);
-            }}
-          >
-            <Ionicons
-              name={cat.icon as any}
-              size={16}
-              color={selectedCategory === cat.label ? '#FFF' : Colors.textSecondary}
-            />
-            <Text style={[
-              styles.categoryLabel,
-              selectedCategory === cat.label && styles.categoryLabelActive,
-            ]}>{cat.label}</Text>
-          </Pressable>
-        ))}
+        {exploreCategories.map(cat => {
+          const isActive = selectedCategory === cat.label;
+          return (
+            <Pressable
+              key={cat.label}
+              style={[
+                styles.categoryChip,
+                isActive && styles.categoryChipActive,
+              ]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSelectedCategory(cat.label);
+              }}
+            >
+              <View style={[
+                styles.catIconWrap,
+                isActive && { backgroundColor: 'rgba(255,255,255,0.25)' },
+              ]}>
+                <Ionicons
+                  name={cat.icon as any}
+                  size={18}
+                  color={isActive ? '#FFF' : Colors.primary}
+                />
+              </View>
+              <Text style={[
+                styles.categoryLabel,
+                isActive && styles.categoryLabelActive,
+              ]}>{cat.label}</Text>
+            </Pressable>
+          );
+        })}
       </ScrollView>
 
       <ScrollView
@@ -203,28 +211,43 @@ const styles = StyleSheet.create({
   },
   categoryRow: {
     paddingHorizontal: 20,
-    gap: 8,
-    paddingBottom: 12,
+    gap: 10,
+    paddingBottom: 14,
   },
   categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
     backgroundColor: Colors.card,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   categoryChipActive: {
     backgroundColor: Colors.primary,
     borderColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.3,
+  },
+  catIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: Colors.primary + '12',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryLabel: {
-    fontSize: 13,
-    fontFamily: 'Poppins_500Medium',
-    color: Colors.textSecondary,
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.text,
   },
   categoryLabelActive: { color: '#FFF' },
   results: {

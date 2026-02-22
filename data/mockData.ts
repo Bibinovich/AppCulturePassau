@@ -353,13 +353,13 @@ export const sampleBusinesses: BusinessData[] = [
 ];
 
 export const businessCategories = [
-  'All',
-  'Restaurants',
-  'Event Planners',
-  'Decorators',
-  'Musicians',
-  'Venues',
-  'Photographers',
+  { label: 'All', icon: 'grid', color: '#1C1C1E' },
+  { label: 'Restaurants', icon: 'restaurant', color: '#E85D3A' },
+  { label: 'Event Planners', icon: 'calendar', color: '#1A7A6D' },
+  { label: 'Decorators', icon: 'color-palette', color: '#9B59B6' },
+  { label: 'Musicians', icon: 'musical-notes', color: '#3498DB' },
+  { label: 'Venues', icon: 'business', color: '#F2A93B' },
+  { label: 'Photographers', icon: 'camera', color: '#E74C3C' },
 ];
 
 export const exploreCategories = [
