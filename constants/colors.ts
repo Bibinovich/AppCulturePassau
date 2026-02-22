@@ -1,4 +1,3 @@
-// colors.ts  (or constants/Colors.ts, theme/index.ts, etc.)
 import { Platform } from 'react-native';
 
 export interface ShadowStyle {
@@ -42,6 +41,7 @@ export type ColorTheme = {
   success: string;
   warning: string;
   error: string;
+  info: string;
 
   overlay: string;
   tabIconDefault: string;
@@ -52,131 +52,116 @@ export type ColorTheme = {
   tint: string;
 };
 
-// ────────────────────────────────────────────────
-//                SHARED / BASE VALUES
-// ────────────────────────────────────────────────
 const base = {
-  primary: '#D4552A',          // rich terracotta
-  primaryLight: '#E67A5B',
-  primaryDark: '#A93E22',
-  primaryGlow: 'rgba(212, 85, 42, 0.14)',
-  primarySoft: 'rgba(212, 85, 42, 0.07)',
+  primary: '#00D4AA',
+  primaryLight: '#33DDBB',
+  primaryDark: '#00A882',
+  primaryGlow: 'rgba(0, 212, 170, 0.15)',
+  primarySoft: 'rgba(0, 212, 170, 0.07)',
 
-  secondary: '#1B7F6F',        // deep refined teal
-  secondaryLight: '#2E9C8A',
-  secondaryDark: '#146257',
+  secondary: '#7C3AED',
+  secondaryLight: '#9F67FF',
+  secondaryDark: '#5B21B6',
 
-  accent: '#C9971A',           // celebration gold
-  accentLight: '#E6BE4C',
+  accent: '#FF6B35',
+  accentLight: '#FFB347',
 
-  success: '#2E7D32',
-  warning: '#F09000',
-  error: '#D32F2F',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
 
   overlay: 'rgba(0,0,0,0.44)',
 } as const;
 
-// ────────────────────────────────────────────────
-//                   LIGHT THEME
-// ────────────────────────────────────────────────
 export const light: ColorTheme = {
   ...base,
 
-  background: '#F8F6F3',
-  backgroundSecondary: '#F2EFEA',
+  background: '#F8F9FA',
+  backgroundSecondary: '#F0F2F5',
 
   surface: '#FFFFFF',
-  surfaceElevated: '#F9F7F4',
-  surfaceSecondary: '#F2EFEA',
+  surfaceElevated: '#F0F2F5',
+  surfaceSecondary: '#F8F9FA',
 
-  border: '#E4DED8',
-  borderLight: '#ECE7E1',
-  divider: '#EDE8E2',
+  border: '#E2E8F0',
+  borderLight: '#EDF2F7',
+  divider: '#E2E8F0',
 
-  text: '#1E1E1F',
-  textSecondary: '#57565B',
-  textTertiary: '#8C8C92',
+  text: '#0D0F14',
+  textSecondary: '#64748B',
+  textTertiary: '#94A3B8',
   textInverse: '#FFFFFF',
 
   tabBar: '#FFFFFF',
-  tabBarBorder: '#E4DED8',
-  tabIconDefault: '#8C8C92',
-  tabIconSelected: '#D4552A',
+  tabBarBorder: '#E2E8F0',
+  tabIconDefault: '#94A3B8',
+  tabIconSelected: '#00D4AA',
 
-  tint: '#D4552A',
+  tint: '#00D4AA',
 };
 
-// ────────────────────────────────────────────────
-//                   DARK THEME
-// ────────────────────────────────────────────────
 export const dark: ColorTheme = {
   ...base,
 
-  // Darker but not pitch black – better eye comfort
-  background: '#121215',
-  backgroundSecondary: '#1A1A1F',
+  background: '#0D0F14',
+  backgroundSecondary: '#161B27',
 
-  surface: '#1E1E22',
-  surfaceElevated: '#26262B',
-  surfaceSecondary: '#222226',
+  surface: '#161B27',
+  surfaceElevated: '#1E2535',
+  surfaceSecondary: '#1E2535',
 
-  border: '#34343A',
-  borderLight: '#3A3A40',
-  divider: '#2F2F35',
+  border: '#2D3748',
+  borderLight: '#374151',
+  divider: '#2D3748',
 
-  text: '#F3F3F6',
-  textSecondary: '#B8B8C0',
-  textTertiary: '#82828A',
-  textInverse: '#0F0F11',
+  text: '#F1F5F9',
+  textSecondary: '#94A3B8',
+  textTertiary: '#475569',
+  textInverse: '#0D0F14',
 
-  tabBar: '#1E1E22',
-  tabBarBorder: '#34343A',
-  tabIconDefault: '#82828A',
-  tabIconSelected: '#F4A58A',   // warmer/lighter primary variant
+  tabBar: '#161B27',
+  tabBarBorder: '#2D3748',
+  tabIconDefault: '#475569',
+  tabIconSelected: '#00D4AA',
 
-  tint: '#F4A58A',              // better visibility on dark background
+  tint: '#00D4AA',
 };
 
-// ────────────────────────────────────────────────
-//                   SHADOWS
-// ────────────────────────────────────────────────
 export const shadows = {
   small: {
-    shadowColor: Platform.select({ ios: '#3E2C24', default: '#000' }),
+    shadowColor: Platform.select({ ios: '#0D0F14', default: '#000' }),
     shadowOffset: { width: 0, height: 1.5 },
-    shadowOpacity: 0.09,
+    shadowOpacity: 0.08,
     shadowRadius: 3.5,
     elevation: 2.5,
   } satisfies ShadowStyle,
 
   medium: {
-    shadowColor: Platform.select({ ios: '#3E2C24', default: '#000' }),
+    shadowColor: Platform.select({ ios: '#0D0F14', default: '#000' }),
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.11,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
   } satisfies ShadowStyle,
 
   large: {
-    shadowColor: Platform.select({ ios: '#3E2C24', default: '#000' }),
+    shadowColor: Platform.select({ ios: '#0D0F14', default: '#000' }),
     shadowOffset: { width: 0, height: 9 },
-    shadowOpacity: 0.16,
+    shadowOpacity: 0.14,
     shadowRadius: 18,
     elevation: 10,
   } satisfies ShadowStyle,
 
   heavy: {
-    shadowColor: Platform.select({ ios: '#3E2C24', default: '#000' }),
+    shadowColor: Platform.select({ ios: '#0D0F14', default: '#000' }),
     shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.24,
+    shadowOpacity: 0.22,
     shadowRadius: 32,
     elevation: 16,
   } satisfies ShadowStyle,
 };
 
-// ────────────────────────────────────────────────
-//                   MAIN EXPORT
-// ────────────────────────────────────────────────
 const Colors = {
   ...light,
   light,
