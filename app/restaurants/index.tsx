@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -46,8 +46,8 @@ export default function RestaurantsScreen() {
         {filtered.map((rest, index) => (
           <Animated.View key={rest.id} entering={FadeInDown.delay(index * 60).duration(400)}>
             <Pressable style={styles.card} onPress={() => router.push({ pathname: '/restaurants/[id]', params: { id: rest.id } })}>
-              <View style={[styles.cardBanner, { backgroundColor: rest.color }]}>
-                <Ionicons name={rest.icon as any} size={32} color="rgba(255,255,255,0.9)" />
+              <View style={[styles.cardBanner]}>
+                <Image source={{ uri: rest.imageUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} />
                 {rest.isOpen && <View style={styles.openBadge}><Text style={styles.openText}>Open</Text></View>}
               </View>
               <View style={styles.cardBody}>
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: 20, paddingTop: 4 },
   resultCount: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary, marginBottom: 10 },
   card: { backgroundColor: Colors.card, borderRadius: 18, overflow: 'hidden', marginBottom: 14, borderWidth: 1, borderColor: Colors.cardBorder },
-  cardBanner: { height: 100, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  cardBanner: { height: 100, position: 'relative', overflow: 'hidden' },
   openBadge: { position: 'absolute', top: 10, right: 10, backgroundColor: Colors.success, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   openText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
   cardBody: { padding: 14, gap: 8 },

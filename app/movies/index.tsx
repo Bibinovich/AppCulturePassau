@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,8 +40,8 @@ export default function MoviesScreen() {
               {trending.map((movie, i) => (
                 <Animated.View key={movie.id} entering={FadeInDown.delay(i * 80).duration(400)}>
                   <Pressable style={styles.trendingCard} onPress={() => router.push({ pathname: '/movies/[id]', params: { id: movie.id } })}>
-                    <View style={[styles.trendingPoster, { backgroundColor: movie.posterColor }]}>
-                      <Ionicons name="film" size={40} color="rgba(255,255,255,0.9)" />
+                    <View style={{ position: 'relative' }}>
+                      <Image source={{ uri: movie.posterUrl }} style={styles.trendingPoster} />
                       <View style={styles.trendingBadge}>
                         <Ionicons name="trending-up" size={12} color="#FFF" />
                       </View>
@@ -82,9 +82,7 @@ export default function MoviesScreen() {
           {filtered.map((movie, index) => (
             <Animated.View key={movie.id} entering={FadeInDown.delay(index * 60).duration(400)}>
               <Pressable style={styles.movieCard} onPress={() => router.push({ pathname: '/movies/[id]', params: { id: movie.id } })}>
-                <View style={[styles.moviePoster, { backgroundColor: movie.posterColor }]}>
-                  <Ionicons name="film" size={28} color="rgba(255,255,255,0.9)" />
-                </View>
+                <Image source={{ uri: movie.posterUrl }} style={styles.moviePoster} />
                 <View style={styles.movieInfo}>
                   <Text style={styles.movieTitle} numberOfLines={1}>{movie.title}</Text>
                   <Text style={styles.movieMeta}>{movie.language} | {movie.duration} | {movie.rating}</Text>
@@ -117,7 +115,7 @@ const styles = StyleSheet.create({
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text, paddingHorizontal: 20, marginBottom: 14 },
   trendingCard: { width: 150, gap: 6 },
-  trendingPoster: { width: 150, height: 200, borderRadius: 16, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  trendingPoster: { width: 150, height: 200, borderRadius: 16 },
   trendingBadge: { position: 'absolute', top: 8, right: 8, backgroundColor: Colors.primary, width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   trendingTitle: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   trendingLang: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
@@ -130,7 +128,7 @@ const styles = StyleSheet.create({
   listSection: { paddingHorizontal: 20 },
   resultCount: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary, marginBottom: 10 },
   movieCard: { flexDirection: 'row', backgroundColor: Colors.card, borderRadius: 16, overflow: 'hidden', marginBottom: 12, borderWidth: 1, borderColor: Colors.cardBorder },
-  moviePoster: { width: 100, alignItems: 'center', justifyContent: 'center' },
+  moviePoster: { width: 100 },
   movieInfo: { flex: 1, padding: 14, gap: 4 },
   movieTitle: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: Colors.text },
   movieMeta: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },

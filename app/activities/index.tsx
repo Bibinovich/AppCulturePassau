@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,8 +36,8 @@ export default function ActivitiesScreen() {
               {popular.map((act, i) => (
                 <Animated.View key={act.id} entering={FadeInDown.delay(i * 80).duration(400)}>
                   <Pressable style={styles.popularCard} onPress={() => router.push({ pathname: '/activities/[id]', params: { id: act.id } })}>
-                    <View style={[styles.popularBanner, { backgroundColor: act.color }]}>
-                      <Ionicons name={act.icon as any} size={32} color="rgba(255,255,255,0.9)" />
+                    <View style={[styles.popularBanner]}>
+                      <Image source={{ uri: act.imageUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} />
                     </View>
                     <View style={styles.popularInfo}>
                       <Text style={styles.popularName} numberOfLines={1}>{act.name}</Text>
@@ -77,9 +77,7 @@ export default function ActivitiesScreen() {
           {filtered.map((act, index) => (
             <Animated.View key={act.id} entering={FadeInDown.delay(index * 60).duration(400)}>
               <Pressable style={styles.card} onPress={() => router.push({ pathname: '/activities/[id]', params: { id: act.id } })}>
-                <View style={[styles.cardIcon, { backgroundColor: act.color + '15' }]}>
-                  <Ionicons name={act.icon as any} size={28} color={act.color} />
-                </View>
+                <Image source={{ uri: act.imageUrl }} style={styles.cardIcon} />
                 <View style={styles.cardInfo}>
                   <Text style={styles.cardName}>{act.name}</Text>
                   <Text style={styles.cardCat}>{act.category} | {act.duration}</Text>
@@ -108,7 +106,7 @@ const styles = StyleSheet.create({
   section: { marginBottom: 20 },
   sectionTitle: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text, paddingHorizontal: 20, marginBottom: 14 },
   popularCard: { width: 180, backgroundColor: Colors.card, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: Colors.cardBorder },
-  popularBanner: { height: 100, alignItems: 'center', justifyContent: 'center' },
+  popularBanner: { height: 100, overflow: 'hidden' },
   popularInfo: { padding: 10, gap: 2 },
   popularName: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   popularCat: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
@@ -123,7 +121,7 @@ const styles = StyleSheet.create({
   listSection: { paddingHorizontal: 20 },
   resultCount: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary, marginBottom: 10 },
   card: { flexDirection: 'row', backgroundColor: Colors.card, borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: Colors.cardBorder, gap: 14 },
-  cardIcon: { width: 60, height: 60, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  cardIcon: { width: 60, height: 60, borderRadius: 16, overflow: 'hidden' },
   cardInfo: { flex: 1, gap: 3 },
   cardName: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: Colors.text },
   cardCat: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },

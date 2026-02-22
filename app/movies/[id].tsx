@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Image } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,8 +31,8 @@ export default function MovieDetailScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <View style={[styles.posterArea, { backgroundColor: movie.posterColor }]}>
-          <Ionicons name="film" size={64} color="rgba(255,255,255,0.9)" />
+        <View style={[styles.posterArea]}>
+          <Image source={{ uri: movie.posterUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} />
           <View style={styles.posterBadge}>
             <Ionicons name="star" size={14} color={Colors.accent} />
             <Text style={styles.posterScore}>{movie.imdbScore}</Text>
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 12 },
   headerTitle: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.text, flex: 1, textAlign: 'center', marginHorizontal: 12 },
-  posterArea: { height: 240, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  posterArea: { height: 240, position: 'relative', overflow: 'hidden' },
   posterBadge: { position: 'absolute', bottom: 16, right: 16, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   posterScore: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: '#FFF' },
   infoSection: { padding: 20, gap: 10 },

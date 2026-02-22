@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Image } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,8 +22,8 @@ export default function ActivityDetailScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <View style={[styles.banner, { backgroundColor: act.color }]}>
-          <Ionicons name={act.icon as any} size={64} color="rgba(255,255,255,0.9)" />
+        <View style={[styles.banner]}>
+          <Image source={{ uri: act.imageUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} />
           {act.isPopular && <View style={styles.popularBadge}><Ionicons name="flame" size={14} color="#FFF" /><Text style={styles.popularText}>Popular</Text></View>}
         </View>
 
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 12 },
   headerTitle: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.text, flex: 1, textAlign: 'center', marginHorizontal: 12 },
-  banner: { height: 220, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  banner: { height: 220, position: 'relative', overflow: 'hidden' },
   popularBadge: { position: 'absolute', top: 16, left: 16, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   popularText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
   info: { padding: 20, gap: 12 },

@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -47,9 +47,7 @@ export default function ShoppingScreen() {
           <Animated.View key={store.id} entering={FadeInDown.delay(index * 60).duration(400)}>
             <Pressable style={styles.card} onPress={() => router.push({ pathname: '/shopping/[id]', params: { id: store.id } })}>
               <View style={styles.cardTop}>
-                <View style={[styles.storeIcon, { backgroundColor: store.color + '15' }]}>
-                  <Ionicons name={store.icon as any} size={28} color={store.color} />
-                </View>
+                <Image source={{ uri: store.imageUrl }} style={styles.storeIcon} />
                 <View style={styles.storeInfo}>
                   <Text style={styles.storeName}>{store.name}</Text>
                   <Text style={styles.storeCat}>{store.category}</Text>
@@ -98,7 +96,7 @@ const styles = StyleSheet.create({
   resultCount: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary, marginBottom: 10 },
   card: { backgroundColor: Colors.card, borderRadius: 18, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: Colors.cardBorder, gap: 10 },
   cardTop: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  storeIcon: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  storeIcon: { width: 56, height: 56, borderRadius: 16, overflow: 'hidden' },
   storeInfo: { flex: 1, gap: 2 },
   storeName: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.text },
   storeCat: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },

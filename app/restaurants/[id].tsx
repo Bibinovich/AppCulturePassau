@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Linking } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Linking, Image } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,8 +28,8 @@ export default function RestaurantDetailScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <View style={[styles.banner, { backgroundColor: rest.color }]}>
-          <Ionicons name={rest.icon as any} size={56} color="rgba(255,255,255,0.9)" />
+        <View style={[styles.banner]}>
+          <Image source={{ uri: rest.imageUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} />
           {rest.isOpen && <View style={styles.openBadge}><View style={styles.openDot} /><Text style={styles.openText}>Open Now</Text></View>}
         </View>
 
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 12 },
   headerTitle: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.text, flex: 1, textAlign: 'center', marginHorizontal: 12 },
-  banner: { height: 200, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  banner: { height: 200, position: 'relative', overflow: 'hidden' },
   openBadge: { position: 'absolute', top: 16, right: 16, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   openDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.success },
   openText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },

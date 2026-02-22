@@ -6,6 +6,7 @@ import {
   ScrollView,
   Platform,
   Share,
+  Image,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -156,9 +157,10 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
       <View
         style={[
           styles.heroSection,
-          { backgroundColor: event.imageColor, height: 280 + topInset },
+          { height: 280 + topInset },
         ]}
       >
+        <Image source={{ uri: event.imageUrl }} style={{ position: 'absolute', width: '100%', height: '100%' }} />
         <View style={[styles.heroOverlay, { paddingTop: topInset }]}>
           <View style={styles.heroNav}>
             <Pressable style={styles.navButton} onPress={() => router.back()}>
@@ -367,7 +369,7 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
                   style={styles.relatedCard}
                   onPress={() => router.push(`/event/${re.id}`)}
                 >
-                  <View style={[styles.relatedSwatch, { backgroundColor: re.imageColor }]} />
+                  <Image source={{ uri: re.imageUrl }} style={styles.relatedSwatch} />
                   <View style={styles.relatedInfo}>
                     <Text style={styles.relatedTitle} numberOfLines={1}>{re.title}</Text>
                     <Text style={styles.relatedMeta}>{formatDateShort(re.date)}</Text>
