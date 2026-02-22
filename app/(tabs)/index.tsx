@@ -88,18 +88,17 @@ export default function HomeScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).duration(600)}>
-          <Text style={[styles.sectionTitle, { paddingHorizontal: 20 }]}>Quick Access</Text>
-          <View style={styles.quickGrid}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
             {superAppSections.map(sec => (
-              <Pressable key={sec.id} style={styles.quickItem}
+              <Pressable key={sec.id} style={styles.quickPill}
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push(sectionRoutes[sec.id] as any); }}>
-                <View style={[styles.quickIcon, { backgroundColor: sec.color + '15' }]}>
-                  <Ionicons name={sec.icon as any} size={24} color={sec.color} />
+                <View style={[styles.quickPillIcon, { backgroundColor: sec.color + '15' }]}>
+                  <Ionicons name={sec.icon as any} size={18} color={sec.color} />
                 </View>
-                <Text style={styles.quickLabel}>{sec.label}</Text>
+                <Text style={styles.quickPillLabel}>{sec.label}</Text>
               </Pressable>
             ))}
-          </View>
+          </ScrollView>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(300).duration(600)}>
@@ -212,10 +211,10 @@ const styles = StyleSheet.create({
   greetSection: { paddingHorizontal: 20, marginBottom: 20 },
   greeting: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
   heroTitle: { fontSize: 26, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 20, gap: 10, marginBottom: 28 },
-  quickItem: { width: (width - 70) / 3, alignItems: 'center', gap: 6, backgroundColor: Colors.card, borderRadius: 16, paddingVertical: 16, borderWidth: 1, borderColor: Colors.cardBorder },
-  quickIcon: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  quickLabel: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  quickRow: { paddingHorizontal: 20, gap: 10, paddingBottom: 20 },
+  quickPill: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.card, borderRadius: 28, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: Colors.cardBorder },
+  quickPillIcon: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  quickPillLabel: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   sectionTitle: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 14 },
   section: { marginBottom: 28 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 14 },

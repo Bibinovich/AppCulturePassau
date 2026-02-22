@@ -1,14 +1,22 @@
 import { db } from "./db";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, lte, gte } from "drizzle-orm";
 import {
   users, profiles, follows, likes, reviews,
   paymentMethods, transactions, wallets,
+  sponsors, eventSponsors, sponsorPlacements,
+  perks, perkRedemptions, memberships, notifications,
   type User, type InsertUser,
   type Profile, type InsertProfile,
   type Review, type InsertReview,
   type PaymentMethod, type InsertPaymentMethod,
   type Transaction, type InsertTransaction,
   type Wallet, type Follow, type Like,
+  type Sponsor, type InsertSponsor,
+  type EventSponsor, type SponsorPlacement,
+  type Perk, type InsertPerk,
+  type PerkRedemption,
+  type Membership, type InsertMembership,
+  type Notification, type InsertNotification,
 } from "@shared/schema";
 
 export class DatabaseStorage {
@@ -262,6 +270,176 @@ export class DatabaseStorage {
       if (user) members.push(user);
     }
     return members;
+  }
+
+  // === Sponsors ===
+  async getSponsor(id: string): Promise<Sponsor | undefined> {
+    const [s] = await db.select().from(sponsors).where(eq(sponsors.id, id));
+    return s;
+  }
+
+  async getAllSponsors(): Promise<Sponsor[]> {
+    return db.select().from(sponsors).where(eq(sponsors.status, "active")).orderBy(desc(sponsors.createdAt));
+  }
+
+  async createSponsor(data: InsertSponsor): Promise<Sponsor> {
+    const [s] = await db.insert(sponsors).values(data).returning();
+    return s;
+  }
+
+  async updateSponsor(id: string, data: Partial<Sponsor>): Promise<Sponsor | undefined> {
+    const [s] = await db.update(sponsors).set(data).where(eq(sponsors.id, id)).returning();
+    return s;
+  }
+
+  async deleteSponsor(id: string): Promise<boolean> {
+    const result = await db.update(sponsors).set({ status: "archived" }).where(eq(sponsors.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Event Sponsors
+  async getEventSponsors(eventId: string): Promise<(EventSponsor & { sponsor?: Sponsor })[]> {
+    const es = await db.select().from(eventSponsors).where(eq(eventSponsors.eventId, eventId)).orderBy(desc(eventSponsors.logoPriority));
+    const results = [];
+    for (const e of es) {
+      const sponsor = await this.getSponsor(e.sponsorId);
+      results.push({ ...e, sponsor });
+    }
+    return results;
+  }
+
+  async addEventSponsor(eventId: string, sponsorId: string, tier: string): Promise<EventSponsor> {
+    const [es] = await db.insert(eventSponsors).values({ eventId, sponsorId, tier }).returning();
+    return es;
+  }
+
+  async removeEventSponsor(id: string): Promise<boolean> {
+    const result = await db.delete(eventSponsors).where(eq(eventSponsors.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Sponsor Placements
+  async getActivePlacements(placementType?: string): Promise<(SponsorPlacement & { sponsor?: Sponsor })[]> {
+    const now = new Date();
+    let query = db.select().from(sponsorPlacements);
+    const placements = placementType
+      ? await query.where(and(eq(sponsorPlacements.placementType, placementType), lte(sponsorPlacements.startDate!, now), gte(sponsorPlacements.endDate!, now))).orderBy(desc(sponsorPlacements.weight))
+      : await query.orderBy(desc(sponsorPlacements.weight));
+    const results = [];
+    for (const p of placements) {
+      const sponsor = await this.getSponsor(p.sponsorId);
+      results.push({ ...p, sponsor });
+    }
+    return results;
+  }
+
+  async createPlacement(data: Partial<SponsorPlacement>): Promise<SponsorPlacement> {
+    const [p] = await db.insert(sponsorPlacements).values(data as any).returning();
+    return p;
+  }
+
+  // === Perks ===
+  async getPerk(id: string): Promise<Perk | undefined> {
+    const [p] = await db.select().from(perks).where(eq(perks.id, id));
+    return p;
+  }
+
+  async getAllPerks(): Promise<Perk[]> {
+    return db.select().from(perks).where(eq(perks.status, "active")).orderBy(desc(perks.createdAt));
+  }
+
+  async getPerksByCategory(category: string): Promise<Perk[]> {
+    return db.select().from(perks).where(and(eq(perks.status, "active"), eq(perks.category!, category))).orderBy(desc(perks.createdAt));
+  }
+
+  async createPerk(data: InsertPerk): Promise<Perk> {
+    const [p] = await db.insert(perks).values(data).returning();
+    return p;
+  }
+
+  async updatePerk(id: string, data: Partial<Perk>): Promise<Perk | undefined> {
+    const [p] = await db.update(perks).set({ ...data, updatedAt: new Date() }).where(eq(perks.id, id)).returning();
+    return p;
+  }
+
+  async deletePerk(id: string): Promise<boolean> {
+    const result = await db.update(perks).set({ status: "archived" }).where(eq(perks.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Perk Redemptions
+  async redeemPerk(perkId: string, userId: string, transactionId?: string): Promise<PerkRedemption | null> {
+    const perk = await this.getPerk(perkId);
+    if (!perk || perk.status !== "active") return null;
+
+    if (perk.usageLimit && (perk.usedCount || 0) >= perk.usageLimit) return null;
+
+    const userRedemptions = await db.select().from(perkRedemptions).where(
+      and(eq(perkRedemptions.perkId, perkId), eq(perkRedemptions.userId, userId))
+    );
+    if (perk.perUserLimit && userRedemptions.length >= perk.perUserLimit) return null;
+
+    const [redemption] = await db.insert(perkRedemptions).values({ perkId, userId, transactionId }).returning();
+    await db.update(perks).set({ usedCount: sql`${perks.usedCount} + 1` }).where(eq(perks.id, perkId));
+    return redemption;
+  }
+
+  async getUserRedemptions(userId: string): Promise<(PerkRedemption & { perk?: Perk })[]> {
+    const redemptions = await db.select().from(perkRedemptions).where(eq(perkRedemptions.userId, userId)).orderBy(desc(perkRedemptions.redeemedAt));
+    const results = [];
+    for (const r of redemptions) {
+      const perk = await this.getPerk(r.perkId);
+      results.push({ ...r, perk });
+    }
+    return results;
+  }
+
+  // === Memberships ===
+  async getMembership(userId: string): Promise<Membership | undefined> {
+    const [m] = await db.select().from(memberships).where(and(eq(memberships.userId, userId), eq(memberships.status, "active"))).orderBy(desc(memberships.createdAt));
+    return m;
+  }
+
+  async createMembership(data: InsertMembership): Promise<Membership> {
+    const [m] = await db.insert(memberships).values(data).returning();
+    return m;
+  }
+
+  async updateMembership(id: string, data: Partial<Membership>): Promise<Membership | undefined> {
+    const [m] = await db.update(memberships).set(data).where(eq(memberships.id, id)).returning();
+    return m;
+  }
+
+  // === Notifications ===
+  async getNotifications(userId: string): Promise<Notification[]> {
+    return db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
+  }
+
+  async getUnreadCount(userId: string): Promise<number> {
+    const result = await db.select().from(notifications).where(
+      and(eq(notifications.userId, userId), eq(notifications.isRead, false))
+    );
+    return result.length;
+  }
+
+  async createNotification(data: InsertNotification): Promise<Notification> {
+    const [n] = await db.insert(notifications).values(data).returning();
+    return n;
+  }
+
+  async markNotificationRead(id: string): Promise<Notification | undefined> {
+    const [n] = await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id)).returning();
+    return n;
+  }
+
+  async markAllNotificationsRead(userId: string): Promise<boolean> {
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.userId, userId));
+    return true;
+  }
+
+  async deleteNotification(id: string): Promise<boolean> {
+    const result = await db.delete(notifications).where(eq(notifications.id, id)).returning();
+    return result.length > 0;
   }
 }
 
