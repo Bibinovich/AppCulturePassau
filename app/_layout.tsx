@@ -46,6 +46,11 @@ function RootLayoutNav() {
       <Stack.Screen name="perks/index" options={{ headerShown: false }} />
       <Stack.Screen name="notifications/index" options={{ headerShown: false }} />
       <Stack.Screen name="help/index" options={{ headerShown: false }} />
+      <Stack.Screen name="artist/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="venue/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="legal/terms" options={{ headerShown: false }} />
+      <Stack.Screen name="legal/privacy" options={{ headerShown: false }} />
+      <Stack.Screen name="legal/cookies" options={{ headerShown: false }} />
     </Stack>
   );
 }
