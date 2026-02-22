@@ -139,6 +139,12 @@ export default function ProfileScreen() {
 
           <Text style={styles.name}>{displayName}</Text>
           {user?.username && <Text style={styles.username}>@{user.username}</Text>}
+          {user?.culturePassId && (
+            <View style={styles.cpidRow}>
+              <Ionicons name="finger-print" size={14} color={Colors.primary} />
+              <Text style={styles.cpidText}>{user.culturePassId}</Text>
+            </View>
+          )}
 
           <View style={styles.locationRow}>
             <Ionicons name="location" size={14} color={Colors.primary} />
@@ -356,6 +362,8 @@ const styles = StyleSheet.create({
   },
   name: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text },
   username: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginTop: 1 },
+  cpidRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  cpidText: { fontFamily: 'Poppins_500Medium', fontSize: 12, color: Colors.primary, letterSpacing: 1 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   location: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   tierBadge: { marginTop: 10 },

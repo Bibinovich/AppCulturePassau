@@ -54,6 +54,9 @@ function DirectoryCard({ profile, index }: { profile: Profile; index: number }) 
               {profile.isVerified && <Ionicons name="checkmark-circle" size={16} color={Colors.secondary} />}
             </View>
             <Text style={styles.cardCategory}>{profile.category || profile.entityType}</Text>
+            {profile.culturePassId && (
+              <Text style={styles.cpidLabel}>{profile.culturePassId}</Text>
+            )}
           </View>
           {profile.rating ? (
             <View style={styles.ratingBadge}>
@@ -238,6 +241,7 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   cardName: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.text, flexShrink: 1 },
   cardCategory: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
+  cpidLabel: { fontFamily: 'Poppins_400Regular', fontSize: 11, color: Colors.textTertiary, letterSpacing: 0.8, marginTop: 1 },
   ratingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.accent + '18', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 14 },
   ratingText: { fontSize: 14, fontFamily: 'Poppins_700Bold', color: Colors.accent },
   cardDesc: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 21 },

@@ -159,6 +159,12 @@ export default function ProfileDetailScreen() {
                 </View>
               )}
             </View>
+            {profile.culturePassId && (
+              <View style={styles.cpidBadge}>
+                <Ionicons name="finger-print" size={13} color="rgba(255,255,255,0.9)" />
+                <Text style={styles.cpidBadgeText}>{profile.culturePassId}</Text>
+              </View>
+            )}
             {(profile.category || profile.location) && (
               <View style={styles.heroMetaRow}>
                 {profile.category && (
@@ -491,6 +497,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_600SemiBold',
     color: '#FFF',
   },
+  cpidBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginTop: 6 },
+  cpidBadgeText: { fontFamily: 'Poppins_500Medium', fontSize: 12, color: 'rgba(255,255,255,0.95)', letterSpacing: 1 },
   heroMetaRow: {
     flexDirection: 'row',
     gap: 8,

@@ -79,6 +79,9 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
               </View>
               {profile.category && <Text style={styles.cardCategory}>{profile.category}</Text>}
             </View>
+            {profile.culturePassId && (
+              <Text style={styles.cpidLabel}>{profile.culturePassId}</Text>
+            )}
           </View>
           <Pressable hitSlop={8} onPress={handleShare} style={styles.shareBtn}>
             <Ionicons name="share-outline" size={18} color={Colors.textTertiary} />
@@ -244,6 +247,7 @@ const styles = StyleSheet.create({
   typeBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 6, opacity: 0.9 },
   typeBadgeText: { fontSize: 10, fontFamily: 'Poppins_600SemiBold', textTransform: 'capitalize' },
   cardCategory: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
+  cpidLabel: { fontFamily: 'Poppins_400Regular', fontSize: 11, color: Colors.textTertiary, letterSpacing: 0.8, marginTop: 2 },
   shareBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.backgroundSecondary, alignItems: 'center', justifyContent: 'center' },
   cardDesc: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 20 },
   cardStats: { flexDirection: 'row', alignItems: 'center', gap: 4 },
