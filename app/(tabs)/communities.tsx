@@ -20,17 +20,24 @@ import { useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/query-client';
 import { useState, useMemo, useCallback } from 'react';
 import type { Profile } from '@shared/schema';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+  FadeInRight,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { FilterChipRow, FilterItem } from '@/components/FilterChip';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const TYPE_COLORS: Record<string, string> = {
-  community: '#E85D3A',
-  organisation: '#1A7A6D',
-  venue: '#9B59B6',
-  council: '#3498DB',
-  government: '#2C3E50',
-  artist: '#E91E8C',
-  business: '#F2A93B',
+  community: '#00D4AA',
+  organisation: '#7C3AED',
+  venue: '#3B82F6',
+  council: '#10B981',
+  government: '#5B21B6',
+  artist: '#FF6B35',
+  business: '#FFB347',
 };
 
 const TYPE_ICONS: Record<string, string> = {
@@ -59,7 +66,56 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-// ─── CommunityCard ────────────────────────────────────────────────────────────
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function FeaturedBanner({ profile, onPress }: { profile: Profile; onPress: () => void }) {
+  const color = TYPE_COLORS[profile.entityType] ?? Colors.primary;
+  return (
+    <Animated.View entering={FadeInRight.delay(100).duration(500)}>
+      <Pressable onPress={onPress} style={styles.featuredCard}>
+        <LinearGradient
+          colors={['#0D0F14', '#1a0533', '#0a2a2a']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.featuredGradient}
+        >
+          <View style={styles.featuredGlowDot} />
+          <View style={styles.featuredContent}>
+            <View style={styles.featuredBadge}>
+              <Ionicons name="star" size={10} color="#FFB347" />
+              <Text style={styles.featuredBadgeText}>Featured</Text>
+            </View>
+            <Text style={styles.featuredName} numberOfLines={1}>{profile.name}</Text>
+            <Text style={styles.featuredDesc} numberOfLines={2}>{profile.description}</Text>
+            <View style={styles.featuredStats}>
+              <View style={styles.featuredStatItem}>
+                <Ionicons name="people" size={12} color={Colors.primary} />
+                <Text style={styles.featuredStatText}>{formatNumber(profile.membersCount ?? 0)}</Text>
+              </View>
+              <View style={[styles.featuredDot, { backgroundColor: color }]} />
+              <View style={styles.featuredStatItem}>
+                <Ionicons name="heart" size={12} color="#FF6B35" />
+                <Text style={styles.featuredStatText}>{formatNumber(profile.followersCount ?? 0)}</Text>
+              </View>
+              {profile.rating != null && (
+                <>
+                  <View style={[styles.featuredDot, { backgroundColor: '#FFB347' }]} />
+                  <View style={styles.featuredStatItem}>
+                    <Ionicons name="star" size={12} color="#FFB347" />
+                    <Text style={styles.featuredStatText}>{profile.rating.toFixed(1)}</Text>
+                  </View>
+                </>
+              )}
+            </View>
+          </View>
+          <View style={[styles.featuredIcon, { backgroundColor: color + '20' }]}>
+            <Ionicons name={(TYPE_ICONS[profile.entityType] ?? 'people') as any} size={32} color={color} />
+          </View>
+        </LinearGradient>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
 function CommunityCard({ profile, index }: { profile: Profile; index: number }) {
   const { isCommunityJoined, toggleJoinCommunity } = useSaved();
@@ -67,19 +123,21 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
   const color = TYPE_COLORS[profile.entityType] ?? Colors.primary;
   const icon = TYPE_ICONS[profile.entityType] ?? 'people';
 
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   const handleShare = useCallback(async () => {
     try {
       await Share.share({
         message: `Check out ${profile.name} on CulturePass! ${profile.description ?? ''}`,
       });
-    } catch {
-      // Silently ignore share cancellation / errors
-    }
+    } catch {}
   }, [profile.name, profile.description]);
 
   const handleJoin = useCallback(
     (e: any) => {
-      // stopPropagation only exists on web synthetic events
       e?.stopPropagation?.();
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       toggleJoinCommunity(profile.id);
@@ -89,149 +147,146 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
 
   const statItems = useMemo(
     () => [
-      { icon: 'people' as const, text: `${formatNumber(profile.membersCount ?? 0)} members` },
-      { icon: 'heart' as const, text: `${formatNumber(profile.followersCount ?? 0)} followers` },
+      { icon: 'people' as const, text: formatNumber(profile.membersCount ?? 0), label: 'members' },
+      { icon: 'heart' as const, text: formatNumber(profile.followersCount ?? 0), label: 'followers' },
       ...(profile.rating != null
-        ? [{ icon: 'star' as const, text: profile.rating.toFixed(1) }]
+        ? [{ icon: 'star' as const, text: profile.rating.toFixed(1), label: 'rating' }]
         : []),
     ],
     [profile.membersCount, profile.followersCount, profile.rating],
   );
 
-  // Cast tags safely
   const tags = Array.isArray(profile.tags) ? (profile.tags as string[]) : [];
 
   return (
-    <Animated.View entering={FadeInDown.delay(index * 60).duration(400)}>
-      <Pressable
-        style={styles.card}
-        onPress={() =>
-          router.push({ pathname: '/profile/[id]', params: { id: profile.id } })
-        }
+    <Animated.View entering={FadeInDown.delay(index * 50).duration(400)}>
+      <AnimatedPressable
+        style={[styles.card, animStyle]}
+        onPress={() => router.push({ pathname: '/profile/[id]', params: { id: profile.id } })}
+        onPressIn={() => { scale.value = withSpring(0.98, { damping: 15 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
       >
-        {/* Top accent strip */}
-        <View style={[styles.cardAccentStrip, { backgroundColor: color }]} />
+        <LinearGradient
+          colors={[color, color + 'CC']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.cardAccentStrip}
+        />
 
-        {/* Top row */}
         <View style={styles.cardTop}>
-          <View style={[styles.communityIcon, { backgroundColor: color + '15' }]}>
-            <Ionicons name={icon as any} size={28} color={color} />
+          <View style={[styles.communityIcon, { backgroundColor: color + '12' }]}>
+            <Ionicons name={icon as any} size={26} color={color} />
           </View>
 
           <View style={styles.cardInfo}>
             <View style={styles.nameRow}>
-              <Text style={styles.cardName} numberOfLines={1}>
-                {profile.name}
-              </Text>
+              <Text style={styles.cardName} numberOfLines={1}>{profile.name}</Text>
               {profile.isVerified && (
-                <Ionicons name="checkmark-circle" size={16} color={Colors.secondary} />
+                <View style={styles.verifiedWrap}>
+                  <Ionicons name="checkmark-circle" size={16} color={Colors.primary} />
+                </View>
               )}
             </View>
 
             <View style={styles.typeBadgeRow}>
-              <View style={[styles.typeBadge, { backgroundColor: color + '10' }]}>
+              <LinearGradient
+                colors={[color + '18', color + '08']}
+                style={styles.typeBadge}
+              >
                 <Text style={[styles.typeBadgeText, { color }]}>{profile.entityType}</Text>
-              </View>
+              </LinearGradient>
               {profile.category ? (
-                <Text style={styles.cardCategory}>{profile.category}</Text>
+                <Text style={styles.cardCategory} numberOfLines={1}>{profile.category}</Text>
               ) : null}
             </View>
-
-            {profile.culturePassId ? (
-              <Text style={styles.cpidLabel}>{profile.culturePassId}</Text>
-            ) : null}
           </View>
 
-          {/* Share button — separate Pressable so it doesn't trigger card navigation */}
           <Pressable hitSlop={8} onPress={handleShare} style={styles.shareBtn}>
-            <Ionicons name="share-outline" size={18} color={Colors.textTertiary} />
+            <Ionicons name="share-outline" size={17} color={Colors.textTertiary} />
           </Pressable>
         </View>
 
-        {/* Description */}
         {profile.description ? (
-          <Text style={styles.cardDesc} numberOfLines={2}>
-            {profile.description}
-          </Text>
+          <Text style={styles.cardDesc} numberOfLines={2}>{profile.description}</Text>
         ) : null}
 
-        {/* Stats */}
         <View style={styles.cardStats}>
           {statItems.map((s, i) => (
             <View key={`${s.icon}-${i}`} style={styles.statChip}>
               <Ionicons
                 name={s.icon}
-                size={14}
-                color={s.icon === 'star' ? Colors.accent : color}
+                size={13}
+                color={s.icon === 'star' ? Colors.accentLight : s.icon === 'heart' ? Colors.accent : color}
               />
               <Text style={styles.statChipText}>{s.text}</Text>
+              <Text style={styles.statChipLabel}>{s.label}</Text>
             </View>
           ))}
         </View>
 
         <View style={styles.avatarRow}>
-          {['#E85D3A', '#1A7A6D', '#9B59B6', '#3498DB'].map((c, i) => (
+          {[Colors.primary, Colors.secondary, Colors.accent, Colors.info].map((c, i) => (
             <View
               key={i}
               style={[
                 styles.avatarCircle,
-                { backgroundColor: c + '18', marginLeft: i === 0 ? 0 : -8 },
+                { backgroundColor: c + '18', borderColor: Colors.surface, marginLeft: i === 0 ? 0 : -8 },
               ]}
             >
-              <Ionicons name="person" size={13} color={c} />
+              <Ionicons name="person" size={11} color={c} />
             </View>
           ))}
-          <Text style={styles.avatarLabel}>Recent members</Text>
+          <Text style={styles.avatarLabel}>Active members</Text>
         </View>
 
-        {/* Location + tags */}
-        <View style={styles.locationTagRow}>
-          {profile.city ? (
-            <View style={styles.locationPill}>
-              <Ionicons name="location" size={12} color={Colors.textSecondary} />
-              <Text style={styles.locationPillText}>
-                {profile.city}
-                {profile.country ? `, ${profile.country}` : ''}
-              </Text>
-            </View>
-          ) : null}
-
-          {tags.slice(0, 2).map(tag => (
-            <View key={tag} style={[styles.tagPill, { backgroundColor: color + '10' }]}>
-              <Text style={[styles.tagPillText, { color }]}>{tag}</Text>
-            </View>
-          ))}
-        </View>
+        {(profile.city || tags.length > 0) && (
+          <View style={styles.locationTagRow}>
+            {profile.city ? (
+              <View style={styles.locationPill}>
+                <Ionicons name="location" size={11} color={Colors.textSecondary} />
+                <Text style={styles.locationPillText}>
+                  {profile.city}{profile.country ? `, ${profile.country}` : ''}
+                </Text>
+              </View>
+            ) : null}
+            {tags.slice(0, 2).map(tag => (
+              <View key={tag} style={[styles.tagPill, { backgroundColor: color + '0D' }]}>
+                <Text style={[styles.tagPillText, { color }]}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <View style={styles.joinRow}>
           <Pressable
             style={[
               styles.joinButton,
-              joined && styles.joinedButton,
-              !joined && styles.joinButtonGlow,
+              joined ? styles.joinedButton : undefined,
             ]}
             onPress={handleJoin}
           >
+            {!joined && (
+              <LinearGradient
+                colors={[Colors.primary, Colors.secondary]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={StyleSheet.absoluteFill}
+              />
+            )}
             <Ionicons
               name={joined ? 'checkmark' : 'add'}
-              size={20}
-              color={joined ? Colors.secondary : '#FFF'}
+              size={18}
+              color={joined ? Colors.primary : '#FFF'}
             />
             <Text style={[styles.joinText, joined && styles.joinedText]}>
-              {joined ? 'Joined' : 'Join'}
+              {joined ? 'Joined' : 'Join Community'}
             </Text>
           </Pressable>
-
-          <Pressable style={styles.shareActionBtn} onPress={handleShare} hitSlop={8}>
-            <Ionicons name="share-outline" size={15} color={Colors.textSecondary} />
-          </Pressable>
         </View>
-      </Pressable>
+      </AnimatedPressable>
     </Animated.View>
   );
 }
-
-// ─── CommunitiesScreen ────────────────────────────────────────────────────────
 
 export default function CommunitiesScreen() {
   const insets = useSafeAreaInsets();
@@ -276,6 +331,11 @@ export default function CommunitiesScreen() {
     return counts;
   }, [allProfilesData]);
 
+  const featuredProfile = useMemo(() => {
+    const profiles = allProfilesData ?? [];
+    return profiles.find(p => p.isVerified && (p.membersCount ?? 0) > 0) ?? profiles[0];
+  }, [allProfilesData]);
+
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -298,53 +358,92 @@ export default function CommunitiesScreen() {
     })) as FilterItem[];
   }, [typeCounts]);
 
+  const [searchFocused, setSearchFocused] = useState(false);
+
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.title}>Communities</Text>
+          <Text style={styles.title}>Community</Text>
+          <Text style={styles.subtitle}>Connect with your culture</Text>
         </View>
-        <Pressable style={styles.headerSearchIcon} hitSlop={8}>
-          <Ionicons name="search" size={22} color={Colors.text} />
+        <Pressable
+          style={styles.headerBtn}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/submit' as any);
+          }}
+        >
+          <LinearGradient
+            colors={[Colors.primary + '15', Colors.secondary + '10']}
+            style={styles.headerBtnGradient}
+          >
+            <Ionicons name="add" size={22} color={Colors.primary} />
+          </LinearGradient>
         </Pressable>
       </View>
 
-      {/* Search bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color={Colors.textTertiary} />
+      <View style={[
+        styles.searchContainer,
+        searchFocused && styles.searchContainerFocused,
+      ]}>
+        <Ionicons name="search" size={18} color={searchFocused ? Colors.primary : Colors.textTertiary} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search communities, organisations..."
+          placeholder="Search communities, artists, venues..."
           placeholderTextColor={Colors.textTertiary}
           value={search}
           onChangeText={setSearch}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
           returnKeyType="search"
-          clearButtonMode="never" // We handle clear ourselves
+          clearButtonMode="never"
         />
         {search.length > 0 && (
           <Pressable onPress={() => setSearch('')} hitSlop={8}>
-            <Ionicons name="close-circle" size={20} color={Colors.textTertiary} />
+            <Ionicons name="close-circle" size={18} color={Colors.textTertiary} />
           </Pressable>
         )}
       </View>
 
-      {/* Type filter pills */}
       <FilterChipRow items={filterItems} selectedId={selectedType} onSelect={handleTypeSelect} />
 
-      {/* Content */}
       {isLoading ? (
         <View style={styles.loadingWrap}>
           <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading communities...</Text>
         </View>
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.grid}
           keyboardShouldPersistTaps="handled"
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} colors={[Colors.primary]} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={Colors.primary}
+              colors={[Colors.primary]}
+            />
+          }
         >
-          <Text style={styles.resultCount}>{filteredProfiles.length} results</Text>
+          {featuredProfile && selectedType === 'all' && !search.trim() && (
+            <FeaturedBanner
+              profile={featuredProfile}
+              onPress={() => router.push({ pathname: '/profile/[id]', params: { id: featuredProfile.id } })}
+            />
+          )}
+
+          <View style={styles.resultRow}>
+            <Text style={styles.resultCount}>
+              {filteredProfiles.length} {selectedType === 'all' ? 'total' : selectedType + 's'}
+            </Text>
+            {search.trim() ? (
+              <Pressable onPress={() => setSearch('')} style={styles.clearSearchBtn}>
+                <Text style={styles.clearSearchText}>Clear search</Text>
+              </Pressable>
+            ) : null}
+          </View>
 
           {filteredProfiles.map((profile, index) => (
             <CommunityCard key={profile.id} profile={profile} index={index} />
@@ -352,9 +451,19 @@ export default function CommunitiesScreen() {
 
           {filteredProfiles.length === 0 && (
             <View style={styles.emptyState}>
-              <Ionicons name="people-outline" size={52} color={Colors.textTertiary} />
+              <View style={styles.emptyIconWrap}>
+                <Ionicons name="search-outline" size={36} color={Colors.primary} />
+              </View>
               <Text style={styles.emptyTitle}>No results found</Text>
               <Text style={styles.emptySubtext}>Try adjusting your search or filters</Text>
+              {search.trim() && (
+                <Pressable
+                  style={styles.emptyResetBtn}
+                  onPress={() => { setSearch(''); setSelectedType('all'); }}
+                >
+                  <Text style={styles.emptyResetText}>Reset filters</Text>
+                </Pressable>
+              )}
             </View>
           )}
 
@@ -365,105 +474,234 @@ export default function CommunitiesScreen() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: { 
-    paddingHorizontal: 20, 
-    paddingTop: 8, 
-    paddingBottom: 16,
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   headerLeft: { flex: 1 },
-  headerSearchIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.backgroundSecondary,
+  title: {
+    fontSize: 30,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textSecondary,
+    marginTop: -2,
+  },
+  headerBtn: {},
+  headerBtnGradient: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.primary + '20',
   },
-  title: { fontSize: 32, fontFamily: 'Poppins_700Bold', color: Colors.text },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
     marginHorizontal: 20,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 11,
     gap: 10,
-    borderWidth: 0.5,
-    borderColor: Colors.cardBorder,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
     marginBottom: 12,
-    ...Colors.shadow.small,
+    ...Colors.shadows.small,
+  },
+  searchContainerFocused: {
+    borderColor: Colors.primary + '60',
+    backgroundColor: Colors.primary + '04',
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: 'Poppins_400Regular',
     color: Colors.text,
     padding: 0,
+  },
+  loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  loadingText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textTertiary,
+  },
+  grid: { paddingHorizontal: 20, gap: 14 },
+
+  featuredCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 4,
+    ...Colors.shadows.large,
+  },
+  featuredGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    minHeight: 140,
+    overflow: 'hidden',
+  },
+  featuredGlowDot: {
+    position: 'absolute',
+    top: -30,
+    right: -30,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: Colors.primary + '12',
+  },
+  featuredContent: { flex: 1, marginRight: 16 },
+  featuredBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFB347' + '20',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+  },
+  featuredBadgeText: {
+    fontSize: 10,
+    fontFamily: 'Poppins_700Bold',
+    color: '#FFB347',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  featuredName: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: '#FFF',
+    marginBottom: 4,
+  },
+  featuredDesc: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: '#94A3B8',
+    lineHeight: 18,
+    marginBottom: 10,
+  },
+  featuredStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  featuredStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  featuredStatText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#E2E8F0',
+  },
+  featuredDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+  },
+  featuredIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  resultRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
   },
   resultCount: {
     fontSize: 13,
     fontFamily: 'Poppins_500Medium',
     color: Colors.textSecondary,
-    marginBottom: 10,
   },
-  loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  grid: { paddingHorizontal: 20, gap: 16 },
+  clearSearchBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: Colors.primary + '10',
+  },
+  clearSearchText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.primary,
+  },
+
   card: {
     backgroundColor: Colors.surface,
-    borderRadius: 22,
+    borderRadius: 20,
     overflow: 'hidden',
     paddingTop: 0,
-    paddingHorizontal: 18,
-    paddingBottom: 18,
-    borderWidth: 0.5,
-    borderColor: Colors.border,
-    gap: 12,
-    ...Colors.shadow.medium,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.border + '80',
+    gap: 10,
+    ...Colors.shadows.medium,
   },
   cardAccentStrip: {
-    height: 4,
+    height: 3.5,
     width: '100%',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   communityIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 50,
+    height: 50,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardInfo: { flex: 1, gap: 2 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  cardInfo: { flex: 1, gap: 3 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  verifiedWrap: {},
   cardName: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: 'Poppins_700Bold',
     color: Colors.text,
     flexShrink: 1,
+    letterSpacing: -0.2,
   },
   typeBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  typeBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 6, opacity: 0.9 },
-  typeBadgeText: { fontSize: 10, fontFamily: 'Poppins_600SemiBold', textTransform: 'capitalize' },
-  cardCategory: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  cpidLabel: {
-    fontFamily: 'Poppins_400Regular',
-    fontSize: 11,
-    color: Colors.textTertiary,
-    letterSpacing: 0.8,
-    marginTop: 2,
+  typeBadge: {
+    paddingHorizontal: 9,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  typeBadgeText: {
+    fontSize: 10,
+    fontFamily: 'Poppins_700Bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  cardCategory: {
+    fontSize: 12,
+    fontFamily: 'Poppins_500Medium',
+    color: Colors.textSecondary,
+    flexShrink: 1,
   },
   shareBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 12,
     backgroundColor: Colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -474,30 +712,50 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     lineHeight: 20,
   },
-  cardStats: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  cardStats: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   statChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
     paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: 10,
     backgroundColor: Colors.backgroundSecondary,
   },
-  statChipText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  statChipText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+  },
+  statChipLabel: {
+    fontSize: 11,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textTertiary,
+  },
   locationTagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   locationPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: Colors.backgroundSecondary,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 12,
+    borderRadius: 10,
   },
-  locationPillText: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  tagPill: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
-  tagPillText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold' },
+  locationPillText: {
+    fontSize: 11,
+    fontFamily: 'Poppins_500Medium',
+    color: Colors.textSecondary,
+  },
+  tagPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  tagPillText: {
+    fontSize: 11,
+    fontFamily: 'Poppins_600SemiBold',
+  },
   avatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -509,8 +767,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: Colors.card,
+    borderWidth: 2,
   },
   avatarLabel: {
     fontSize: 11,
@@ -522,41 +779,74 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  shareActionBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.backgroundSecondary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 2,
   },
   joinButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary,
+    gap: 7,
     borderRadius: 12,
-    paddingVertical: 14,
+    paddingVertical: 13,
     paddingHorizontal: 16,
-  },
-  joinButtonGlow: {
+    overflow: 'hidden',
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 6,
+    elevation: 5,
   },
   joinedButton: {
-    backgroundColor: Colors.secondary + '12',
-    borderWidth: 1,
-    borderColor: Colors.secondary + '30',
+    backgroundColor: Colors.primary + '0C',
+    borderWidth: 1.5,
+    borderColor: Colors.primary + '30',
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  joinText: { fontSize: 15, fontFamily: 'Poppins_700Bold', color: '#FFF' },
-  joinedText: { color: Colors.secondary },
-  emptyState: { alignItems: 'center', paddingVertical: 60, gap: 10 },
-  emptyTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  emptySubtext: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  joinText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_700Bold',
+    color: '#FFF',
+  },
+  joinedText: {
+    color: Colors.primary,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+    gap: 10,
+  },
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    backgroundColor: Colors.primary + '10',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  emptyResetBtn: {
+    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: Colors.primary,
+  },
+  emptyResetText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#FFF',
+  },
 });
