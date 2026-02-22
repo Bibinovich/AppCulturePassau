@@ -109,6 +109,9 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
           router.push({ pathname: '/profile/[id]', params: { id: profile.id } })
         }
       >
+        {/* Top accent strip */}
+        <View style={[styles.cardAccentStrip, { backgroundColor: color }]} />
+
         {/* Top row */}
         <View style={styles.cardTop}>
           <View style={[styles.communityIcon, { backgroundColor: color + '15' }]}>
@@ -155,16 +158,13 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
         {/* Stats */}
         <View style={styles.cardStats}>
           {statItems.map((s, i) => (
-            <View key={`${s.icon}-${i}`} style={styles.statWithSeparator}>
-              {i > 0 && <Text style={styles.statDot}>·</Text>}
-              <View style={styles.stat}>
-                <Ionicons
-                  name={s.icon}
-                  size={14}
-                  color={s.icon === 'star' ? Colors.accent : Colors.textSecondary}
-                />
-                <Text style={styles.statText}>{s.text}</Text>
-              </View>
+            <View key={`${s.icon}-${i}`} style={styles.statChip}>
+              <Ionicons
+                name={s.icon}
+                size={14}
+                color={s.icon === 'star' ? Colors.accent : color}
+              />
+              <Text style={styles.statChipText}>{s.text}</Text>
             </View>
           ))}
         </View>
@@ -207,13 +207,14 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
           <Pressable
             style={[
               styles.joinButton,
-              joined ? styles.joinedButton : styles.joinButtonShadow,
+              joined && styles.joinedButton,
+              !joined && styles.joinButtonGlow,
             ]}
             onPress={handleJoin}
           >
             <Ionicons
               name={joined ? 'checkmark' : 'add'}
-              size={18}
+              size={20}
               color={joined ? Colors.secondary : '#FFF'}
             />
             <Text style={[styles.joinText, joined && styles.joinedText]}>
@@ -301,8 +302,12 @@ export default function CommunitiesScreen() {
     <View style={[styles.container, { paddingTop: topInset }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Communities</Text>
-        <Text style={styles.subtitle}>Connect with cultural communities & organisations</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.title}>Communities</Text>
+        </View>
+        <Pressable style={styles.headerSearchIcon} hitSlop={8}>
+          <Ionicons name="search" size={22} color={Colors.text} />
+        </Pressable>
       </View>
 
       {/* Search bar */}
@@ -364,14 +369,24 @@ export default function CommunitiesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 14 },
-  title: { fontSize: 28, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-    color: Colors.textSecondary,
-    marginTop: 2,
+  header: { 
+    paddingHorizontal: 20, 
+    paddingTop: 8, 
+    paddingBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
+  headerLeft: { flex: 1 },
+  headerSearchIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.backgroundSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: { fontSize: 32, fontFamily: 'Poppins_700Bold', color: Colors.text },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -400,15 +415,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  grid: { paddingHorizontal: 20, gap: 14 },
+  grid: { paddingHorizontal: 20, gap: 16 },
   card: {
-    backgroundColor: Colors.card,
-    borderRadius: 18,
-    padding: 18,
+    backgroundColor: Colors.surface,
+    borderRadius: 22,
+    overflow: 'hidden',
+    paddingTop: 0,
+    paddingHorizontal: 18,
+    paddingBottom: 18,
     borderWidth: 0.5,
-    borderColor: Colors.cardBorder,
-    gap: 10,
+    borderColor: Colors.border,
+    gap: 12,
     ...Colors.shadow.medium,
+  },
+  cardAccentStrip: {
+    height: 4,
+    width: '100%',
+    marginBottom: 12,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   communityIcon: {
@@ -451,11 +474,17 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     lineHeight: 20,
   },
-  cardStats: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  statWithSeparator: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  stat: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  statText: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  statDot: { fontSize: 14, color: Colors.textTertiary, marginHorizontal: 2 },
+  cardStats: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  statChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: Colors.backgroundSecondary,
+  },
+  statChipText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   locationTagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   locationPill: {
     flexDirection: 'row',
@@ -507,18 +536,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 8,
     backgroundColor: Colors.primary,
-    borderRadius: 14,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
-  joinButtonShadow: { ...Colors.shadow.small },
+  joinButtonGlow: {
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 8,
+    elevation: 6,
+  },
   joinedButton: {
     backgroundColor: Colors.secondary + '12',
     borderWidth: 1,
     borderColor: Colors.secondary + '30',
   },
-  joinText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  joinText: { fontSize: 15, fontFamily: 'Poppins_700Bold', color: '#FFF' },
   joinedText: { color: Colors.secondary },
   emptyState: { alignItems: 'center', paddingVertical: 60, gap: 10 },
   emptyTitle: { fontSize: 18, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
