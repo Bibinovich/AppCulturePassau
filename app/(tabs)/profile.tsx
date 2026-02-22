@@ -140,7 +140,11 @@ export default function ProfileScreen() {
             <MenuItem icon="receipt-outline" label="Transaction History" color="#9B59B6"
               onPress={() => router.push('/payment/transactions')} />
             <MenuItem icon="wallet-outline" label="CulturePass Wallet" value={`$${(wallet?.balance || 0).toFixed(2)}`} color="#2ECC71"
-              onPress={() => router.push('/payment/wallet')} showDivider={false} />
+              onPress={() => router.push('/payment/wallet')} />
+            <MenuItem icon="gift-outline" label="Perks & Benefits" color={Colors.accent}
+              onPress={() => router.push('/perks')} />
+            <MenuItem icon="notifications-outline" label="View Notifications" color="#FF9F0A"
+              onPress={() => router.push('/notifications')} showDivider={false} />
           </View>
         </View>
 
