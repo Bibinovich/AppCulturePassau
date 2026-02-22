@@ -8,6 +8,8 @@ import Colors from '@/constants/colors';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import type { Wallet } from '@shared/schema';
 
 function MenuItem({ icon, label, value, onPress, color, showDivider = true }: {
   icon: string; label: string; value?: string; onPress?: () => void; color?: string; showDivider?: boolean;
@@ -51,6 +53,13 @@ export default function ProfileScreen() {
   const { savedEvents, joinedCommunities } = useSaved();
   const [pushNotifs, setPushNotifs] = useState(true);
   const [emailNotifs, setEmailNotifs] = useState(false);
+
+  const { data: users } = useQuery<{id: string}[]>({ queryKey: ['/api/users'] });
+  const userId = users?.[0]?.id;
+  const { data: wallet } = useQuery<Wallet>({
+    queryKey: ['/api/wallet', userId],
+    enabled: !!userId,
+  });
 
   const savedEventsList = sampleEvents.filter(e => savedEvents.includes(e.id));
   const joinedCommunitiesList = sampleCommunities.filter(c => joinedCommunities.includes(c.id));
@@ -127,11 +136,11 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Payment & Billing</Text>
           <View style={styles.menuCard}>
             <MenuItem icon="card-outline" label="Payment Methods" color="#3498DB"
-              onPress={() => Alert.alert('Payment Methods', 'Add your credit card, debit card, or PayPal account to make quick payments for events, movies, and dining.')} />
+              onPress={() => router.push('/payment/methods')} />
             <MenuItem icon="receipt-outline" label="Transaction History" color="#9B59B6"
-              onPress={() => Alert.alert('Transactions', 'No transactions yet. Your booking history will appear here.')} />
-            <MenuItem icon="wallet-outline" label="CulturePass Wallet" value="$0.00" color="#2ECC71"
-              onPress={() => Alert.alert('Wallet', 'Your CulturePass wallet balance is $0.00. Add funds to make quick payments.')} showDivider={false} />
+              onPress={() => router.push('/payment/transactions')} />
+            <MenuItem icon="wallet-outline" label="CulturePass Wallet" value={`$${(wallet?.balance || 0).toFixed(2)}`} color="#2ECC71"
+              onPress={() => router.push('/payment/wallet')} showDivider={false} />
           </View>
         </View>
 

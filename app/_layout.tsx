@@ -29,6 +29,10 @@ function RootLayoutNav() {
       <Stack.Screen name="activities/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
       <Stack.Screen name="shopping/index" options={{ headerShown: false, animation: 'slide_from_right' }} />
       <Stack.Screen name="shopping/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="profile/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="payment/methods" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="payment/transactions" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="payment/wallet" options={{ headerShown: false, animation: 'slide_from_right' }} />
     </Stack>
   );
 }
