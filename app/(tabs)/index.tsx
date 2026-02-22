@@ -77,7 +77,7 @@ export default function HomeScreen() {
         </Pressable>
         <View style={styles.topBarRight}>
           <Pressable style={styles.iconButton} hitSlop={8}><Ionicons name="search-outline" size={22} color={Colors.text} /></Pressable>
-          <Pressable style={styles.iconButton} hitSlop={8}><Ionicons name="notifications-outline" size={22} color={Colors.text} /><View style={styles.notifDot} /></Pressable>
+          <Pressable style={styles.iconButton} hitSlop={8} onPress={() => router.push('/notifications')}><Ionicons name="notifications-outline" size={22} color={Colors.text} /><View style={styles.notifDot} /></Pressable>
         </View>
       </View>
 
@@ -195,6 +195,21 @@ export default function HomeScreen() {
             )
           ))}
         </View>
+
+        <Animated.View entering={FadeInDown.delay(600).duration(600)}>
+          <Pressable style={styles.perksBanner} onPress={() => router.push('/perks')}>
+            <View style={styles.perksBannerLeft}>
+              <View style={styles.perksBannerIcon}>
+                <Ionicons name="gift" size={24} color="#FFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.perksBannerTitle}>Perks & Benefits</Text>
+                <Text style={styles.perksBannerSub}>Exclusive discounts and rewards for you</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#FFF" />
+          </Pressable>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -257,4 +272,9 @@ const styles = StyleSheet.create({
   dealTitle: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
   dealBadge: { backgroundColor: Colors.primary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   dealBadgeText: { fontSize: 11, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+  perksBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: Colors.secondary, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 16, marginHorizontal: 20, marginBottom: 28 },
+  perksBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+  perksBannerIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  perksBannerTitle: { fontSize: 15, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+  perksBannerSub: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: 'rgba(255,255,255,0.85)' },
 });
