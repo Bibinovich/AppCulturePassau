@@ -27,29 +27,32 @@ import type { User, Membership } from '@shared/schema';
 import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useCallback, useMemo } from 'react';
 
-const OL = {
-  blue:       '#0085C7',
-  yellow:     '#F4C300',
-  black:      '#1A1A2E',
-  green:      '#009F3D',
-  red:        '#DF0024',
-  navy:       '#001F5B',
-  navyMid:    '#003580',
-  navyLight:  '#0E52A8',
-  gold:       '#C9A227',
-  goldLight:  '#E8C547',
-  silver:     '#A8B2C0',
-  bg:         '#EFF2F8',
+const CP = {
+  teal:       '#00D4AA',
+  tealDark:   '#00A882',
+  purple:     '#7C3AED',
+  purpleDark: '#5B21B6',
+  ember:      '#FF6B35',
+  gold:       '#FFB347',
+  dark:       '#0D0F14',
+  darkMid:    '#161B27',
+  darkRaised: '#1E2535',
+  muted:      '#94A3B8',
+  border:     '#2D3748',
+  bg:         '#F8F9FA',
   surface:    '#FFFFFF',
+  text:       '#0D0F14',
+  success:    '#10B981',
+  info:       '#3B82F6',
 } as const;
 
-const RING_ACCENTS = [OL.blue, OL.yellow, OL.black, OL.green, OL.red] as const;
+const ACCENT_COLORS = [CP.teal, CP.purple, CP.ember, CP.gold, CP.info] as const;
 
 const SOCIAL_ICONS = [
-  { key: 'instagram', icon: 'logo-instagram' as const, label: 'Instagram', color: OL.red        },
-  { key: 'twitter',   icon: 'logo-twitter'   as const, label: 'Twitter',   color: OL.blue       },
-  { key: 'linkedin',  icon: 'logo-linkedin'  as const, label: 'LinkedIn',  color: OL.navyLight  },
-  { key: 'facebook',  icon: 'logo-facebook'  as const, label: 'Facebook',  color: OL.navyLight  },
+  { key: 'instagram', icon: 'logo-instagram' as const, label: 'Instagram', color: CP.ember     },
+  { key: 'twitter',   icon: 'logo-twitter'   as const, label: 'Twitter',   color: CP.info      },
+  { key: 'linkedin',  icon: 'logo-linkedin'  as const, label: 'LinkedIn',  color: CP.purple    },
+  { key: 'facebook',  icon: 'logo-facebook'  as const, label: 'Facebook',  color: CP.info      },
 ] as const;
 
 const TIER_CONFIG: Record<string, {
@@ -57,11 +60,11 @@ const TIER_CONFIG: Record<string, {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
 }> = {
-  free:    { color: OL.silver,   label: 'Standard', icon: 'shield-outline' },
-  plus:    { color: OL.blue,     label: 'Plus',     icon: 'star'           },
-  pro:     { color: OL.navyLight,label: 'Pro',      icon: 'star'           },
-  premium: { color: OL.gold,     label: 'Premium',  icon: 'diamond'        },
-  vip:     { color: OL.goldLight,label: 'VIP',      icon: 'diamond'        },
+  free:    { color: CP.muted,      label: 'Standard', icon: 'shield-outline' },
+  plus:    { color: CP.teal,       label: 'Plus',     icon: 'star'           },
+  pro:     { color: CP.purple,     label: 'Pro',      icon: 'star'           },
+  premium: { color: CP.ember,      label: 'Premium',  icon: 'diamond'        },
+  vip:     { color: CP.gold,       label: 'VIP',      icon: 'diamond'        },
 };
 
 function formatNumber(n: number): string {
@@ -79,17 +82,14 @@ function getInitials(name: string): string {
   return name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 }
 
-const OlympicRings = memo(({ size = 22, opacity = 0.22 }: { size?: number; opacity?: number }) => (
-  <View style={{ flexDirection: 'row', alignItems: 'center' }} pointerEvents="none">
-    {[OL.blue, OL.yellow, OL.black, OL.green, OL.red].map((c, i) => (
+const BrandDots = memo(({ size = 22, opacity = 0.22 }: { size?: number; opacity?: number }) => (
+  <View style={{ flexDirection: 'row', alignItems: 'center', gap: size * 0.4 }} pointerEvents="none">
+    {[CP.teal, CP.purple, CP.ember, CP.gold, CP.info].map((c, i) => (
       <View
         key={i}
         style={{
           width: size, height: size, borderRadius: size / 2,
-          borderWidth: size * 0.13,
-          borderColor: c,
-          backgroundColor: 'transparent',
-          marginLeft: i === 0 ? 0 : -(size * 0.33),
+          backgroundColor: c,
           opacity,
         }}
       />
@@ -134,7 +134,7 @@ const SocialCard = memo(({ icon, label, color, accentColor, onPress }: {
         <Ionicons name={icon} size={22} color={color} />
       </View>
       <Text style={styles.socialLabel}>{label}</Text>
-      <Ionicons name="open-outline" size={14} color={OL.silver} />
+      <Ionicons name="open-outline" size={14} color={CP.muted} />
     </AnimatedPressable>
   );
 });
@@ -156,7 +156,7 @@ const DetailRow = memo(({
         <Text style={styles.detailLabel}>{label}</Text>
         <Text style={[styles.detailValue, valueColor ? { color: valueColor } : undefined]}>{value}</Text>
       </View>
-      {showArrow && <Ionicons name="open-outline" size={16} color={OL.silver} />}
+      {showArrow && <Ionicons name="open-outline" size={16} color={CP.muted} />}
     </>
   );
   if (onPress) {
@@ -169,11 +169,11 @@ function LoadingSkeleton({ topInset }: { topInset: number }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[OL.black, OL.navy, OL.navyMid]}
+        colors={[CP.dark, '#1a0533', '#0a2a2a']}
         style={[styles.hero, { paddingTop: topInset + 8, justifyContent: 'center', alignItems: 'center', minHeight: 340 }]}
       >
-        <ActivityIndicator size="large" color={OL.goldLight} />
-        <Text style={{ color: OL.silver, marginTop: 12, fontFamily: 'Poppins_400Regular', fontSize: 13 }}>
+        <ActivityIndicator size="large" color={CP.teal} />
+        <Text style={{ color: CP.muted, marginTop: 12, fontFamily: 'Poppins_400Regular', fontSize: 13 }}>
           Loading profile…
         </Text>
       </LinearGradient>
@@ -227,7 +227,7 @@ export default function PublicProfileScreen() {
   if (!user) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <Ionicons name="person-outline" size={52} color={OL.silver} />
+        <Ionicons name="person-outline" size={52} color={CP.muted} />
         <Text style={[styles.errorText, { marginTop: 14 }]}>Profile not found</Text>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>Go Back</Text>
@@ -243,7 +243,7 @@ export default function PublicProfileScreen() {
         contentContainerStyle={{ paddingBottom: bottomInset + 52 }}
       >
         <LinearGradient
-          colors={[OL.black, OL.navy, OL.navyMid]}
+          colors={[CP.dark, '#1a0533', '#0a2a2a']}
           start={{ x: 0.1, y: 0 }}
           end={{ x: 0.85, y: 1 }}
           style={[styles.hero, { paddingTop: topInset + 8 }]}
@@ -252,7 +252,7 @@ export default function PublicProfileScreen() {
           <View style={styles.arcInner} pointerEvents="none" />
 
           <View style={styles.heroRingsWm} pointerEvents="none">
-            <OlympicRings size={34} opacity={0.15} />
+            <BrandDots size={34} opacity={0.15} />
           </View>
 
           <View style={styles.heroNav}>
@@ -260,7 +260,7 @@ export default function PublicProfileScreen() {
               <Ionicons name="chevron-back" size={22} color="#FFF" />
             </Pressable>
 
-            <OlympicRings size={20} opacity={0.5} />
+            <BrandDots size={20} opacity={0.5} />
 
             <Pressable style={styles.navBtn} onPress={handleShare} hitSlop={8}>
               <Ionicons name="share-outline" size={20} color="#FFF" />
@@ -271,9 +271,9 @@ export default function PublicProfileScreen() {
             <View style={styles.avatarGlow} />
 
             <LinearGradient
-              colors={[OL.goldLight, OL.gold, '#9E7A1A', OL.goldLight]}
+              colors={[CP.teal, CP.purple, CP.teal]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={styles.avatarGoldRing}
+              style={styles.avatarGradientRing}
             >
               <View style={styles.avatarInner}>
                 <Text style={styles.avatarText}>{initials}</Text>
@@ -282,7 +282,7 @@ export default function PublicProfileScreen() {
 
             {user.isVerified && (
               <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark" size={10} color={OL.navy} />
+                <Ionicons name="checkmark" size={10} color="#FFF" />
               </View>
             )}
 
@@ -291,14 +291,14 @@ export default function PublicProfileScreen() {
 
             <View style={styles.heroPills}>
               {user.culturePassId && (
-                <View style={[styles.heroPill, styles.heroPillGold]}>
-                  <Ionicons name="finger-print" size={12} color={OL.goldLight} />
-                  <Text style={[styles.heroPillText, { color: OL.goldLight }]}>{user.culturePassId}</Text>
+                <View style={[styles.heroPill, styles.heroPillAccent]}>
+                  <Ionicons name="finger-print" size={12} color={CP.teal} />
+                  <Text style={[styles.heroPillText, { color: CP.teal }]}>{user.culturePassId}</Text>
                 </View>
               )}
               {locationText ? (
                 <View style={styles.heroPill}>
-                  <Ionicons name="location" size={12} color={OL.silver} />
+                  <Ionicons name="location" size={12} color={CP.muted} />
                   <Text style={styles.heroPillText}>{locationText}</Text>
                 </View>
               ) : null}
@@ -307,9 +307,9 @@ export default function PublicProfileScreen() {
 
           <Animated.View entering={FadeInUp.delay(130).duration(400)} style={styles.statsBar}>
             <LinearGradient
-              colors={['transparent', OL.gold, OL.goldLight, OL.gold, 'transparent']}
+              colors={['transparent', CP.teal, CP.purple, CP.teal, 'transparent']}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={styles.statsGoldLine}
+              style={styles.statsAccentLine}
             />
             <StatItem value={user.followersCount ?? 0} label="Followers" />
             <View style={styles.statDivider} />
@@ -330,7 +330,7 @@ export default function PublicProfileScreen() {
           </LinearGradient>
           {memberSince ? (
             <View style={styles.memberSince}>
-              <Ionicons name="calendar-outline" size={14} color={OL.silver} />
+              <Ionicons name="calendar-outline" size={14} color={CP.muted} />
               <Text style={styles.memberSinceText}>Since {memberSince}</Text>
             </View>
           ) : null}
@@ -355,7 +355,7 @@ export default function PublicProfileScreen() {
                   icon={s.icon}
                   label={s.label}
                   color={s.color}
-                  accentColor={RING_ACCENTS[i % RING_ACCENTS.length]}
+                  accentColor={ACCENT_COLORS[i % ACCENT_COLORS.length]}
                   onPress={() => handleOpenSocial(s.key)}
                 />
               ))}
@@ -369,7 +369,7 @@ export default function PublicProfileScreen() {
             <View style={styles.card}>
               {locationText ? (
                 <DetailRow
-                  icon="location" iconBg={OL.blue + '14'} iconColor={OL.blue}
+                  icon="location" iconBg={CP.purple + '14'} iconColor={CP.purple}
                   label="Location" value={locationText}
                 />
               ) : null}
@@ -377,8 +377,8 @@ export default function PublicProfileScreen() {
                 <>
                   {locationText && <View style={styles.detailDivider} />}
                   <DetailRow
-                    icon="globe-outline" iconBg={OL.green + '14'} iconColor={OL.green}
-                    label="Website" value={user.website} valueColor={OL.blue}
+                    icon="globe-outline" iconBg={CP.teal + '14'} iconColor={CP.teal}
+                    label="Website" value={user.website} valueColor={CP.teal}
                     onPress={() => Linking.openURL(user.website!)} showArrow
                   />
                 </>
@@ -387,7 +387,7 @@ export default function PublicProfileScreen() {
                 <>
                   <View style={styles.detailDivider} />
                   <DetailRow
-                    icon="call-outline" iconBg={OL.gold + '14'} iconColor={OL.gold}
+                    icon="call-outline" iconBg={CP.ember + '14'} iconColor={CP.ember}
                     label="Phone" value={user.phone}
                   />
                 </>
@@ -401,28 +401,28 @@ export default function PublicProfileScreen() {
             <SectionHeader title="Digital Identity" />
 
             <LinearGradient
-              colors={[OL.black, OL.navy, '#0A3070']}
+              colors={[CP.dark, '#1a0533', CP.darkMid]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
               style={styles.cpidCard}
             >
               <LinearGradient
-                colors={['transparent', OL.gold, OL.goldLight, OL.gold, 'transparent']}
+                colors={['transparent', CP.teal, CP.purple, CP.teal, 'transparent']}
                 start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={styles.cpidGoldEdge}
+                style={styles.cpidAccentEdge}
               />
-              <View style={styles.cpidRingsWm} pointerEvents="none">
-                <OlympicRings size={28} opacity={0.2} />
+              <View style={styles.cpidDotsWm} pointerEvents="none">
+                <BrandDots size={28} opacity={0.2} />
               </View>
 
               <View style={styles.cpidTop}>
                 <View style={styles.cpidLogoRow}>
-                  <LinearGradient colors={[OL.goldLight, OL.gold]} style={styles.cpidLogoIcon}>
-                    <Ionicons name="globe" size={13} color={OL.navy} />
+                  <LinearGradient colors={[CP.teal, CP.purple]} style={styles.cpidLogoIcon}>
+                    <Ionicons name="globe" size={13} color="#FFF" />
                   </LinearGradient>
                   <Text style={styles.cpidLogoText}>CulturePass</Text>
                 </View>
                 <View style={styles.cpidVerifiedIcon}>
-                  <Ionicons name="shield-checkmark" size={15} color={OL.goldLight} />
+                  <Ionicons name="shield-checkmark" size={15} color={CP.teal} />
                 </View>
               </View>
 
@@ -430,7 +430,7 @@ export default function PublicProfileScreen() {
                 <Text style={styles.cpidLabel}>CULTUREPASS ID</Text>
                 <Text style={styles.cpidValue}>{user.culturePassId}</Text>
                 <LinearGradient
-                  colors={['transparent', OL.gold, 'transparent']}
+                  colors={['transparent', CP.teal, 'transparent']}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
                   style={styles.cpidUnderline}
                 />
@@ -447,13 +447,13 @@ export default function PublicProfileScreen() {
                 </View>
                 <View style={[styles.cpidMetaItem, { alignItems: 'flex-end' as const }]}>
                   <Text style={styles.cpidMetaLabel}>Tier</Text>
-                  <Text style={[styles.cpidMetaValue, { color: OL.goldLight }]}>{tierConf.label}</Text>
+                  <Text style={[styles.cpidMetaValue, { color: CP.teal }]}>{tierConf.label}</Text>
                 </View>
               </View>
 
               <View style={styles.cpidFooter}>
                 <Text style={styles.cpidFooterText}>Verified Digital Identity</Text>
-                <Ionicons name="finger-print" size={20} color={OL.gold + '55'} />
+                <Ionicons name="finger-print" size={20} color={CP.teal + '55'} />
               </View>
             </LinearGradient>
 
@@ -464,14 +464,14 @@ export default function PublicProfileScreen() {
                 router.push('/profile/qr');
               }}
             >
-              <LinearGradient colors={[OL.blue + '1A', OL.navyLight + '0D']} style={styles.viewQrIconWrap}>
-                <Ionicons name="qr-code-outline" size={20} color={OL.blue} />
+              <LinearGradient colors={[CP.teal + '1A', CP.purple + '0D']} style={styles.viewQrIconWrap}>
+                <Ionicons name="qr-code-outline" size={20} color={CP.teal} />
               </LinearGradient>
               <View style={{ flex: 1 }}>
                 <Text style={styles.viewQrText}>View QR Code</Text>
                 <Text style={styles.viewQrSub}>Scan to share your profile</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={OL.silver} />
+              <Ionicons name="chevron-forward" size={18} color={CP.muted} />
             </Pressable>
           </Animated.View>
         )}
@@ -481,11 +481,11 @@ export default function PublicProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: OL.bg },
+  container: { flex: 1, backgroundColor: CP.bg },
   centered:  { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
-  errorText:      { fontSize: 16, fontFamily: 'Poppins_500Medium', color: OL.silver },
-  backButton:     { marginTop: 16, paddingHorizontal: 24, paddingVertical: 11, borderRadius: 14, backgroundColor: OL.navyMid },
+  errorText:      { fontSize: 16, fontFamily: 'Poppins_500Medium', color: CP.muted },
+  backButton:     { marginTop: 16, paddingHorizontal: 24, paddingVertical: 11, borderRadius: 14, backgroundColor: CP.purple },
   backButtonText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
 
   hero: { paddingBottom: 30, overflow: 'hidden' },
@@ -493,12 +493,12 @@ const styles = StyleSheet.create({
   arcOuter: {
     position: 'absolute', top: -90, right: -90,
     width: 240, height: 240, borderRadius: 120,
-    borderWidth: 30, borderColor: OL.gold + '10',
+    borderWidth: 30, borderColor: CP.teal + '10',
   },
   arcInner: {
     position: 'absolute', top: -44, right: -44,
     width: 140, height: 140, borderRadius: 70,
-    borderWidth: 20, borderColor: OL.gold + '08',
+    borderWidth: 20, borderColor: CP.purple + '10',
   },
 
   heroRingsWm: {
@@ -530,27 +530,27 @@ const styles = StyleSheet.create({
   avatarGlow: {
     position: 'absolute', top: -20,
     width: 160, height: 160, borderRadius: 80,
-    backgroundColor: OL.gold + '0A',
-    shadowColor: OL.gold,
+    backgroundColor: CP.teal + '0A',
+    shadowColor: CP.teal,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.25, shadowRadius: 40,
   },
-  avatarGoldRing: {
+  avatarGradientRing: {
     width: 104, height: 104, borderRadius: 52,
     padding: 3, marginBottom: 18,
-    shadowColor: OL.gold,
+    shadowColor: CP.teal,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5, shadowRadius: 18,
     elevation: 12,
   },
   avatarInner: {
     flex: 1, borderRadius: 50,
-    backgroundColor: OL.navyMid,
+    backgroundColor: CP.darkMid,
     alignItems: 'center', justifyContent: 'center',
   },
   avatarText: {
     fontFamily: 'Poppins_700Bold',
-    fontSize: 33, color: OL.goldLight, letterSpacing: 1,
+    fontSize: 33, color: CP.teal, letterSpacing: 1,
   },
   verifiedBadge: {
     position: 'absolute',
@@ -558,10 +558,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginLeft: 38,
     width: 24, height: 24, borderRadius: 12,
-    backgroundColor: OL.goldLight,
-    borderWidth: 3, borderColor: OL.navy,
+    backgroundColor: CP.teal,
+    borderWidth: 3, borderColor: CP.dark,
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: OL.gold,
+    shadowColor: CP.teal,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.7, shadowRadius: 5,
   },
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
   },
   heroHandle: {
     fontFamily: 'Poppins_400Regular',
-    fontSize: 15, color: OL.silver,
+    fontSize: 15, color: CP.muted,
     marginTop: 3, marginBottom: 16,
   },
 
@@ -587,9 +587,9 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 50,
   },
-  heroPillGold: {
-    backgroundColor: OL.gold + '16',
-    borderColor: OL.gold + '35',
+  heroPillAccent: {
+    backgroundColor: CP.teal + '16',
+    borderColor: CP.teal + '35',
   },
   heroPillText: {
     fontFamily: 'Poppins_500Medium',
@@ -604,13 +604,13 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
     overflow: 'hidden',
   },
-  statsGoldLine: {
+  statsAccentLine: {
     position: 'absolute', top: 0, left: 30, right: 30,
     height: 1.5, opacity: 0.6,
   },
   statItem:  { flex: 1, alignItems: 'center' },
   statNum:   { fontFamily: 'Poppins_700Bold', fontSize: 22, color: '#FFF', letterSpacing: -0.5 },
-  statLabel: { fontFamily: 'Poppins_400Regular', fontSize: 11, color: OL.silver, marginTop: 3, letterSpacing: 0.4 },
+  statLabel: { fontFamily: 'Poppins_400Regular', fontSize: 11, color: CP.muted, marginTop: 3, letterSpacing: 0.4 },
   statDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.1)' },
 
   tierRow: {
@@ -628,13 +628,13 @@ const styles = StyleSheet.create({
 
   section:       { paddingHorizontal: 20, marginTop: 32 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
-  sectionAccent: { width: 4, height: 22, borderRadius: 2, backgroundColor: OL.gold },
-  sectionTitle:  { fontFamily: 'Poppins_700Bold', fontSize: 18, color: OL.black, letterSpacing: -0.3 },
+  sectionAccent: { width: 4, height: 22, borderRadius: 2, backgroundColor: CP.teal },
+  sectionTitle:  { fontFamily: 'Poppins_700Bold', fontSize: 18, color: CP.text, letterSpacing: -0.3 },
 
   card: {
-    backgroundColor: OL.surface,
+    backgroundColor: CP.surface,
     borderRadius: 20, padding: 20,
-    shadowColor: OL.navy,
+    shadowColor: CP.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
   },
@@ -646,9 +646,9 @@ const styles = StyleSheet.create({
   socialGrid: { gap: 10 },
   socialCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: OL.surface, borderRadius: 16, padding: 16,
+    backgroundColor: CP.surface, borderRadius: 16, padding: 16,
     overflow: 'hidden',
-    shadowColor: OL.navy,
+    shadowColor: CP.dark,
     shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
   },
   socialStrip: {
@@ -659,25 +659,25 @@ const styles = StyleSheet.create({
     width: 46, height: 46, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center',
   },
-  socialLabel: { flex: 1, fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: OL.black },
+  socialLabel: { flex: 1, fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: CP.text },
 
   detailRow:     { flexDirection: 'row', alignItems: 'center', gap: 14 },
   detailIconWrap:{ width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   detailText:    { flex: 1 },
-  detailLabel:   { fontFamily: 'Poppins_400Regular', fontSize: 11, color: OL.silver, letterSpacing: 0.4, marginBottom: 2 },
-  detailValue:   { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: OL.black },
-  detailDivider: { height: 1, backgroundColor: OL.bg, marginVertical: 16, marginLeft: 60 },
+  detailLabel:   { fontFamily: 'Poppins_400Regular', fontSize: 11, color: CP.muted, letterSpacing: 0.4, marginBottom: 2 },
+  detailValue:   { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: CP.text },
+  detailDivider: { height: 1, backgroundColor: CP.bg, marginVertical: 16, marginLeft: 60 },
 
   cpidCard: {
     borderRadius: 24, padding: 24, overflow: 'hidden',
-    shadowColor: OL.navy,
+    shadowColor: CP.purple,
     shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.45, shadowRadius: 28, elevation: 14,
+    shadowOpacity: 0.35, shadowRadius: 28, elevation: 14,
   },
-  cpidGoldEdge: {
+  cpidAccentEdge: {
     position: 'absolute', top: 0, left: 0, right: 0, height: 2.5,
   },
-  cpidRingsWm: {
+  cpidDotsWm: {
     position: 'absolute', bottom: 22, right: 20,
   },
   cpidTop: {
@@ -693,19 +693,19 @@ const styles = StyleSheet.create({
   cpidVerifiedIcon: {
     width: 32, height: 32, borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.1)',
-    borderWidth: 1, borderColor: OL.gold + '40',
+    borderWidth: 1, borderColor: CP.teal + '40',
     alignItems: 'center', justifyContent: 'center',
   },
 
   cpidCenter:    { alignItems: 'center', marginBottom: 26 },
-  cpidLabel:     { fontFamily: 'Poppins_500Medium', fontSize: 9, color: OL.silver, letterSpacing: 4, marginBottom: 8 },
+  cpidLabel:     { fontFamily: 'Poppins_500Medium', fontSize: 9, color: CP.muted, letterSpacing: 4, marginBottom: 8 },
   cpidValue:     { fontFamily: 'Poppins_700Bold', fontSize: 30, color: '#FFF', letterSpacing: 5 },
   cpidUnderline: { width: 160, height: 1.5, marginTop: 10, opacity: 0.65 },
 
   cpidMeta:      { flexDirection: 'row', marginBottom: 20, gap: 8 },
   cpidMetaItem:  { flex: 1 },
   cpidMetaLabel: {
-    fontFamily: 'Poppins_400Regular', fontSize: 9, color: OL.silver,
+    fontFamily: 'Poppins_400Regular', fontSize: 9, color: CP.muted,
     textTransform: 'uppercase' as const, letterSpacing: 1.2, marginBottom: 4,
   },
   cpidMetaValue: { fontFamily: 'Poppins_600SemiBold', fontSize: 13, color: '#FFF' },
@@ -715,18 +715,18 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 14,
   },
   cpidFooterText: {
-    fontFamily: 'Poppins_500Medium', fontSize: 11, color: OL.silver, letterSpacing: 0.3,
+    fontFamily: 'Poppins_500Medium', fontSize: 11, color: CP.muted, letterSpacing: 0.3,
   },
 
   viewQrBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: OL.surface, borderRadius: 18, padding: 16, marginTop: 12,
-    shadowColor: OL.navy,
+    backgroundColor: CP.surface, borderRadius: 18, padding: 16, marginTop: 12,
+    shadowColor: CP.dark,
     shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 6, elevation: 2,
   },
   viewQrIconWrap: {
     width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
   },
-  viewQrText: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: OL.black },
-  viewQrSub:  { fontFamily: 'Poppins_400Regular', fontSize: 12, color: OL.silver, marginTop: 1 },
+  viewQrText: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: CP.text },
+  viewQrSub:  { fontFamily: 'Poppins_400Regular', fontSize: 12, color: CP.muted, marginTop: 1 },
 });
