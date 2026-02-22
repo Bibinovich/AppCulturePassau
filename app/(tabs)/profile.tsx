@@ -10,7 +10,9 @@ import {
   Share,
   RefreshControl,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useSaved } from '@/contexts/SavedContext';
@@ -264,85 +266,101 @@ export default function ProfileScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} colors={[Colors.primary]} />}
       >
         <Animated.View entering={FadeInDown.duration(400)} style={styles.profileHeader}>
-          <View style={styles.headerTop}>
-            <Pressable style={styles.settingsBtn} onPress={handleShare}>
-              <Ionicons name="share-outline" size={20} color={Colors.text} />
-            </Pressable>
-            <Text style={styles.headerLabel}>Profile</Text>
-            <Pressable
-              style={styles.settingsBtn}
-              onPress={() => router.push('/notifications')}
-            >
-              <Ionicons name="notifications-outline" size={22} color={Colors.text} />
-              {unreadCount > 0 && <View style={styles.notifDot} />}
-            </Pressable>
-          </View>
-
           <View style={styles.heroCard}>
-            <View style={styles.heroCardAccent} />
-            <View style={styles.avatarSection}>
-              <View style={styles.avatarGlow} />
-              <View style={styles.avatarRow}>
-                <View style={styles.avatar}>
-                  <Ionicons name="person" size={38} color={Colors.primary} />
-                  <View
-                    style={[
-                      styles.tierIcon,
-                      { backgroundColor: tierStyle.bg, borderColor: tierStyle.text + '30' },
-                    ]}
-                  >
-                    <Ionicons name={tierStyle.icon as any} size={13} color={tierStyle.text} />
-                  </View>
+            <LinearGradient
+              colors={[Colors.primary, Colors.primaryDark || '#B8431F', Colors.secondary]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.heroBanner}
+            >
+              <View style={styles.heroBannerOverlay}>
+                <View style={styles.heroBannerActions}>
+                  <Pressable style={styles.heroBannerBtn} onPress={handleShare}>
+                    <Ionicons name="share-outline" size={18} color="#FFF" />
+                  </Pressable>
+                  <Text style={styles.heroLabel}>Profile</Text>
+                  <Pressable style={styles.heroBannerBtn} onPress={() => router.push('/notifications')}>
+                    <Ionicons name="notifications-outline" size={18} color="#FFF" />
+                    {unreadCount > 0 && <View style={styles.notifDot} />}
+                  </Pressable>
                 </View>
+                <View style={styles.heroBannerPattern}>
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <View key={i} style={[styles.patternCircle, { opacity: 0.06 + i * 0.02, left: 30 + i * 55, top: 10 + (i % 2) * 20 }]} />
+                  ))}
+                </View>
+              </View>
+            </LinearGradient>
+
+            <View style={styles.avatarContainer}>
+              {user?.avatarUrl ? (
+                <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} contentFit="cover" />
+              ) : (
+                <View style={styles.avatarFallback}>
+                  <Text style={styles.avatarInitials}>
+                    {(displayName || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                  </Text>
+                </View>
+              )}
+              <View style={[styles.tierIcon, { backgroundColor: tierStyle.bg, borderColor: '#FFF' }]}>
+                <Ionicons name={tierStyle.icon as any} size={12} color={tierStyle.text} />
               </View>
             </View>
 
-            <Text style={styles.name}>{displayName}</Text>
-            {user?.username ? (
-              <Text style={styles.username}>@{user.username}</Text>
-            ) : null}
-
-            <View style={styles.idLocationRow}>
-              {user?.culturePassId ? (
-                <View style={styles.cpidChip}>
-                  <Ionicons name="finger-print" size={12} color={Colors.primary} />
-                  <Text style={styles.cpidText}>{user.culturePassId}</Text>
-                </View>
+            <View style={styles.heroBody}>
+              <View style={styles.nameRow}>
+                <Text style={styles.name}>{displayName}</Text>
+                {user?.isVerified && (
+                  <Ionicons name="checkmark-circle" size={18} color={Colors.secondary} />
+                )}
+              </View>
+              {user?.username ? (
+                <Text style={styles.username}>@{user.username}</Text>
               ) : null}
-              <View style={styles.locationChip}>
-                <Ionicons name="location" size={12} color={Colors.secondary} />
-                <Text style={styles.locationChipText}>{displayLocation}</Text>
+
+              <View style={styles.idLocationRow}>
+                {user?.culturePassId ? (
+                  <View style={styles.cpidChip}>
+                    <Ionicons name="finger-print" size={12} color={Colors.primary} />
+                    <Text style={styles.cpidText}>{user.culturePassId}</Text>
+                  </View>
+                ) : null}
+                {displayLocation ? (
+                  <View style={styles.locationChip}>
+                    <Ionicons name="location" size={12} color={Colors.secondary} />
+                    <Text style={styles.locationChipText}>{displayLocation}</Text>
+                  </View>
+                ) : null}
+                <View style={[styles.tierBadge, { backgroundColor: tierStyle.bg }]}>
+                  <Ionicons name={tierStyle.icon as any} size={11} color={tierStyle.text} />
+                  <Text style={[styles.tierBadgeText, { color: tierStyle.text }]}>
+                    {capitalize(tier)}
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            <View style={[styles.tierBadge, { backgroundColor: tierStyle.bg }]}>
-              <Ionicons name={tierStyle.icon as any} size={13} color={tierStyle.text} />
-              <Text style={[styles.tierBadgeText, { color: tierStyle.text }]}>
-                {capitalize(tier)} Member
-              </Text>
-            </View>
+              {user?.bio ? (
+                <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
+              ) : null}
 
-            {user?.bio ? (
-              <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
-            ) : null}
-
-            <View style={styles.completenessContainer}>
-              <View style={styles.completenessHeader}>
-                <Text style={styles.completenessText}>Profile completeness</Text>
-                <Text style={[styles.completenessPercent, profileCompleteness >= 80 ? { color: Colors.success } : profileCompleteness >= 50 ? { color: Colors.accent } : {}]}>
-                  {profileCompleteness}%
-                </Text>
+              <View style={styles.completenessContainer}>
+                <View style={styles.completenessHeader}>
+                  <Text style={styles.completenessText}>Profile completeness</Text>
+                  <Text style={[styles.completenessPercent, profileCompleteness >= 80 ? { color: Colors.success } : profileCompleteness >= 50 ? { color: Colors.accent } : {}]}>
+                    {profileCompleteness}%
+                  </Text>
+                </View>
+                <View style={styles.completenessBarBg}>
+                  <View style={[styles.completenessBarFill, { width: `${profileCompleteness}%` as any }, profileCompleteness >= 80 ? { backgroundColor: Colors.success } : profileCompleteness >= 50 ? { backgroundColor: Colors.accent } : {}]} />
+                </View>
               </View>
-              <View style={styles.completenessBarBg}>
-                <View style={[styles.completenessBarFill, { width: `${profileCompleteness}%` }, profileCompleteness >= 80 ? { backgroundColor: Colors.success } : profileCompleteness >= 50 ? { backgroundColor: Colors.accent } : {}]} />
-              </View>
-            </View>
 
-            <View style={styles.profileActions}>
-              <Pressable style={styles.editProfileBtn} onPress={() => router.push('/profile/edit')}>
-                <Ionicons name="create-outline" size={16} color={Colors.textInverse} />
-                <Text style={styles.editProfileText}>Edit Profile</Text>
-              </Pressable>
+              <View style={styles.profileActions}>
+                <Pressable style={styles.editProfileBtn} onPress={() => router.push('/profile/edit')}>
+                  <Ionicons name="create-outline" size={16} color="#FFF" />
+                  <Text style={styles.editProfileText}>Edit Profile</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
 
@@ -665,100 +683,116 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 6,
-    backgroundColor: Colors.backgroundSecondary + '80',
-    borderBottomWidth: 0.5,
-    borderBottomColor: Colors.divider,
-  },
-  headerLabel: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  settingsBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Colors.shadow.small,
-  },
-  notifDot: {
-    position: 'absolute',
-    top: 7,
-    right: 7,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.error,
-    borderWidth: 1.5,
-    borderColor: Colors.card,
-  },
-  profileHeader: { alignItems: 'center', paddingBottom: 12 },
+  profileHeader: { paddingBottom: 12 },
   heroCard: {
-    alignItems: 'center',
     marginHorizontal: 20,
-    marginTop: 12,
+    marginTop: 8,
     backgroundColor: Colors.card,
-    borderRadius: 20,
-    paddingTop: 28,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    borderRadius: 22,
     overflow: 'hidden',
     ...Colors.shadow.medium,
   },
-  heroCardAccent: {
+  heroBanner: {
+    height: 110,
+    width: '100%',
+  },
+  heroBannerOverlay: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  heroBannerActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  heroBannerBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroLabel: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  heroBannerPattern: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: 4,
-    backgroundColor: Colors.primary,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    bottom: 0,
   },
-  avatarSection: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarGlow: {
+  patternCircle: {
     position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: Colors.primaryGlow,
-    top: -14,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#FFF',
   },
-  avatarRow: { zIndex: 1 },
-  avatar: {
+  notifDot: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#FF3B30',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  avatarContainer: {
+    alignSelf: 'center',
+    marginTop: -44,
+    marginBottom: 10,
+    position: 'relative',
+  },
+  avatarImage: {
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: Colors.primary + '08',
+    borderWidth: 4,
+    borderColor: Colors.card,
+  },
+  avatarFallback: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: Colors.primary + '20',
-    marginBottom: 10,
+    borderWidth: 4,
+    borderColor: Colors.card,
     ...Colors.shadow.medium,
+  },
+  avatarInitials: {
+    fontSize: 28,
+    fontFamily: 'Poppins_700Bold',
+    color: '#FFF',
+    letterSpacing: 1,
   },
   tierIcon: {
     position: 'absolute',
-    bottom: 6,
-    right: -4,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    bottom: 2,
+    right: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     ...Colors.shadow.small,
   },
-  name: { fontSize: 21, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  heroBody: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  name: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text },
   username: {
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
@@ -768,8 +802,8 @@ const styles = StyleSheet.create({
   idLocationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
+    gap: 6,
+    marginTop: 10,
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
@@ -777,7 +811,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.primary + '08',
+    backgroundColor: Colors.primary + '0D',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
@@ -792,22 +826,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.secondary + '08',
+    backgroundColor: Colors.secondary + '0D',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
   },
-  locationChipText: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.secondary },
+  locationChipText: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: Colors.secondary },
   tierBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 14,
-    marginTop: 10,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
-  tierBadgeText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold' },
+  tierBadgeText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold' },
   bio: {
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
