@@ -181,6 +181,23 @@ export default function ProfileScreen() {
 
   const displayName = user?.displayName ?? 'CulturePass User';
 
+  const profileCompleteness = useMemo(() => {
+    let pct = 0;
+    if (user?.displayName) pct += 20;
+    if (user?.bio) pct += 20;
+    if (user?.avatarUrl) pct += 10;
+    if (user?.city || user?.location) pct += 20;
+    if (user?.username) pct += 15;
+    if (user?.socialLinks && Object.keys(user.socialLinks).length > 0) pct += 15;
+    return pct;
+  }, [user?.displayName, user?.bio, user?.avatarUrl, user?.city, user?.location, user?.username, user?.socialLinks]);
+
+  const nextTierInfo = useMemo(() => {
+    if (tier === 'free') return { name: 'Plus', color: '#3498DB' };
+    if (tier === 'plus') return { name: 'Premium', color: '#F39C12' };
+    return null;
+  }, [tier]);
+
   // Guard against "Sydney, undefined" when country is missing
   const displayLocation = useMemo(() => {
     if (user?.city && user?.country) return `${user.city}, ${user.country}`;
@@ -304,6 +321,23 @@ export default function ProfileScreen() {
             </View>
           </View>
 
+          <View style={styles.completenessContainer}>
+            <Text style={styles.completenessText}>Profile {profileCompleteness}% complete</Text>
+            <View style={styles.completenessBarBg}>
+              <View style={[styles.completenessBarFill, { width: `${profileCompleteness}%` }]} />
+            </View>
+          </View>
+
+          {nextTierInfo && (
+            <Pressable style={[styles.upgradeCta, { backgroundColor: nextTierInfo.color + '10', borderColor: nextTierInfo.color + '25' }]}>
+              <Ionicons name="arrow-up-circle" size={18} color={nextTierInfo.color} />
+              <Text style={[styles.upgradeCtaText, { color: nextTierInfo.color }]}>
+                Upgrade to {nextTierInfo.name} for more perks
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={nextTierInfo.color} />
+            </Pressable>
+          )}
+
           {user?.bio ? (
             <Text style={styles.bio} numberOfLines={2}>
               {user.bio}
@@ -314,6 +348,24 @@ export default function ProfileScreen() {
             <Ionicons name="create-outline" size={17} color={Colors.primary} />
             <Text style={styles.editProfileText}>Edit Profile</Text>
           </Pressable>
+
+          <View style={styles.quickActionRow}>
+            <Pressable style={styles.quickActionChip} onPress={handleShare}>
+              <Ionicons name="share-social-outline" size={16} color={Colors.primary} />
+              <Text style={styles.quickActionText}>Share Profile</Text>
+            </Pressable>
+            <Pressable
+              style={styles.quickActionChip}
+              onPress={() => user?.id && router.push(`/profile/${user.id}`)}
+            >
+              <Ionicons name="eye-outline" size={16} color={Colors.primary} />
+              <Text style={styles.quickActionText}>View Public</Text>
+            </Pressable>
+            <Pressable style={styles.quickActionChip}>
+              <Ionicons name="qr-code-outline" size={16} color={Colors.primary} />
+              <Text style={styles.quickActionText}>Scan QR</Text>
+            </Pressable>
+          </View>
         </Animated.View>
 
         {/* Stats row */}
@@ -334,6 +386,18 @@ export default function ProfileScreen() {
             <Text style={styles.statNum}>${walletBalance.toFixed(0)}</Text>
             <Text style={styles.statLabel}>T. Wallet</Text>
           </Pressable>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.activityCard}>
+          <Text style={styles.activityTitle}>Recent Activity</Text>
+          <View style={styles.activityRow}>
+            <Ionicons name="calendar-outline" size={16} color={Colors.primary} />
+            <Text style={styles.activityText}>{savedEvents.length} events saved this month</Text>
+          </View>
+          <View style={styles.activityRow}>
+            <Ionicons name="people-outline" size={16} color={Colors.secondary} />
+            <Text style={styles.activityText}>{joinedCommunities.length} communities active</Text>
+          </View>
         </Animated.View>
 
         {/* My Communities */}
@@ -790,5 +854,90 @@ const styles = StyleSheet.create({
     color: Colors.textTertiary,
     textAlign: 'center',
     marginBottom: 20,
+  },
+  completenessContainer: {
+    alignItems: 'center',
+    marginTop: 8,
+    paddingHorizontal: 50,
+    width: '100%',
+  },
+  completenessText: {
+    fontSize: 11,
+    fontFamily: 'Poppins_500Medium',
+    color: Colors.textTertiary,
+    marginBottom: 4,
+  },
+  completenessBarBg: {
+    width: '100%',
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
+    overflow: 'hidden',
+  },
+  completenessBarFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: Colors.primary,
+  },
+  upgradeCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  upgradeCtaText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  quickActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+  },
+  quickActionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  quickActionText: {
+    fontSize: 12,
+    fontFamily: 'Poppins_500Medium',
+    color: Colors.text,
+  },
+  activityCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: Colors.card,
+    borderRadius: 14,
+    padding: 16,
+    gap: 10,
+    ...Colors.shadow.small,
+  },
+  activityTitle: {
+    fontSize: 14,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  activityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  activityText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textSecondary,
   },
 });

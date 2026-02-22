@@ -110,7 +110,6 @@ function DirectoryCard({ profile, index }: { profile: Profile; index: number }) 
           </Text>
         ) : null}
 
-        {/* Tags */}
         {tags.length > 0 && (
           <View style={styles.serviceRow}>
             {tags.slice(0, 3).map(tag => (
@@ -124,7 +123,20 @@ function DirectoryCard({ profile, index }: { profile: Profile; index: number }) 
           </View>
         )}
 
-        {/* Footer */}
+        {((profile as any).phone || (profile as any).address) && (
+          <View style={styles.quickActions}>
+            {(profile as any).phone ? (
+              <View style={[styles.quickActionCircle, { backgroundColor: Colors.secondary + '15' }]}>
+                <Ionicons name="call" size={15} color={Colors.secondary} />
+              </View>
+            ) : null}
+            {(profile as any).address ? (
+              <View style={[styles.quickActionCircle, { backgroundColor: '#3498DB15' }]}>
+                <Ionicons name="location" size={15} color="#3498DB" />
+              </View>
+            ) : null}
+          </View>
+        )}
         <View style={styles.cardFooter}>
           {profile.city ? (
             <View style={styles.locationRow}>
@@ -204,6 +216,14 @@ export default function DirectoryScreen() {
     return results;
   }, [selectedType, search, nonCommunityProfiles]);
 
+  const typeCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: nonCommunityProfiles.length };
+    for (const p of nonCommunityProfiles) {
+      counts[p.entityType] = (counts[p.entityType] ?? 0) + 1;
+    }
+    return counts;
+  }, [nonCommunityProfiles]);
+
   const handleFilterSelect = useCallback((label: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedType(label);
@@ -276,6 +296,13 @@ export default function DirectoryScreen() {
                 >
                   {filter.display}
                 </Text>
+                {(typeCounts[filter.label] ?? 0) > 0 && (
+                  <View style={[styles.countBadge, isActive && { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
+                    <Text style={[styles.countBadgeText, isActive && { color: '#FFF' }]}>
+                      {typeCounts[filter.label]}
+                    </Text>
+                  </View>
+                )}
               </Pressable>
             );
           })}
@@ -376,6 +403,19 @@ const styles = StyleSheet.create({
   },
   categoryText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   categoryTextActive: { color: '#FFF' },
+  countBadge: {
+    backgroundColor: Colors.backgroundSecondary,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 8,
+    minWidth: 20,
+    alignItems: 'center',
+  },
+  countBadgeText: {
+    fontSize: 10,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.textSecondary,
+  },
   resultCount: {
     fontSize: 13,
     fontFamily: 'Poppins_500Medium',
@@ -442,6 +482,18 @@ const styles = StyleSheet.create({
   },
   serviceText: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   moreServices: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  quickActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  quickActionCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -31,6 +31,7 @@ export default function SignUpScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
           <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.benefitsRow}>Free events · Community access · Exclusive perks</Text>
           <Text style={styles.subtitle}>Join thousands of community members celebrating culture together.</Text>
 
           <View style={styles.form}>
@@ -63,6 +64,25 @@ export default function SignUpScreen() {
                 </Pressable>
               </View>
               {password.length > 0 && password.length < 6 && <Text style={styles.hint}>Password must be at least 6 characters</Text>}
+              {password.length > 0 && (
+                <View style={styles.strengthContainer}>
+                  <View style={styles.strengthBarBg}>
+                    <View style={[
+                      styles.strengthBarFill,
+                      {
+                        width: password.length < 6 ? '33%' : password.length < 10 ? '66%' : '100%',
+                        backgroundColor: password.length < 6 ? Colors.error : password.length < 10 ? Colors.warning : Colors.success,
+                      },
+                    ]} />
+                  </View>
+                  <Text style={[
+                    styles.strengthLabel,
+                    { color: password.length < 6 ? Colors.error : password.length < 10 ? Colors.warning : Colors.success },
+                  ]}>
+                    {password.length < 6 ? 'Weak' : password.length < 10 ? 'Medium' : 'Strong'}
+                  </Text>
+                </View>
+              )}
             </View>
 
             <Pressable style={styles.checkRow} onPress={() => setAgreed(!agreed)}>
@@ -109,4 +129,9 @@ const styles = StyleSheet.create({
   switchRow: { alignItems: 'center' },
   switchText: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
   switchLink: { color: Colors.primary, fontFamily: 'Poppins_600SemiBold' },
+  benefitsRow: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textTertiary, marginBottom: 4 },
+  strengthContainer: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  strengthBarBg: { flex: 1, height: 4, borderRadius: 2, backgroundColor: Colors.border },
+  strengthBarFill: { height: 4, borderRadius: 2 },
+  strengthLabel: { fontSize: 12, fontFamily: 'Poppins_500Medium' },
 });

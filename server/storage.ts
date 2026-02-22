@@ -232,7 +232,7 @@ export class DatabaseStorage {
   async addFunds(userId: string, amount: number): Promise<Wallet> {
     let [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId));
     if (!wallet) {
-      [wallet] = await db.insert(wallets).values({ userId, balance: amount }).returning();
+      [wallet] = await db.insert(wallets).values({ userId, balance: String(amount) }).returning();
     } else {
       [wallet] = await db.update(wallets).set({
         balance: sql`${wallets.balance} + ${amount}`,
@@ -240,14 +240,14 @@ export class DatabaseStorage {
       }).where(eq(wallets.userId, userId)).returning();
     }
     await this.createTransaction({
-      userId, type: "credit", amount, description: "Wallet top-up", category: "wallet", status: "completed",
+      userId, type: "credit", amount: String(amount), description: "Wallet top-up", category: "wallet", status: "completed",
     });
     return wallet;
   }
 
   async deductFunds(userId: string, amount: number, description: string): Promise<Wallet | null> {
     const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId));
-    if (!wallet || (wallet.balance || 0) < amount) return null;
+    if (!wallet || Number(wallet.balance || 0) < amount) return null;
 
     const [updated] = await db.update(wallets).set({
       balance: sql`${wallets.balance} - ${amount}`,
@@ -255,7 +255,7 @@ export class DatabaseStorage {
     }).where(eq(wallets.userId, userId)).returning();
 
     await this.createTransaction({
-      userId, type: "debit", amount, description, category: "payment", status: "completed",
+      userId, type: "debit", amount: String(amount), description, category: "payment", status: "completed",
     });
     return updated;
   }

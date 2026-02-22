@@ -50,6 +50,27 @@ export default function WelcomeScreen() {
           Discover cultural events, connect with communities, and celebrate diversity across
           Australia, New Zealand, and beyond.
         </Animated.Text>
+
+        <View style={styles.featureList}>
+          <Animated.View entering={FadeInDown.delay(1000).duration(600)} style={styles.featureRow}>
+            <View style={[styles.featureIcon, { backgroundColor: Colors.primary + '18' }]}>
+              <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
+            </View>
+            <Text style={styles.featureText}>Discover Events</Text>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(1150).duration(600)} style={styles.featureRow}>
+            <View style={[styles.featureIcon, { backgroundColor: Colors.secondary + '18' }]}>
+              <Ionicons name="people-outline" size={18} color={Colors.secondary} />
+            </View>
+            <Text style={styles.featureText}>Join Communities</Text>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(1300).duration(600)} style={styles.featureRow}>
+            <View style={[styles.featureIcon, { backgroundColor: Colors.accent + '20' }]}>
+              <Ionicons name="gift-outline" size={18} color={Colors.accent} />
+            </View>
+            <Text style={styles.featureText}>Exclusive Perks</Text>
+          </Animated.View>
+        </View>
       </View>
 
       {/* Bottom section */}
@@ -112,6 +133,8 @@ export default function WelcomeScreen() {
             <Text style={styles.socialText}>Apple</Text>
           </Pressable>
         </View>
+
+        <Text style={styles.trustBar}>5 countries · 50k+ members · 1000+ events</Text>
       </Animated.View>
     </View>
   );
@@ -231,4 +254,9 @@ const styles = StyleSheet.create({
   // Extracted from inline `{ opacity: 0.8 }` to a stable stylesheet reference
   socialButtonPressed: { opacity: 0.8 },
   socialText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  featureList: { marginTop: 24, gap: 12, width: '100%', paddingHorizontal: 8 },
+  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  featureIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  featureText: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.text },
+  trustBar: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textTertiary, textAlign: 'center', marginTop: 12 },
 });

@@ -12,6 +12,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const isValid = email.includes('@') && password.length >= 6;
 
@@ -32,7 +33,7 @@ export default function LoginScreen() {
             <View style={styles.logoCircle}><Ionicons name="globe-outline" size={36} color={Colors.primary} /></View>
           </View>
 
-          <Text style={styles.title}>Welcome back CulturePass</Text>
+          <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>Sign in to continue your cultural journey.</Text>
 
           <View style={styles.form}>
@@ -62,6 +63,13 @@ export default function LoginScreen() {
               </View>
             </View>
           </View>
+
+          <Pressable style={styles.rememberRow} onPress={() => setRememberMe(!rememberMe)}>
+            <View style={[styles.rememberCheckbox, rememberMe && styles.rememberChecked]}>
+              {rememberMe && <Ionicons name="checkmark" size={12} color="#FFF" />}
+            </View>
+            <Text style={styles.rememberText}>Remember me</Text>
+          </Pressable>
 
           <Pressable style={[styles.submitBtn, !isValid && { opacity: 0.5 }]} onPress={isValid ? handleLogin : undefined} disabled={!isValid}>
             <Text style={styles.submitText}>Sign In</Text>
@@ -120,4 +128,8 @@ const styles = StyleSheet.create({
   switchRow: { alignItems: 'center' },
   switchText: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
   switchLink: { color: Colors.primary, fontFamily: 'Poppins_600SemiBold' },
+  rememberRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 },
+  rememberCheckbox: { width: 20, height: 20, borderRadius: 5, borderWidth: 2, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
+  rememberChecked: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  rememberText: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
 });

@@ -166,6 +166,21 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
           ))}
         </View>
 
+        <View style={styles.avatarRow}>
+          {['#E85D3A', '#1A7A6D', '#9B59B6', '#3498DB'].map((c, i) => (
+            <View
+              key={i}
+              style={[
+                styles.avatarCircle,
+                { backgroundColor: c + '18', marginLeft: i === 0 ? 0 : -8 },
+              ]}
+            >
+              <Ionicons name="person" size={13} color={c} />
+            </View>
+          ))}
+          <Text style={styles.avatarLabel}>Recent members</Text>
+        </View>
+
         {/* Location + tags */}
         <View style={styles.locationTagRow}>
           {profile.city ? (
@@ -185,23 +200,28 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
           ))}
         </View>
 
-        {/* Join button */}
-        <Pressable
-          style={[
-            styles.joinButton,
-            joined ? styles.joinedButton : styles.joinButtonShadow,
-          ]}
-          onPress={handleJoin}
-        >
-          <Ionicons
-            name={joined ? 'checkmark' : 'add'}
-            size={18}
-            color={joined ? Colors.secondary : '#FFF'}
-          />
-          <Text style={[styles.joinText, joined && styles.joinedText]}>
-            {joined ? 'Joined' : 'Join'}
-          </Text>
-        </Pressable>
+        <View style={styles.joinRow}>
+          <Pressable
+            style={[
+              styles.joinButton,
+              joined ? styles.joinedButton : styles.joinButtonShadow,
+            ]}
+            onPress={handleJoin}
+          >
+            <Ionicons
+              name={joined ? 'checkmark' : 'add'}
+              size={18}
+              color={joined ? Colors.secondary : '#FFF'}
+            />
+            <Text style={[styles.joinText, joined && styles.joinedText]}>
+              {joined ? 'Joined' : 'Join'}
+            </Text>
+          </Pressable>
+
+          <Pressable style={styles.shareActionBtn} onPress={handleShare} hitSlop={8}>
+            <Ionicons name="share-outline" size={15} color={Colors.textSecondary} />
+          </Pressable>
+        </View>
       </Pressable>
     </Animated.View>
   );
@@ -242,6 +262,15 @@ export default function CommunitiesScreen() {
 
     return profiles;
   }, [allProfilesData, search, selectedType]);
+
+  const typeCounts = useMemo(() => {
+    const profiles = allProfilesData ?? [];
+    const counts: Record<string, number> = { all: profiles.length };
+    for (const p of profiles) {
+      counts[p.entityType] = (counts[p.entityType] ?? 0) + 1;
+    }
+    return counts;
+  }, [allProfilesData]);
 
   const handleTypeSelect = useCallback((id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -299,6 +328,13 @@ export default function CommunitiesScreen() {
               <Text style={[styles.quickPillLabel, isActive && { color: '#FFF' }]}>
                 {item.label}
               </Text>
+              {(typeCounts[item.id] ?? 0) > 0 && (
+                <View style={[styles.countBadge, isActive && { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
+                  <Text style={[styles.countBadgeText, isActive && { color: '#FFF' }]}>
+                    {typeCounts[item.id]}
+                  </Text>
+                </View>
+              )}
             </Pressable>
           );
         })}
@@ -459,7 +495,54 @@ const styles = StyleSheet.create({
   locationPillText: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   tagPill: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
   tagPillText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold' },
+  avatarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  avatarCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.card,
+  },
+  avatarLabel: {
+    fontSize: 11,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textTertiary,
+    marginLeft: 8,
+  },
+  joinRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  shareActionBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.backgroundSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countBadge: {
+    backgroundColor: Colors.backgroundSecondary,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 8,
+    minWidth: 20,
+    alignItems: 'center',
+  },
+  countBadgeText: {
+    fontSize: 10,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.textSecondary,
+  },
   joinButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
