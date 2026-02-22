@@ -6,33 +6,47 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { communities, communityIcons } from '@/data/mockData';
 import Colors from '@/constants/colors';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import * as Haptics from 'expo-haptics';
 
-const chipColors = ['#E85D3A', '#1A7A6D', '#F2A93B', '#3498DB', '#9B59B6', '#E74C3C', '#2ECC71', '#1ABC9C', '#8E44AD', '#F39C12', '#16A085', '#C0392B', '#2980B9', '#D35400', '#27AE60'];
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+// Kept as a module-level constant — no need to recreate on every render
+const CHIP_COLORS = [
+  '#E85D3A', '#1A7A6D', '#F2A93B', '#3498DB', '#9B59B6',
+  '#E74C3C', '#2ECC71', '#1ABC9C', '#8E44AD', '#F39C12',
+  '#16A085', '#C0392B', '#2980B9', '#D35400', '#27AE60',
+];
+
+// ─── CommunitiesScreen ────────────────────────────────────────────────────────
 
 export default function CommunitiesScreen() {
   const insets = useSafeAreaInsets();
   const topInset = Platform.OS === 'web' ? 67 : insets.top;
+  const bottomInset = Platform.OS === 'web' ? 34 : insets.bottom;
   const { state, setCommunities: setSelectedCommunities } = useOnboarding();
+
+  // Initialise from saved onboarding state
   const [selected, setSelected] = useState<string[]>(state.communities);
 
-  const toggle = (community: string) => {
+  const toggle = useCallback((community: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelected(prev =>
-      prev.includes(community) ? prev.filter(c => c !== community) : [...prev, community]
+      prev.includes(community)
+        ? prev.filter(c => c !== community)
+        : [...prev, community],
     );
-  };
+  }, []);
 
-  const handleNext = () => {
-    if (selected.length > 0) {
-      setSelectedCommunities(selected);
-      router.push('/(onboarding)/interests');
-    }
-  };
+  const handleNext = useCallback(() => {
+    if (selected.length === 0) return;
+    setSelectedCommunities(selected);
+    router.push('/(onboarding)/interests');
+  }, [selected, setSelectedCommunities]);
 
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
+      {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
@@ -40,17 +54,25 @@ export default function CommunitiesScreen() {
         <Text style={styles.step}>2 of 3</Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <Animated.View entering={FadeInDown.delay(100).duration(600)}>
           <Text style={styles.title}>Your Communities</Text>
-          <Text style={styles.subtitle}>Select the communities you'd like to connect with. You can always change these later.</Text>
+          <Text style={styles.subtitle}>
+            Select the communities you'd like to connect with. You can always change these later.
+          </Text>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.chipContainer}>
           {communities.map((community, idx) => {
             const isSelected = selected.includes(community);
-            const color = chipColors[idx % chipColors.length];
-            const iconName = communityIcons[community] || 'people';
+            const color = CHIP_COLORS[idx % CHIP_COLORS.length];
+            // Fall back to 'people' if the community has no mapped icon
+            const iconName = (communityIcons[community] as string | undefined) ?? 'people';
+
             return (
               <Pressable
                 key={community}
@@ -65,10 +87,9 @@ export default function CommunitiesScreen() {
                   size={18}
                   color={isSelected ? '#FFF' : color}
                 />
-                <Text style={[
-                  styles.chipText,
-                  isSelected && { color: '#FFF' },
-                ]}>{community}</Text>
+                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                  {community}
+                </Text>
                 {isSelected && (
                   <Ionicons name="checkmark-circle" size={18} color="#FFF" />
                 )}
@@ -76,15 +97,23 @@ export default function CommunitiesScreen() {
             );
           })}
         </Animated.View>
+
+        {/* Spacer so last chip isn't hidden behind the footer */}
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom + 16 }]}>
-        <Text style={styles.selectedCount}>{selected.length} selected</Text>
+      {/* Footer */}
+      <View style={[styles.footer, { paddingBottom: bottomInset + 16 }]}>
+        <Text style={styles.selectedCount}>
+          {selected.length} {selected.length === 1 ? 'community' : 'communities'} selected
+        </Text>
         <Pressable
           style={[styles.nextButton, selected.length === 0 && styles.buttonDisabled]}
           onPress={handleNext}
           disabled={selected.length === 0}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: selected.length === 0 }}
+          accessibilityLabel="Continue to interests"
         >
           <Text style={styles.nextButtonText}>Continue</Text>
           <Ionicons name="arrow-forward" size={20} color="#FFF" />
@@ -93,6 +122,8 @@ export default function CommunitiesScreen() {
     </View>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
@@ -143,6 +174,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins_500Medium',
     color: Colors.text,
+  },
+  // Extracted selected text style so it's not recreated as a new object per chip per render
+  chipTextSelected: {
+    color: '#FFF',
   },
   footer: {
     paddingHorizontal: 20,

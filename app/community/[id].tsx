@@ -16,6 +16,7 @@ export default function CommunityDetailScreen() {
   const { isCommunityJoined, toggleJoinCommunity } = useSaved();
 
   const community = sampleCommunities.find(c => c.id === id);
+
   if (!community) {
     return (
       <View style={[styles.container, { paddingTop: topInset, justifyContent: 'center', alignItems: 'center' }]}>
@@ -28,15 +29,25 @@ export default function CommunityDetailScreen() {
   }
 
   const joined = isCommunityJoined(community.id);
-  const communityEvents = sampleEvents.filter(e =>
-    e.communityTag === community.name.replace(' Community', '').replace(' Cultural Forum', '').replace(' Association', '')
-    || e.organizerId === community.id
-  );
+
+  // Deduplicate events in case both filter conditions match the same event
+  const communityEvents = [...new Map(
+    sampleEvents
+      .filter(e =>
+        e.communityTag === community.name
+          .replace(' Community', '')
+          .replace(' Cultural Forum', '')
+          .replace(' Association', '')
+        || e.organizerId === community.id
+      )
+      .map(e => [e.id, e])
+  ).values()];
 
   return (
-    <View style={[styles.container]}>
-      <View style={[styles.hero, { backgroundColor: community.color, paddingTop: topInset }]}>
-        <View style={styles.heroOverlay}>
+    <View style={styles.container}>
+      {/* Hero — height accounts for dynamic safe area inset */}
+      <View style={[styles.hero, { backgroundColor: community.color, height: 240 + topInset }]}>
+        <View style={[styles.heroOverlay, { paddingTop: topInset }]}>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={22} color="#FFF" />
           </Pressable>
@@ -111,10 +122,12 @@ export default function CommunityDetailScreen() {
         <Animated.View entering={FadeInDown.delay(500).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Wellbeing & Support</Text>
           <View style={styles.wellbeingCard}>
-            <Ionicons name="heart-circle" size={28} color={Colors.secondary} />
+            <Ionicons name="heart-circle" size={28} color={Colors.secondary} style={{ marginTop: 2 }} />
             <View style={{ flex: 1 }}>
               <Text style={styles.wellbeingTitle}>Mental Health & Belonging</Text>
-              <Text style={styles.wellbeingDesc}>Community support resources, cultural counselling, and wellbeing programs are available for all members.</Text>
+              <Text style={styles.wellbeingDesc}>
+                Community support resources, cultural counselling, and wellbeing programs are available for all members.
+              </Text>
             </View>
           </View>
         </Animated.View>
@@ -128,7 +141,11 @@ export default function CommunityDetailScreen() {
             toggleJoinCommunity(community.id);
           }}
         >
-          <Ionicons name={joined ? "checkmark-circle" : "add-circle"} size={22} color={joined ? Colors.secondary : '#FFF'} />
+          <Ionicons
+            name={joined ? 'checkmark-circle' : 'add-circle'}
+            size={22}
+            color={joined ? Colors.secondary : '#FFF'}
+          />
           <Text style={[styles.joinText, joined && styles.joinedText]}>
             {joined ? 'Joined Community' : 'Join Community'}
           </Text>
@@ -138,13 +155,16 @@ export default function CommunityDetailScreen() {
   );
 }
 
-function formatNumber(num: number) {
+function formatNumber(num: number): string {
   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
   return num.toString();
 }
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
+function formatDate(dateStr: string): string {
+  // Parse manually to avoid timezone shifting from new Date(string)
+  const [year, month, day] = dateStr.split('-').map(Number);
+  if (!year || !month || !day) return dateStr;
+  const d = new Date(year, month - 1, day);
   return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
 }
 
@@ -152,7 +172,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   errorText: { fontSize: 16, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   backLink: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.primary, marginTop: 12 },
-  hero: { height: 240 },
+  // height is set dynamically via inline style to account for safe area inset
+  hero: {},
   heroOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.25)',

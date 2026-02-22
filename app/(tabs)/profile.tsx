@@ -1,4 +1,14 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Switch, Share } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ScrollView,
+  Platform,
+  Alert,
+  Switch,
+  Share,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '@/contexts/OnboardingContext';
@@ -7,10 +17,34 @@ import { sampleEvents, sampleCommunities } from '@/data/mockData';
 import Colors from '@/constants/colors';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Wallet, User, Membership } from '@shared/schema';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatDate(dateStr: string): string {
+  // Parse manually to avoid UTC/local timezone shifting the date
+  const [year, month, day] = dateStr.split('-').map(Number);
+  if (!year || !month || !day) return dateStr;
+  const d = new Date(year, month - 1, day);
+  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const TIER_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
+  free: { bg: Colors.textTertiary + '15', text: Colors.textSecondary, icon: 'shield-outline' },
+  plus: { bg: '#3498DB15', text: '#3498DB', icon: 'star' },
+  premium: { bg: '#F39C1215', text: '#F39C12', icon: 'diamond' },
+};
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function SectionTitle({ title }: { title: string }) {
   return (
@@ -21,20 +55,38 @@ function SectionTitle({ title }: { title: string }) {
   );
 }
 
-function MenuItem({ icon, label, value, onPress, color, showDivider = true, badge }: {
-  icon: string; label: string; value?: string; onPress?: () => void; color?: string; showDivider?: boolean; badge?: number;
-}) {
+interface MenuItemProps {
+  icon: string;
+  label: string;
+  value?: string;
+  onPress?: () => void;
+  color?: string;
+  showDivider?: boolean;
+  badge?: number;
+}
+
+function MenuItem({
+  icon,
+  label,
+  value,
+  onPress,
+  color,
+  showDivider = true,
+  badge,
+}: MenuItemProps) {
   return (
     <>
       <Pressable style={styles.menuItem} onPress={onPress}>
-        <View style={[styles.menuIcon, { backgroundColor: (color || Colors.primary) + '12' }]}>
-          <Ionicons name={icon as any} size={20} color={color || Colors.primary} />
+        <View style={[styles.menuIcon, { backgroundColor: (color ?? Colors.primary) + '12' }]}>
+          <Ionicons name={icon as any} size={20} color={color ?? Colors.primary} />
         </View>
         <Text style={styles.menuLabel}>{label}</Text>
         {badge != null && badge > 0 && (
-          <View style={styles.badge}><Text style={styles.badgeText}>{badge}</Text></View>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{badge}</Text>
+          </View>
         )}
-        {value && <Text style={styles.menuValue}>{value}</Text>}
+        {value ? <Text style={styles.menuValue}>{value}</Text> : null}
         <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
       </Pressable>
       {showDivider && <View style={styles.divider} />}
@@ -42,28 +94,43 @@ function MenuItem({ icon, label, value, onPress, color, showDivider = true, badg
   );
 }
 
-function ToggleItem({ icon, label, value, onToggle, color, showDivider = true }: {
-  icon: string; label: string; value: boolean; onToggle: (v: boolean) => void; color?: string; showDivider?: boolean;
-}) {
+interface ToggleItemProps {
+  icon: string;
+  label: string;
+  value: boolean;
+  onToggle: (v: boolean) => void;
+  color?: string;
+  showDivider?: boolean;
+}
+
+function ToggleItem({
+  icon,
+  label,
+  value,
+  onToggle,
+  color,
+  showDivider = true,
+}: ToggleItemProps) {
   return (
     <>
       <View style={styles.menuItem}>
-        <View style={[styles.menuIcon, { backgroundColor: (color || Colors.primary) + '12' }]}>
-          <Ionicons name={icon as any} size={20} color={color || Colors.primary} />
+        <View style={[styles.menuIcon, { backgroundColor: (color ?? Colors.primary) + '12' }]}>
+          <Ionicons name={icon as any} size={20} color={color ?? Colors.primary} />
         </View>
         <Text style={styles.menuLabel}>{label}</Text>
-        <Switch value={value} onValueChange={onToggle} trackColor={{ false: Colors.border, true: Colors.primary + '60' }} thumbColor={value ? Colors.primary : '#f4f3f4'} />
+        <Switch
+          value={value}
+          onValueChange={onToggle}
+          trackColor={{ false: Colors.border, true: Colors.primary + '60' }}
+          thumbColor={value ? Colors.primary : '#f4f3f4'}
+        />
       </View>
       {showDivider && <View style={styles.divider} />}
     </>
   );
 }
 
-const TIER_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
-  free: { bg: Colors.textTertiary + '15', text: Colors.textSecondary, icon: 'shield-outline' },
-  plus: { bg: '#3498DB15', text: '#3498DB', icon: 'star' },
-  premium: { bg: '#F39C1215', text: '#F39C12', icon: 'diamond' },
-};
+// ─── ProfileScreen ────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -73,6 +140,7 @@ export default function ProfileScreen() {
   const [pushNotifs, setPushNotifs] = useState(true);
   const [emailNotifs, setEmailNotifs] = useState(false);
 
+  // ── API queries ──────────────────────────────────────────────────────────────
   const { data: usersData } = useQuery<User[]>({ queryKey: ['/api/users'] });
   const user = usersData?.[0];
   const userId = user?.id;
@@ -97,40 +165,112 @@ export default function ProfileScreen() {
     enabled: !!userId,
   });
 
-  const savedEventsList = sampleEvents.filter(e => savedEvents.includes(e.id));
-  const joinedCommunitiesList = sampleCommunities.filter(c => joinedCommunities.includes(c.id));
-  const tier = membership?.tier || 'free';
-  const tierStyle = TIER_COLORS[tier] || TIER_COLORS.free;
+  // ── Derived values ───────────────────────────────────────────────────────────
+  const savedEventsList = useMemo(
+    () => sampleEvents.filter(e => savedEvents.includes(e.id)),
+    [savedEvents],
+  );
 
-  const handleReset = () => {
-    Alert.alert('Reset App', 'This will clear all your data and return you to the onboarding screen.',
-      [{ text: 'Cancel', style: 'cancel' }, { text: 'Reset', style: 'destructive', onPress: async () => { await resetOnboarding(); router.replace('/(onboarding)'); } }]);
-  };
+  const joinedCommunitiesList = useMemo(
+    () => sampleCommunities.filter(c => joinedCommunities.includes(c.id)),
+    [joinedCommunities],
+  );
 
-  const displayName = user?.displayName || 'CulturePass User';
-  const displayLocation = user?.city && user?.country ? `${user.city}, ${user.country}` : `${state.city}, ${state.country}`;
+  const tier = membership?.tier ?? 'free';
+  const tierStyle = TIER_COLORS[tier] ?? TIER_COLORS.free;
+
+  const displayName = user?.displayName ?? 'CulturePass User';
+
+  // Guard against "Sydney, undefined" when country is missing
+  const displayLocation = useMemo(() => {
+    if (user?.city && user?.country) return `${user.city}, ${user.country}`;
+    if (state.city && state.country) return `${state.city}, ${state.country}`;
+    return state.city ?? '';
+  }, [user?.city, user?.country, state.city, state.country]);
+
+  // ── Handlers ─────────────────────────────────────────────────────────────────
+  const handleShare = useCallback(async () => {
+    try {
+      await Share.share({
+        message: `Check out my CulturePass profile! ${displayName} from ${displayLocation}. Download CulturePass to connect with cultural communities!`,
+      });
+    } catch {
+      // Silently ignore share cancellation / errors
+    }
+  }, [displayName, displayLocation]);
+
+  const handleReset = useCallback(() => {
+    Alert.alert(
+      'Reset App',
+      'This will clear all your data and return you to the onboarding screen.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: async () => {
+            await resetOnboarding();
+            router.replace('/(onboarding)');
+          },
+        },
+      ],
+    );
+  }, [resetOnboarding]);
+
+  const handleResetPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    handleReset();
+  }, [handleReset]);
+
+  const handleSignOut = useCallback(() => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel' },
+      { text: 'Sign Out', style: 'destructive' },
+    ]);
+  }, []);
+
+  const walletBalance = wallet?.balance ?? 0;
+  const tickets = ticketCount?.count ?? 0;
+  const unreadCount = unreadNotifs?.count ?? 0;
 
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        {/* Profile header */}
         <Animated.View entering={FadeInDown.duration(400)} style={styles.profileHeader}>
           <View style={styles.headerTop}>
-            <Pressable style={styles.settingsBtn} onPress={async () => { try { await Share.share({ message: `Check out my CulturePass profile! ${displayName} from ${displayLocation}. Download CulturePass to connect with cultural communities!` }); } catch {} }}>
+            {/* Share button */}
+            <Pressable style={styles.settingsBtn} onPress={handleShare}>
               <Ionicons name="share-outline" size={20} color={Colors.text} />
             </Pressable>
+
             <Text style={styles.headerLabel}>Profile</Text>
-            <Pressable style={styles.settingsBtn} onPress={() => router.push('/notifications')}>
+
+            {/* Notifications button */}
+            <Pressable
+              style={styles.settingsBtn}
+              onPress={() => router.push('/notifications')}
+            >
               <Ionicons name="notifications-outline" size={22} color={Colors.text} />
-              {(unreadNotifs?.count || 0) > 0 && <View style={styles.notifDot} />}
+              {unreadCount > 0 && <View style={styles.notifDot} />}
             </Pressable>
           </View>
 
+          {/* Avatar */}
           <View style={styles.avatarSection}>
             <View style={styles.avatarGlow} />
             <View style={styles.avatarRow}>
               <View style={styles.avatar}>
                 <Ionicons name="person" size={40} color={Colors.primary} />
-                <View style={[styles.tierIcon, { backgroundColor: tierStyle.bg, borderColor: tierStyle.text + '30' }]}>
+                <View
+                  style={[
+                    styles.tierIcon,
+                    { backgroundColor: tierStyle.bg, borderColor: tierStyle.text + '30' },
+                  ]}
+                >
                   <Ionicons name={tierStyle.icon as any} size={13} color={tierStyle.text} />
                 </View>
               </View>
@@ -138,28 +278,37 @@ export default function ProfileScreen() {
           </View>
 
           <Text style={styles.name}>{displayName}</Text>
-          {user?.username && <Text style={styles.username}>@{user.username}</Text>}
-          {user?.culturePassId && (
+          {user?.username ? (
+            <Text style={styles.username}>@{user.username}</Text>
+          ) : null}
+          {user?.culturePassId ? (
             <View style={styles.cpidRow}>
               <Ionicons name="finger-print" size={14} color={Colors.primary} />
               <Text style={styles.cpidText}>{user.culturePassId}</Text>
             </View>
-          )}
+          ) : null}
 
           <View style={styles.locationRow}>
             <Ionicons name="location" size={14} color={Colors.primary} />
             <Text style={styles.location}>{displayLocation}</Text>
           </View>
 
+          {/* Tier badge */}
           <View style={styles.tierBadge}>
             <View style={[styles.tierBadgeInner, { backgroundColor: tierStyle.bg }]}>
               <View style={[styles.tierGlass, { backgroundColor: tierStyle.text + '08' }]} />
               <Ionicons name={tierStyle.icon as any} size={14} color={tierStyle.text} />
-              <Text style={[styles.tierBadgeText, { color: tierStyle.text }]}>{tier.charAt(0).toUpperCase() + tier.slice(1)} Member</Text>
+              <Text style={[styles.tierBadgeText, { color: tierStyle.text }]}>
+                {capitalize(tier)} Member
+              </Text>
             </View>
           </View>
 
-          {user?.bio && <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>}
+          {user?.bio ? (
+            <Text style={styles.bio} numberOfLines={2}>
+              {user.bio}
+            </Text>
+          ) : null}
 
           <Pressable style={styles.editProfileBtn} onPress={() => router.push('/profile/edit')}>
             <Ionicons name="create-outline" size={17} color={Colors.primary} />
@@ -167,124 +316,238 @@ export default function ProfileScreen() {
           </Pressable>
         </Animated.View>
 
+        {/* Stats row */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.statsRow}>
-          <Pressable style={styles.statCard} onPress={() => {}}>
+          <Pressable style={styles.statCard} onPress={() => router.push('/(tabs)/communities')}>
             <Text style={styles.statNum}>{joinedCommunities.length}</Text>
             <Text style={styles.statLabel}>Communities</Text>
           </Pressable>
-          <Pressable style={styles.statCard} onPress={() => {}}>
+          <Pressable style={styles.statCard} onPress={() => router.push('/(tabs)/explore')}>
             <Text style={styles.statNum}>{savedEvents.length}</Text>
             <Text style={styles.statLabel}>Saved</Text>
           </Pressable>
           <Pressable style={styles.statCard} onPress={() => router.push('/tickets')}>
-            <Text style={styles.statNum}>{ticketCount?.count || 0}</Text>
+            <Text style={styles.statNum}>{tickets}</Text>
             <Text style={styles.statLabel}>Tickets</Text>
           </Pressable>
           <Pressable style={styles.statCard} onPress={() => router.push('/payment/wallet')}>
-            <Text style={styles.statNum}>${(wallet?.balance || 0).toFixed(0)}</Text>
+            <Text style={styles.statNum}>${walletBalance.toFixed(0)}</Text>
             <Text style={styles.statLabel}>T. Wallet</Text>
           </Pressable>
         </Animated.View>
 
+        {/* My Communities */}
         {joinedCommunitiesList.length > 0 && (
           <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.section}>
             <SectionTitle title="My Communities" />
             {joinedCommunitiesList.slice(0, 3).map(c => (
-              <Pressable key={c.id} style={styles.miniCard}
-                onPress={() => router.push({ pathname: '/community/[id]', params: { id: c.id } })}>
-                <View style={[styles.miniIcon, { backgroundColor: c.color + '15' }]}><Ionicons name={c.icon as any} size={20} color={c.color} /></View>
-                <View style={{ flex: 1 }}><Text style={styles.miniTitle}>{c.name}</Text><Text style={styles.miniSub}>{c.members.toLocaleString()} members</Text></View>
+              <Pressable
+                key={c.id}
+                style={styles.miniCard}
+                onPress={() =>
+                  router.push({ pathname: '/community/[id]', params: { id: c.id } })
+                }
+              >
+                <View style={[styles.miniIcon, { backgroundColor: c.color + '15' }]}>
+                  <Ionicons name={c.icon as any} size={20} color={c.color} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.miniTitle}>{c.name}</Text>
+                  <Text style={styles.miniSub}>{c.members.toLocaleString()} members</Text>
+                </View>
                 <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
               </Pressable>
             ))}
             {joinedCommunitiesList.length > 3 && (
-              <Pressable style={styles.seeAllBtn} onPress={() => router.push('/(tabs)/communities')}>
-                <Text style={styles.seeAllText}>See All ({joinedCommunitiesList.length})</Text>
+              <Pressable
+                style={styles.seeAllBtn}
+                onPress={() => router.push('/(tabs)/communities')}
+              >
+                <Text style={styles.seeAllText}>
+                  See All ({joinedCommunitiesList.length})
+                </Text>
               </Pressable>
             )}
           </Animated.View>
         )}
 
+        {/* Saved Events */}
         {savedEventsList.length > 0 && (
           <Animated.View entering={FadeInDown.delay(250).duration(400)} style={styles.section}>
             <SectionTitle title="Saved Events" />
             {savedEventsList.slice(0, 3).map(e => (
-              <Pressable key={e.id} style={styles.miniCard}
-                onPress={() => router.push({ pathname: '/event/[id]', params: { id: e.id } })}>
-                <View style={[styles.miniIcon, { backgroundColor: e.imageColor + '15' }]}><Ionicons name="calendar" size={20} color={e.imageColor} /></View>
-                <View style={{ flex: 1 }}><Text style={styles.miniTitle} numberOfLines={1}>{e.title}</Text><Text style={styles.miniSub}>{formatDate(e.date)}</Text></View>
+              <Pressable
+                key={e.id}
+                style={styles.miniCard}
+                onPress={() =>
+                  router.push({ pathname: '/event/[id]', params: { id: e.id } })
+                }
+              >
+                <View style={[styles.miniIcon, { backgroundColor: e.imageColor + '15' }]}>
+                  <Ionicons name="calendar" size={20} color={e.imageColor} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.miniTitle} numberOfLines={1}>
+                    {e.title}
+                  </Text>
+                  <Text style={styles.miniSub}>{formatDate(e.date)}</Text>
+                </View>
                 <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
               </Pressable>
             ))}
           </Animated.View>
         )}
 
+        {/* Location & Preferences */}
         <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.section}>
           <SectionTitle title="Location & Preferences" />
           <View style={styles.menuCard}>
-            <MenuItem icon="location-outline" label="Location" value={displayLocation} color={Colors.primary}
-              onPress={() => router.push('/profile/edit')} />
-            <MenuItem icon="people-outline" label="My Communities" value={`${state.communities.length} selected`} color={Colors.secondary}
-              onPress={() => router.push('/(tabs)/communities')} />
-            <MenuItem icon="heart-outline" label="Interests" value={`${state.interests.length} selected`} color={Colors.accent}
-              onPress={() => Alert.alert('Interests', state.interests.join(', ') || 'None selected')} showDivider={false} />
+            <MenuItem
+              icon="location-outline"
+              label="Location"
+              value={displayLocation}
+              color={Colors.primary}
+              onPress={() => router.push('/profile/edit')}
+            />
+            <MenuItem
+              icon="people-outline"
+              label="My Communities"
+              value={`${state.communities.length} selected`}
+              color={Colors.secondary}
+              onPress={() => router.push('/(tabs)/communities')}
+            />
+            <MenuItem
+              icon="heart-outline"
+              label="Interests"
+              value={`${state.interests.length} selected`}
+              color={Colors.accent}
+              onPress={() =>
+                Alert.alert(
+                  'Interests',
+                  state.interests.join(', ') || 'None selected',
+                )
+              }
+              showDivider={false}
+            />
           </View>
         </Animated.View>
 
+        {/* Tickets & Wallet */}
         <Animated.View entering={FadeInDown.delay(350).duration(400)} style={styles.section}>
           <SectionTitle title="Tickets & Wallet" />
           <View style={styles.menuCard}>
-            <MenuItem icon="ticket-outline" label="My Tickets" color="#E74C3C" badge={ticketCount?.count || 0}
-              onPress={() => router.push('/tickets')} />
-            <MenuItem icon="wallet-outline" label="Ticket Wallet" value={`$${(wallet?.balance || 0).toFixed(2)}`} color="#2ECC71"
-              onPress={() => router.push('/payment/wallet')} />
-            <MenuItem icon="gift-outline" label="Perks & Benefits" color={Colors.accent}
-              onPress={() => router.push('/perks')} showDivider={false} />
+            <MenuItem
+              icon="ticket-outline"
+              label="My Tickets"
+              color="#E74C3C"
+              badge={tickets}
+              onPress={() => router.push('/tickets')}
+            />
+            <MenuItem
+              icon="wallet-outline"
+              label="Ticket Wallet"
+              value={`$${walletBalance.toFixed(2)}`}
+              color="#2ECC71"
+              onPress={() => router.push('/payment/wallet')}
+            />
+            <MenuItem
+              icon="gift-outline"
+              label="Perks & Benefits"
+              color={Colors.accent}
+              onPress={() => router.push('/perks')}
+              showDivider={false}
+            />
           </View>
         </Animated.View>
 
+        {/* Payment & Billing */}
         <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.section}>
           <SectionTitle title="Payment & Billing" />
           <View style={styles.menuCard}>
-            <MenuItem icon="card-outline" label="Payment Methods" color="#3498DB"
-              onPress={() => router.push('/payment/methods')} />
-            <MenuItem icon="receipt-outline" label="Transaction History" color="#9B59B6"
-              onPress={() => router.push('/payment/transactions')} showDivider={false} />
+            <MenuItem
+              icon="card-outline"
+              label="Payment Methods"
+              color="#3498DB"
+              onPress={() => router.push('/payment/methods')}
+            />
+            <MenuItem
+              icon="receipt-outline"
+              label="Transaction History"
+              color="#9B59B6"
+              onPress={() => router.push('/payment/transactions')}
+              showDivider={false}
+            />
           </View>
         </Animated.View>
 
+        {/* Notifications */}
         <Animated.View entering={FadeInDown.delay(450).duration(400)} style={styles.section}>
           <SectionTitle title="Notifications" />
           <View style={styles.menuCard}>
-            <MenuItem icon="notifications-outline" label="View Notifications" color="#FF9F0A" badge={unreadNotifs?.count || 0}
-              onPress={() => router.push('/notifications')} />
-            <ToggleItem icon="megaphone-outline" label="Push Notifications" value={pushNotifs} onToggle={setPushNotifs} color="#FF2D55" />
-            <ToggleItem icon="mail-outline" label="Email Updates" value={emailNotifs} onToggle={setEmailNotifs} color="#5856D6" showDivider={false} />
+            <MenuItem
+              icon="notifications-outline"
+              label="View Notifications"
+              color="#FF9F0A"
+              badge={unreadCount}
+              onPress={() => router.push('/notifications')}
+            />
+            <ToggleItem
+              icon="megaphone-outline"
+              label="Push Notifications"
+              value={pushNotifs}
+              onToggle={setPushNotifs}
+              color="#FF2D55"
+            />
+            <ToggleItem
+              icon="mail-outline"
+              label="Email Updates"
+              value={emailNotifs}
+              onToggle={setEmailNotifs}
+              color="#5856D6"
+              showDivider={false}
+            />
           </View>
         </Animated.View>
 
+        {/* Help & Support */}
         <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.section}>
           <SectionTitle title="Help & Support" />
           <View style={styles.menuCard}>
-            <MenuItem icon="help-buoy-outline" label="Help Centre" color="#34C759"
-              onPress={() => router.push('/help')} />
-            <MenuItem icon="chatbubble-outline" label="Contact Support" color="#007AFF"
-              onPress={() => router.push('/help')} />
-            <MenuItem icon="document-text-outline" label="Terms & Privacy" color="#8E8E93"
-              onPress={() => router.push('/help')} />
-            <MenuItem icon="information-circle-outline" label="About CulturePass" color={Colors.primary}
-              onPress={() => router.push('/help')} showDivider={false} />
+            <MenuItem
+              icon="help-buoy-outline"
+              label="Help Centre"
+              color="#34C759"
+              onPress={() => router.push('/help')}
+            />
+            <MenuItem
+              icon="chatbubble-outline"
+              label="Contact Support"
+              color="#007AFF"
+              onPress={() => router.push('/help')}
+            />
+            <MenuItem
+              icon="document-text-outline"
+              label="Terms & Privacy"
+              color="#8E8E93"
+              onPress={() => router.push('/help')}
+            />
+            <MenuItem
+              icon="information-circle-outline"
+              label="About CulturePass"
+              color={Colors.primary}
+              onPress={() => router.push('/help')}
+              showDivider={false}
+            />
           </View>
         </Animated.View>
 
+        {/* Bottom actions */}
         <Animated.View entering={FadeInDown.delay(550).duration(400)} style={styles.bottomActions}>
-          <Pressable style={styles.logoutBtn}
-            onPress={() => Alert.alert('Sign Out', 'Are you sure you want to sign out?', [{ text: 'Cancel' }, { text: 'Sign Out', style: 'destructive' }])}>
+          <Pressable style={styles.logoutBtn} onPress={handleSignOut}>
             <Ionicons name="log-out-outline" size={18} color={Colors.primary} />
             <Text style={styles.logoutText}>Sign Out</Text>
           </Pressable>
-          <Pressable style={styles.resetButton}
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleReset(); }}>
+          <Pressable style={styles.resetButton} onPress={handleResetPress}>
             <Ionicons name="refresh-outline" size={18} color={Colors.error} />
             <Text style={styles.resetText}>Reset App Data</Text>
           </Pressable>
@@ -296,10 +559,7 @@ export default function ProfileScreen() {
   );
 }
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
@@ -324,9 +584,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     ...Colors.shadow.small,
   },
-  notifDot: { position: 'absolute', top: 7, right: 7, width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.error, borderWidth: 1.5, borderColor: Colors.card },
+  notifDot: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.error,
+    borderWidth: 1.5,
+    borderColor: Colors.card,
+  },
   profileHeader: { alignItems: 'center', paddingBottom: 20 },
-  avatarSection: { position: 'relative', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+  avatarSection: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
   avatarGlow: {
     position: 'absolute',
     width: 140,
@@ -361,9 +636,19 @@ const styles = StyleSheet.create({
     ...Colors.shadow.small,
   },
   name: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  username: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginTop: 1 },
+  username: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textSecondary,
+    marginTop: 1,
+  },
   cpidRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  cpidText: { fontFamily: 'Poppins_500Medium', fontSize: 12, color: Colors.primary, letterSpacing: 1 },
+  cpidText: {
+    fontFamily: 'Poppins_500Medium',
+    fontSize: 12,
+    color: Colors.primary,
+    letterSpacing: 1,
+  },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   location: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   tierBadge: { marginTop: 10 },
@@ -384,7 +669,15 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   tierBadgeText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold' },
-  bio: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, textAlign: 'center', paddingHorizontal: 40, marginTop: 8, lineHeight: 18 },
+  bio: {
+    fontSize: 13,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    paddingHorizontal: 40,
+    marginTop: 8,
+    lineHeight: 18,
+  },
   editProfileBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -409,7 +702,12 @@ const styles = StyleSheet.create({
     ...Colors.shadow.small,
   },
   statNum: { fontSize: 20, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  statLabel: { fontSize: 10, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary, marginTop: 2 },
+  statLabel: {
+    fontSize: 10,
+    fontFamily: 'Poppins_500Medium',
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
   section: { paddingHorizontal: 20, marginBottom: 24 },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
   sectionAccent: { width: 4, height: 18, borderRadius: 2, backgroundColor: Colors.primary },
@@ -440,7 +738,12 @@ const styles = StyleSheet.create({
   menuItem: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12 },
   menuIcon: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   menuLabel: { flex: 1, fontSize: 15, fontFamily: 'Poppins_500Medium', color: Colors.text },
-  menuValue: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginRight: 4 },
+  menuValue: {
+    fontSize: 13,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textSecondary,
+    marginRight: 4,
+  },
   badge: {
     minWidth: 22,
     height: 22,
@@ -481,5 +784,11 @@ const styles = StyleSheet.create({
     ...Colors.shadow.small,
   },
   resetText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.error },
-  version: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textTertiary, textAlign: 'center', marginBottom: 20 },
+  version: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textTertiary,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
 });
