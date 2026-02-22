@@ -47,26 +47,41 @@ function ClassicTabLayout() {
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.tabIconDefault,
         tabBarLabelStyle: {
-          fontFamily: 'Poppins_500Medium',
-          fontSize: 11,
+          fontFamily: 'Poppins_600SemiBold',
+          fontSize: 10,
+          letterSpacing: 0.2,
+          marginTop: -2,
         },
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : isDark ? "#000" : "#fff",
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: isDark ? "#333" : Colors.border,
+          backgroundColor: isIOS ? "transparent" : isDark ? "#000" : Colors.tabBar,
+          borderTopWidth: 0,
           elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
+          ...(isWeb ? {
+            height: 84,
+            borderTopWidth: 1,
+            borderTopColor: Colors.tabBarBorder,
+          } : {}),
+          ...(Platform.OS === 'android' ? {
+            borderTopWidth: 1,
+            borderTopColor: Colors.tabBarBorder,
+          } : {}),
+        },
+        tabBarItemStyle: {
+          paddingVertical: 4,
         },
         tabBarBackground: () =>
           isIOS ? (
             <BlurView
-              intensity={100}
+              intensity={98}
               tint={isDark ? "dark" : "light"}
-              style={StyleSheet.absoluteFill}
+              style={[StyleSheet.absoluteFill, { borderTopWidth: 0.5, borderTopColor: Colors.tabBarBorder }]}
             />
           ) : isWeb ? (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? "#000" : "#fff" }]} />
+            <View style={[StyleSheet.absoluteFill, {
+              backgroundColor: isDark ? "#000" : Colors.tabBar,
+              ...Colors.shadow.medium,
+            }]} />
           ) : null,
       }}
     >
@@ -75,7 +90,9 @@ function ClassicTabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} />
+            </View>
           ),
         }}
       />
@@ -84,16 +101,20 @@ function ClassicTabLayout() {
         options={{
           title: "Explore",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "search" : "search-outline"} size={24} color={color} />
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <Ionicons name={focused ? "compass" : "compass-outline"} size={23} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="communities"
         options={{
-          title: "Communities",
+          title: "Community",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "people" : "people-outline"} size={24} color={color} />
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <Ionicons name={focused ? "people" : "people-outline"} size={23} color={color} />
+            </View>
           ),
         }}
       />
@@ -102,7 +123,9 @@ function ClassicTabLayout() {
         options={{
           title: "Directory",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "storefront" : "storefront-outline"} size={24} color={color} />
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <Ionicons name={focused ? "grid" : "grid-outline"} size={21} color={color} />
+            </View>
           ),
         }}
       />
@@ -111,13 +134,24 @@ function ClassicTabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "person-circle" : "person-circle-outline"} size={24} color={color} />
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <Ionicons name={focused ? "person-circle" : "person-circle-outline"} size={23} color={color} />
+            </View>
           ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  activeIconWrap: {
+    backgroundColor: Colors.primary + '10',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+});
 
 export default function TabLayout() {
   if (isLiquidGlassAvailable()) {
