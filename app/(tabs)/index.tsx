@@ -9,6 +9,7 @@ import {
   FlatList,
   Share,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -85,11 +86,12 @@ function FeaturedEventCard({ event }: { event: SampleEvent }) {
   return (
     <View style={styles.featuredCardOuter}>
       <Pressable
-        style={[styles.featuredCard, { backgroundColor: event.imageColor }]}
+        style={styles.featuredCard}
         onPress={() =>
           router.push({ pathname: '/event/[id]', params: { id: event.id } })
         }
       >
+        <Image source={{ uri: event.imageUrl }} style={styles.featuredCardImage} />
         <View style={styles.featuredOverlay}>
           {/* Top row: badge + actions */}
           <View style={styles.featuredTop}>
@@ -352,9 +354,7 @@ export default function HomeScreen() {
                   router.push({ pathname: '/movies/[id]', params: { id: movie.id } })
                 }
               >
-                <View style={[styles.moviePoster, { backgroundColor: movie.posterColor }]}>
-                  <Ionicons name="film" size={28} color="rgba(255,255,255,0.9)" />
-                </View>
+                <Image source={{ uri: movie.posterUrl }} style={styles.moviePoster} />
                 <Text style={styles.movieTitle} numberOfLines={1}>
                   {movie.title}
                 </Text>
@@ -383,9 +383,7 @@ export default function HomeScreen() {
                 router.push({ pathname: '/restaurants/[id]', params: { id: rest.id } })
               }
             >
-              <View style={[styles.restIcon, { backgroundColor: rest.color }]}>
-                <Ionicons name={rest.icon as any} size={20} color="#FFF" />
-              </View>
+              <Image source={{ uri: rest.imageUrl }} style={styles.restIcon} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.restName}>{rest.name}</Text>
                 <Text style={styles.restCuisine}>
@@ -424,9 +422,7 @@ export default function HomeScreen() {
                   router.push({ pathname: '/activities/[id]', params: { id: act.id } })
                 }
               >
-                <View style={[styles.actBanner, { backgroundColor: act.color }]}>
-                  <Ionicons name={act.icon as any} size={24} color="rgba(255,255,255,0.9)" />
-                </View>
+                <Image source={{ uri: act.imageUrl }} style={styles.actBanner} />
                 <View style={styles.actInfo}>
                   <Text style={styles.actName} numberOfLines={1}>
                     {act.name}
@@ -601,6 +597,7 @@ const styles = StyleSheet.create({
   seeAll: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
   featuredCardOuter: { ...Colors.shadow.large },
   featuredCard: { width: CARD_WIDTH, height: 228, borderRadius: 22, overflow: 'hidden' },
+  featuredCardImage: { position: 'absolute', width: '100%', height: '100%' },
   featuredOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.3)',
@@ -667,8 +664,6 @@ const styles = StyleSheet.create({
     width: 120,
     height: 160,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     ...Colors.shadow.medium,
   },
   movieTitle: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text, marginTop: 2 },
@@ -686,7 +681,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.cardBorder,
     ...Colors.shadow.small,
   },
-  restIcon: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  restIcon: { width: 46, height: 46, borderRadius: 14 },
   restName: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   restCuisine: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
   restRating: {
@@ -708,7 +703,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.cardBorder,
     ...Colors.shadow.medium,
   },
-  actBanner: { height: 84, alignItems: 'center', justifyContent: 'center' },
+  actBanner: { height: 84 },
   actInfo: { padding: 12, gap: 3 },
   actName: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
   actPrice: { fontSize: 12, fontFamily: 'Poppins_700Bold', color: Colors.primary },

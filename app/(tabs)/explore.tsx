@@ -8,6 +8,7 @@ import {
   Platform,
   Share,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -326,14 +327,12 @@ function EventCard({ event, index, isSaved, onToggleSave, onShare }: EventCardPr
         }
       >
         {/* Colour swatch / image */}
-        <View style={[styles.resultImage, { backgroundColor: event.imageColor }]}>
-          <Ionicons name="calendar" size={28} color="rgba(255,255,255,0.9)" />
-          {event.isCouncil && (
-            <View style={styles.councilBadge}>
-              <Ionicons name="shield-checkmark" size={14} color="#FFF" />
-            </View>
-          )}
-        </View>
+        <Image source={{ uri: event.imageUrl }} style={styles.resultImage} />
+        {event.isCouncil && (
+          <View style={styles.councilBadge}>
+            <Ionicons name="shield-checkmark" size={14} color="#FFF" />
+          </View>
+        )}
 
         {/* Content */}
         <View style={styles.resultContent}>
@@ -486,8 +485,6 @@ const styles = StyleSheet.create({
   },
   resultImage: {
     width: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
     position: 'relative',
   },
   councilBadge: {
