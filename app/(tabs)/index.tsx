@@ -4,113 +4,40 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useSaved } from '@/contexts/SavedContext';
-import { sampleEvents } from '@/data/mockData';
+import { sampleEvents, sampleMovies, sampleRestaurants, sampleActivities, sampleShopping, superAppSections } from '@/data/mockData';
 import Colors from '@/constants/colors';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { useRef } from 'react';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 48;
 
-function FeaturedEventCard({ event, index }: { event: typeof sampleEvents[0]; index: number }) {
+function FeaturedEventCard({ event }: { event: typeof sampleEvents[0] }) {
   const { isEventSaved, toggleSaveEvent } = useSaved();
   const saved = isEventSaved(event.id);
 
   return (
-    <Pressable
-      style={[styles.featuredCard, { backgroundColor: event.imageColor }]}
-      onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}
-    >
+    <Pressable style={[styles.featuredCard, { backgroundColor: event.imageColor }]}
+      onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}>
       <View style={styles.featuredOverlay}>
         <View style={styles.featuredTop}>
-          <View style={styles.featuredBadge}>
-            <Ionicons name="star" size={12} color={Colors.accent} />
-            <Text style={styles.featuredBadgeText}>Featured</Text>
-          </View>
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation?.();
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              toggleSaveEvent(event.id);
-            }}
-            hitSlop={8}
-          >
+          <View style={styles.featuredBadge}><Ionicons name="star" size={12} color={Colors.accent} /><Text style={styles.featuredBadgeText}>Featured</Text></View>
+          <Pressable onPress={(e) => { e.stopPropagation?.(); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggleSaveEvent(event.id); }} hitSlop={8}>
             <Ionicons name={saved ? "bookmark" : "bookmark-outline"} size={22} color="#FFF" />
           </Pressable>
         </View>
         <View style={styles.featuredBottom}>
-          <View style={styles.communityPill}>
-            <Text style={styles.communityPillText}>{event.communityTag}</Text>
-          </View>
-          {event.councilTag && (
-            <View style={[styles.communityPill, { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
-              <Ionicons name="shield-checkmark" size={12} color="#FFF" />
-              <Text style={styles.communityPillText}>{event.councilTag}</Text>
-            </View>
-          )}
+          <View style={styles.communityPill}><Text style={styles.communityPillText}>{event.communityTag}</Text></View>
           <Text style={styles.featuredTitle} numberOfLines={2}>{event.title}</Text>
           <View style={styles.featuredMeta}>
-            <View style={styles.metaItem}>
-              <Ionicons name="calendar-outline" size={14} color="rgba(255,255,255,0.9)" />
-              <Text style={styles.metaText}>{formatDate(event.date)}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Ionicons name="location-outline" size={14} color="rgba(255,255,255,0.9)" />
-              <Text style={styles.metaText} numberOfLines={1}>{event.venue}</Text>
-            </View>
+            <View style={styles.metaItem}><Ionicons name="calendar-outline" size={14} color="rgba(255,255,255,0.9)" /><Text style={styles.metaText}>{formatDate(event.date)}</Text></View>
+            <View style={styles.metaItem}><Ionicons name="location-outline" size={14} color="rgba(255,255,255,0.9)" /><Text style={styles.metaText} numberOfLines={1}>{event.venue}</Text></View>
           </View>
           <View style={styles.featuredFooter}>
             <Text style={styles.priceTag}>{event.priceLabel}</Text>
-            <View style={styles.attendingBadge}>
-              <Ionicons name="people" size={14} color="#FFF" />
-              <Text style={styles.attendingText}>{event.attending}+ going</Text>
-            </View>
+            <View style={styles.attendingBadge}><Ionicons name="people" size={14} color="#FFF" /><Text style={styles.attendingText}>{event.attending}+ going</Text></View>
           </View>
         </View>
-      </View>
-    </Pressable>
-  );
-}
-
-function EventRow({ event }: { event: typeof sampleEvents[0] }) {
-  const { isEventSaved, toggleSaveEvent } = useSaved();
-
-  return (
-    <Pressable
-      style={styles.eventRow}
-      onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}
-    >
-      <View style={[styles.eventColorBar, { backgroundColor: event.imageColor }]}>
-        <Ionicons name="calendar" size={20} color="#FFF" />
-      </View>
-      <View style={styles.eventRowContent}>
-        <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
-        <View style={styles.eventRowMeta}>
-          <Text style={styles.eventRowDate}>{formatDate(event.date)} {event.time}</Text>
-        </View>
-        <View style={styles.eventRowMeta}>
-          <Ionicons name="location-outline" size={12} color={Colors.textSecondary} />
-          <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
-        </View>
-      </View>
-      <View style={styles.eventRowRight}>
-        <Text style={[styles.eventRowPrice, event.price === 0 && { color: Colors.success }]}>
-          {event.priceLabel}
-        </Text>
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            toggleSaveEvent(event.id);
-          }}
-          hitSlop={8}
-        >
-          <Ionicons
-            name={isEventSaved(event.id) ? "bookmark" : "bookmark-outline"}
-            size={20}
-            color={isEventSaved(event.id) ? Colors.primary : Colors.textTertiary}
-          />
-        </Pressable>
       </View>
     </Pressable>
   );
@@ -127,8 +54,18 @@ export default function HomeScreen() {
   const { state } = useOnboarding();
 
   const featuredEvents = sampleEvents.filter(e => e.isFeatured);
-  const upcomingEvents = sampleEvents.filter(e => !e.isFeatured).slice(0, 4);
-  const councilEvents = sampleEvents.filter(e => e.isCouncil);
+  const trendingMovies = sampleMovies.filter(m => m.isTrending).slice(0, 4);
+  const topRestaurants = sampleRestaurants.slice(0, 3);
+  const topActivities = sampleActivities.filter(a => a.isPopular).slice(0, 3);
+
+  const sectionRoutes: Record<string, string> = {
+    movies: '/movies',
+    restaurants: '/restaurants',
+    activities: '/activities',
+    shopping: '/shopping',
+    events: '/(tabs)/explore',
+    directory: '/(tabs)/directory',
+  };
 
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
@@ -139,71 +76,125 @@ export default function HomeScreen() {
           <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
         </Pressable>
         <View style={styles.topBarRight}>
-          <Pressable style={styles.iconButton} hitSlop={8}>
-            <Ionicons name="search-outline" size={22} color={Colors.text} />
-          </Pressable>
-          <Pressable style={styles.iconButton} hitSlop={8}>
-            <Ionicons name="notifications-outline" size={22} color={Colors.text} />
-            <View style={styles.notifDot} />
-          </Pressable>
+          <Pressable style={styles.iconButton} hitSlop={8}><Ionicons name="search-outline" size={22} color={Colors.text} /></Pressable>
+          <Pressable style={styles.iconButton} hitSlop={8}><Ionicons name="notifications-outline" size={22} color={Colors.text} /><View style={styles.notifDot} /></Pressable>
         </View>
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      >
-        <Animated.View entering={FadeInDown.delay(100).duration(600)}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.greetSection}>
           <Text style={styles.greeting}>Welcome back</Text>
-          <Text style={styles.sectionTitle}>Featured Events</Text>
+          <Text style={styles.heroTitle}>Your Lifestyle Hub</Text>
         </Animated.View>
 
-        <FlatList
-          data={featuredEvents}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={CARD_WIDTH + 16}
-          decelerationRate="fast"
+        <Animated.View entering={FadeInDown.delay(200).duration(600)}>
+          <Text style={[styles.sectionTitle, { paddingHorizontal: 20 }]}>Quick Access</Text>
+          <View style={styles.quickGrid}>
+            {superAppSections.map(sec => (
+              <Pressable key={sec.id} style={styles.quickItem}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push(sectionRoutes[sec.id] as any); }}>
+                <View style={[styles.quickIcon, { backgroundColor: sec.color + '15' }]}>
+                  <Ionicons name={sec.icon as any} size={24} color={sec.color} />
+                </View>
+                <Text style={styles.quickLabel}>{sec.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(300).duration(600)}>
+          <Text style={[styles.sectionTitle, { paddingHorizontal: 20 }]}>Featured Events</Text>
+        </Animated.View>
+        <FlatList data={featuredEvents} horizontal showsHorizontalScrollIndicator={false}
+          snapToInterval={CARD_WIDTH + 16} decelerationRate="fast"
           contentContainerStyle={{ paddingHorizontal: 20, gap: 16 }}
           scrollEnabled={!!featuredEvents.length}
-          renderItem={({ item, index }) => <FeaturedEventCard event={item} index={index} />}
-          keyExtractor={item => item.id}
-          style={{ marginBottom: 28 }}
-        />
+          renderItem={({ item }) => <FeaturedEventCard event={item} />}
+          keyExtractor={item => item.id} style={{ marginBottom: 28 }} />
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Upcoming This Week</Text>
-            <Pressable>
-              <Text style={styles.seeAll}>See All</Text>
+            <Text style={styles.sectionTitleInner}>Now Showing</Text>
+            <Pressable onPress={() => router.push('/movies')}><Text style={styles.seeAll}>See All</Text></Pressable>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}>
+            {trendingMovies.map(movie => (
+              <Pressable key={movie.id} style={styles.movieMini}
+                onPress={() => router.push({ pathname: '/movies/[id]', params: { id: movie.id } })}>
+                <View style={[styles.moviePoster, { backgroundColor: movie.posterColor }]}>
+                  <Ionicons name="film" size={28} color="rgba(255,255,255,0.9)" />
+                </View>
+                <Text style={styles.movieTitle} numberOfLines={1}>{movie.title}</Text>
+                <Text style={styles.movieLang}>{movie.language}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitleInner}>Top Restaurants</Text>
+            <Pressable onPress={() => router.push('/restaurants')}><Text style={styles.seeAll}>See All</Text></Pressable>
+          </View>
+          {topRestaurants.map(rest => (
+            <Pressable key={rest.id} style={styles.restRow}
+              onPress={() => router.push({ pathname: '/restaurants/[id]', params: { id: rest.id } })}>
+              <View style={[styles.restIcon, { backgroundColor: rest.color }]}>
+                <Ionicons name={rest.icon as any} size={20} color="#FFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.restName}>{rest.name}</Text>
+                <Text style={styles.restCuisine}>{rest.cuisine} | {rest.priceRange}</Text>
+              </View>
+              <View style={styles.restRating}>
+                <Ionicons name="star" size={13} color={Colors.accent} />
+                <Text style={styles.restRatingText}>{rest.rating}</Text>
+              </View>
             </Pressable>
-          </View>
-          {upcomingEvents.map(event => (
-            <EventRow key={event.id} event={event} />
           ))}
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <View style={styles.councilHeader}>
-              <Ionicons name="shield-checkmark" size={18} color={Colors.secondary} />
-              <Text style={styles.sectionTitle}>Council Events Near You</Text>
-            </View>
+            <Text style={styles.sectionTitleInner}>Activities Near You</Text>
+            <Pressable onPress={() => router.push('/activities')}><Text style={styles.seeAll}>See All</Text></Pressable>
           </View>
-          {councilEvents.map(event => (
-            <EventRow key={event.id} event={event} />
-          ))}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}>
+            {topActivities.map(act => (
+              <Pressable key={act.id} style={styles.actCard}
+                onPress={() => router.push({ pathname: '/activities/[id]', params: { id: act.id } })}>
+                <View style={[styles.actBanner, { backgroundColor: act.color }]}>
+                  <Ionicons name={act.icon as any} size={24} color="rgba(255,255,255,0.9)" />
+                </View>
+                <View style={styles.actInfo}>
+                  <Text style={styles.actName} numberOfLines={1}>{act.name}</Text>
+                  <Text style={styles.actPrice}>{act.priceLabel}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>My Tickets</Text>
+            <Text style={styles.sectionTitleInner}>Hot Deals</Text>
+            <Pressable onPress={() => router.push('/shopping')}><Text style={styles.seeAll}>See All</Text></Pressable>
           </View>
-          <View style={styles.emptyTickets}>
-            <Ionicons name="ticket-outline" size={40} color={Colors.textTertiary} />
-            <Text style={styles.emptyText}>No tickets yet</Text>
-            <Text style={styles.emptySubtext}>Browse events and grab your first ticket!</Text>
-          </View>
+          {sampleShopping.slice(0, 3).map(store => (
+            store.deals[0] && (
+              <Pressable key={store.id} style={styles.dealRow}
+                onPress={() => router.push({ pathname: '/shopping/[id]', params: { id: store.id } })}>
+                <View style={[styles.dealIcon, { backgroundColor: store.color + '15' }]}>
+                  <Ionicons name="pricetag" size={18} color={store.color} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.dealStore}>{store.name}</Text>
+                  <Text style={styles.dealTitle}>{store.deals[0].title}</Text>
+                </View>
+                <View style={styles.dealBadge}><Text style={styles.dealBadgeText}>{store.deals[0].discount}</Text></View>
+              </Pressable>
+            )
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -212,236 +203,59 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  locationButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  locationText: {
-    fontSize: 15,
-    fontFamily: 'Poppins_600SemiBold',
-    color: Colors.text,
-  },
-  topBarRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  notifDot: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.primary,
-  },
-  greeting: {
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-    color: Colors.textSecondary,
-    paddingHorizontal: 20,
-    marginBottom: 4,
-  },
-  section: {
-    paddingHorizontal: 20,
-    marginBottom: 28,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-  },
-  councilHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontFamily: 'Poppins_700Bold',
-    color: Colors.text,
-    paddingHorizontal: 20,
-    marginBottom: 14,
-  },
-  seeAll: {
-    fontSize: 14,
-    fontFamily: 'Poppins_600SemiBold',
-    color: Colors.primary,
-  },
-  featuredCard: {
-    width: CARD_WIDTH,
-    height: 220,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  featuredOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    padding: 16,
-    justifyContent: 'space-between',
-  },
-  featuredTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  featuredBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  featuredBadgeText: {
-    fontSize: 12,
-    fontFamily: 'Poppins_600SemiBold',
-    color: '#FFF',
-  },
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 12 },
+  locationButton: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  locationText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  topBarRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  iconButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  notifDot: { position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
+  greetSection: { paddingHorizontal: 20, marginBottom: 20 },
+  greeting: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  heroTitle: { fontSize: 26, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 20, gap: 10, marginBottom: 28 },
+  quickItem: { width: (width - 70) / 3, alignItems: 'center', gap: 6, backgroundColor: Colors.card, borderRadius: 16, paddingVertical: 16, borderWidth: 1, borderColor: Colors.cardBorder },
+  quickIcon: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  quickLabel: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  sectionTitle: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 14 },
+  section: { marginBottom: 28 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 14 },
+  sectionTitleInner: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  seeAll: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  featuredCard: { width: CARD_WIDTH, height: 220, borderRadius: 20, overflow: 'hidden' },
+  featuredOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.25)', padding: 16, justifyContent: 'space-between' },
+  featuredTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  featuredBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(0,0,0,0.4)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  featuredBadgeText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
   featuredBottom: { gap: 6 },
-  communityPill: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  communityPillText: {
-    fontSize: 11,
-    fontFamily: 'Poppins_600SemiBold',
-    color: '#FFF',
-  },
-  featuredTitle: {
-    fontSize: 20,
-    fontFamily: 'Poppins_700Bold',
-    color: '#FFF',
-    lineHeight: 26,
-  },
-  featuredMeta: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaText: {
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.9)',
-  },
-  featuredFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  priceTag: {
-    fontSize: 16,
-    fontFamily: 'Poppins_700Bold',
-    color: '#FFF',
-  },
-  attendingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  attendingText: {
-    fontSize: 12,
-    fontFamily: 'Poppins_500Medium',
-    color: 'rgba(255,255,255,0.9)',
-  },
-  eventRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-    gap: 12,
-  },
-  eventColorBar: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  eventRowContent: {
-    flex: 1,
-    gap: 2,
-  },
-  eventRowTitle: {
-    fontSize: 15,
-    fontFamily: 'Poppins_600SemiBold',
-    color: Colors.text,
-  },
-  eventRowMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  eventRowDate: {
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-    color: Colors.textSecondary,
-  },
-  eventRowVenue: {
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-    color: Colors.textSecondary,
-    flex: 1,
-  },
-  eventRowRight: {
-    alignItems: 'flex-end',
-    gap: 8,
-  },
-  eventRowPrice: {
-    fontSize: 14,
-    fontFamily: 'Poppins_700Bold',
-    color: Colors.text,
-  },
-  emptyTickets: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 32,
-    alignItems: 'center',
-    gap: 8,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  emptyText: {
-    fontSize: 16,
-    fontFamily: 'Poppins_600SemiBold',
-    color: Colors.text,
-  },
-  emptySubtext: {
-    fontSize: 13,
-    fontFamily: 'Poppins_400Regular',
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
+  communityPill: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  communityPillText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  featuredTitle: { fontSize: 20, fontFamily: 'Poppins_700Bold', color: '#FFF', lineHeight: 26 },
+  featuredMeta: { flexDirection: 'row', gap: 16 },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaText: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: 'rgba(255,255,255,0.9)' },
+  featuredFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
+  priceTag: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+  attendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  attendingText: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: 'rgba(255,255,255,0.9)' },
+  movieMini: { width: 120, gap: 4 },
+  moviePoster: { width: 120, height: 160, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  movieTitle: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  movieLang: { fontSize: 11, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  restRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Colors.card, borderRadius: 14, padding: 12, marginHorizontal: 20, marginBottom: 8, borderWidth: 1, borderColor: Colors.cardBorder },
+  restIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  restName: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  restCuisine: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  restRating: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: Colors.accent + '15', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  restRatingText: { fontSize: 13, fontFamily: 'Poppins_700Bold', color: Colors.accent },
+  actCard: { width: 160, backgroundColor: Colors.card, borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: Colors.cardBorder },
+  actBanner: { height: 80, alignItems: 'center', justifyContent: 'center' },
+  actInfo: { padding: 10, gap: 2 },
+  actName: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  actPrice: { fontSize: 12, fontFamily: 'Poppins_700Bold', color: Colors.primary },
+  dealRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Colors.card, borderRadius: 14, padding: 12, marginHorizontal: 20, marginBottom: 8, borderWidth: 1, borderColor: Colors.cardBorder },
+  dealIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  dealStore: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  dealTitle: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  dealBadge: { backgroundColor: Colors.primary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  dealBadgeText: { fontSize: 11, fontFamily: 'Poppins_700Bold', color: '#FFF' },
 });

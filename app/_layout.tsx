@@ -21,6 +21,14 @@ function RootLayoutNav() {
       <Stack.Screen name="event/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
       <Stack.Screen name="community/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
       <Stack.Screen name="business/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="movies/index" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="movies/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="restaurants/index" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="restaurants/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="activities/index" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="activities/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="shopping/index" options={{ headerShown: false, animation: 'slide_from_right' }} />
+      <Stack.Screen name="shopping/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
     </Stack>
   );
 }
