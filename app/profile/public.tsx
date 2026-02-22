@@ -147,9 +147,8 @@ const DetailRow = memo(({
   label: string; value: string;
   valueColor?: string; onPress?: () => void; showArrow?: boolean;
 }) => {
-  const Wrapper = (onPress ? Pressable : View) as typeof View;
-  return (
-    <Wrapper style={styles.detailRow} onPress={onPress as any}>
+  const content = (
+    <>
       <View style={[styles.detailIconWrap, { backgroundColor: iconBg }]}>
         <Ionicons name={icon} size={18} color={iconColor} />
       </View>
@@ -158,8 +157,12 @@ const DetailRow = memo(({
         <Text style={[styles.detailValue, valueColor ? { color: valueColor } : undefined]}>{value}</Text>
       </View>
       {showArrow && <Ionicons name="open-outline" size={16} color={OL.silver} />}
-    </Wrapper>
+    </>
   );
+  if (onPress) {
+    return <Pressable style={styles.detailRow} onPress={onPress}>{content}</Pressable>;
+  }
+  return <View style={styles.detailRow}>{content}</View>;
 });
 
 function LoadingSkeleton({ topInset }: { topInset: number }) {
