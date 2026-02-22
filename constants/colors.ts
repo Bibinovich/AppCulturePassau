@@ -1,4 +1,5 @@
-import { Platform, PlatformColor } from 'react-native';
+// colors.ts  (or constants/Colors.ts, theme/index.ts, etc.)
+import { Platform } from 'react-native';
 
 export interface ShadowStyle {
   shadowColor: string;
@@ -8,108 +9,180 @@ export interface ShadowStyle {
   elevation: number;
 }
 
-const Colors = {
-  primary: '#D4654A',
-  primaryLight: '#E0836C',
-  primaryDark: '#B84A32',
-  primaryGlow: 'rgba(212, 101, 74, 0.10)',
-  primarySoft: 'rgba(212, 101, 74, 0.06)',
+export type ColorTheme = {
+  primary: string;
+  primaryLight: string;
+  primaryDark: string;
+  primaryGlow: string;
+  primarySoft: string;
 
-  secondary: '#16656E',
-  secondaryLight: '#2B8A83',
-  secondaryDark: '#0F4D54',
+  secondary: string;
+  secondaryLight: string;
+  secondaryDark: string;
 
-  accent: '#C9941A',
-  accentLight: '#E8C44A',
+  accent: string;
+  accentLight: string;
 
-  background: '#F8F7F4',
-  backgroundSecondary: '#F2F0EB',
+  background: string;
+  backgroundSecondary: string;
 
-  card: '#FFFFFF',
-  cardBorder: '#E5E3DE',
-  cardShadow: 'rgba(0,0,0,0.06)',
+  surface: string;
+  surfaceElevated: string;
+  surfaceSecondary: string;
 
-  text: '#1A1A1C',
-  textSecondary: '#5C5C60',
-  textTertiary: '#98989D',
-  textInverse: '#FFFFFF',
+  border: string;
+  borderLight: string;
+  divider: string;
 
-  border: '#E5E3DE',
-  divider: '#EDEBE6',
+  text: string;
+  textSecondary: string;
+  textTertiary: string;
+  textInverse: string;
 
-  success: '#2EBD59',
+  success: string;
+  warning: string;
+  error: string;
+
+  overlay: string;
+  tabIconDefault: string;
+  tabIconSelected: string;
+  tabBar: string;
+  tabBarBorder: string;
+
+  tint: string;
+};
+
+// ────────────────────────────────────────────────
+//                SHARED / BASE VALUES
+// ────────────────────────────────────────────────
+const base = {
+  primary: '#D4552A',          // rich terracotta
+  primaryLight: '#E67A5B',
+  primaryDark: '#A93E22',
+  primaryGlow: 'rgba(212, 85, 42, 0.14)',
+  primarySoft: 'rgba(212, 85, 42, 0.07)',
+
+  secondary: '#1B7F6F',        // deep refined teal
+  secondaryLight: '#2E9C8A',
+  secondaryDark: '#146257',
+
+  accent: '#C9971A',           // celebration gold
+  accentLight: '#E6BE4C',
+
+  success: '#2E7D32',
   warning: '#F09000',
-  error: '#E93B2D',
+  error: '#D32F2F',
 
-  overlay: 'rgba(0,0,0,0.4)',
-  tabIconDefault: '#8E8E93',
-  tabBar: '#FFFFFF',
-  tabBarBorder: '#E5E3DE',
+  overlay: 'rgba(0,0,0,0.44)',
+} as const;
+
+// ────────────────────────────────────────────────
+//                   LIGHT THEME
+// ────────────────────────────────────────────────
+export const light: ColorTheme = {
+  ...base,
+
+  background: '#F8F6F3',
+  backgroundSecondary: '#F2EFEA',
 
   surface: '#FFFFFF',
-  surfaceElevated: '#F2F0EB',
-  surfaceSecondary: '#F2F0EB',
-  borderLight: '#E5E3DE',
+  surfaceElevated: '#F9F7F4',
+  surfaceSecondary: '#F2EFEA',
 
-  light: {
-    text: '#1A1A1C',
-    background: '#F8F7F4',
-    tint: '#D4654A',
-    tabIconDefault: '#8E8E93',
-    tabIconSelected: '#D4654A',
-    primary: '#D4654A',
-    primaryLight: '#E0836C',
-    primaryDark: '#B84A32',
-    secondary: '#16656E',
-    secondaryLight: '#2B8A83',
-    accent: '#C9941A',
-    accentLight: '#E8C44A',
-    surface: '#FFFFFF',
-    surfaceElevated: '#F2F0EB',
-    card: '#FFFFFF',
-    cardBorder: '#E5E3DE',
-    border: '#E5E3DE',
-    borderLight: '#E5E3DE',
-    divider: '#EDEBE6',
-    textSecondary: '#5C5C60',
-    textTertiary: '#98989D',
-    textInverse: '#FFFFFF',
-    success: '#2EBD59',
-    warning: '#F09000',
-    error: '#E93B2D',
-    overlay: 'rgba(0,0,0,0.4)',
-  },
-  dark: {
-    text: '#F0F0F5',
-    background: '#1A1A1E',
-    tint: '#E0836C',
-    tabIconDefault: '#5C5C60',
-    tabIconSelected: '#E0836C',
-  },
+  border: '#E4DED8',
+  borderLight: '#ECE7E1',
+  divider: '#EDE8E2',
 
-  shadow: {
-    small: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 1 } as const,
-      shadowOpacity: 0.05,
-      shadowRadius: 3,
-      elevation: 1,
-    } satisfies ShadowStyle,
-    medium: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 3 } as const,
-      shadowOpacity: 0.07,
-      shadowRadius: 10,
-      elevation: 3,
-    } satisfies ShadowStyle,
-    large: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 6 } as const,
-      shadowOpacity: 0.10,
-      shadowRadius: 20,
-      elevation: 6,
-    } satisfies ShadowStyle,
-  },
+  text: '#1E1E1F',
+  textSecondary: '#57565B',
+  textTertiary: '#8C8C92',
+  textInverse: '#FFFFFF',
+
+  tabBar: '#FFFFFF',
+  tabBarBorder: '#E4DED8',
+  tabIconDefault: '#8C8C92',
+  tabIconSelected: '#D4552A',
+
+  tint: '#D4552A',
 };
+
+// ────────────────────────────────────────────────
+//                   DARK THEME
+// ────────────────────────────────────────────────
+export const dark: ColorTheme = {
+  ...base,
+
+  // Darker but not pitch black – better eye comfort
+  background: '#121215',
+  backgroundSecondary: '#1A1A1F',
+
+  surface: '#1E1E22',
+  surfaceElevated: '#26262B',
+  surfaceSecondary: '#222226',
+
+  border: '#34343A',
+  borderLight: '#3A3A40',
+  divider: '#2F2F35',
+
+  text: '#F3F3F6',
+  textSecondary: '#B8B8C0',
+  textTertiary: '#82828A',
+  textInverse: '#0F0F11',
+
+  tabBar: '#1E1E22',
+  tabBarBorder: '#34343A',
+  tabIconDefault: '#82828A',
+  tabIconSelected: '#F4A58A',   // warmer/lighter primary variant
+
+  tint: '#F4A58A',              // better visibility on dark background
+};
+
+// ────────────────────────────────────────────────
+//                   SHADOWS
+// ────────────────────────────────────────────────
+export const shadows = {
+  small: {
+    shadowColor: Platform.select({ ios: '#3E2C24', default: '#000' }),
+    shadowOffset: { width: 0, height: 1.5 },
+    shadowOpacity: 0.09,
+    shadowRadius: 3.5,
+    elevation: 2.5,
+  } satisfies ShadowStyle,
+
+  medium: {
+    shadowColor: Platform.select({ ios: '#3E2C24', default: '#000' }),
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.11,
+    shadowRadius: 8,
+    elevation: 5,
+  } satisfies ShadowStyle,
+
+  large: {
+    shadowColor: Platform.select({ ios: '#3E2C24', default: '#000' }),
+    shadowOffset: { width: 0, height: 9 },
+    shadowOpacity: 0.16,
+    shadowRadius: 18,
+    elevation: 10,
+  } satisfies ShadowStyle,
+
+  heavy: {
+    shadowColor: Platform.select({ ios: '#3E2C24', default: '#000' }),
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.24,
+    shadowRadius: 32,
+    elevation: 16,
+  } satisfies ShadowStyle,
+};
+
+// ────────────────────────────────────────────────
+//                   MAIN EXPORT
+// ────────────────────────────────────────────────
+const Colors = {
+  ...light,
+  light,
+  dark,
+  shadow: shadows,
+  shadows,
+} as const;
 
 export default Colors;
