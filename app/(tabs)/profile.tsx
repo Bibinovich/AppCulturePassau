@@ -265,17 +265,12 @@ export default function ProfileScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} colors={[Colors.primary]} />}
       >
-        {/* Profile header */}
         <Animated.View entering={FadeInDown.duration(400)} style={styles.profileHeader}>
           <View style={styles.headerTop}>
-            {/* Share button */}
             <Pressable style={styles.settingsBtn} onPress={handleShare}>
               <Ionicons name="share-outline" size={20} color={Colors.text} />
             </Pressable>
-
             <Text style={styles.headerLabel}>Profile</Text>
-
-            {/* Notifications button */}
             <Pressable
               style={styles.settingsBtn}
               onPress={() => router.push('/notifications')}
@@ -285,89 +280,100 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          {/* Avatar */}
-          <View style={styles.avatarSection}>
-            <View style={styles.avatarGlow} />
-            <View style={styles.avatarRow}>
-              <View style={styles.avatar}>
-                <Ionicons name="person" size={40} color={Colors.primary} />
-                <View
-                  style={[
-                    styles.tierIcon,
-                    { backgroundColor: tierStyle.bg, borderColor: tierStyle.text + '30' },
-                  ]}
-                >
-                  <Ionicons name={tierStyle.icon as any} size={13} color={tierStyle.text} />
+          <View style={styles.heroCard}>
+            <View style={styles.heroCardAccent} />
+            <View style={styles.avatarSection}>
+              <View style={styles.avatarGlow} />
+              <View style={styles.avatarRow}>
+                <View style={styles.avatar}>
+                  <Ionicons name="person" size={38} color={Colors.primary} />
+                  <View
+                    style={[
+                      styles.tierIcon,
+                      { backgroundColor: tierStyle.bg, borderColor: tierStyle.text + '30' },
+                    ]}
+                  >
+                    <Ionicons name={tierStyle.icon as any} size={13} color={tierStyle.text} />
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
 
-          <Text style={styles.name}>{displayName}</Text>
-          {user?.username ? (
-            <Text style={styles.username}>@{user.username}</Text>
-          ) : null}
-          {user?.culturePassId ? (
-            <View style={styles.cpidRow}>
-              <Ionicons name="finger-print" size={14} color={Colors.primary} />
-              <Text style={styles.cpidText}>{user.culturePassId}</Text>
+            <Text style={styles.name}>{displayName}</Text>
+            {user?.username ? (
+              <Text style={styles.username}>@{user.username}</Text>
+            ) : null}
+
+            <View style={styles.idLocationRow}>
+              {user?.culturePassId ? (
+                <View style={styles.cpidChip}>
+                  <Ionicons name="finger-print" size={12} color={Colors.primary} />
+                  <Text style={styles.cpidText}>{user.culturePassId}</Text>
+                </View>
+              ) : null}
+              <View style={styles.locationChip}>
+                <Ionicons name="location" size={12} color={Colors.secondary} />
+                <Text style={styles.locationChipText}>{displayLocation}</Text>
+              </View>
             </View>
-          ) : null}
 
-          <View style={styles.locationRow}>
-            <Ionicons name="location" size={14} color={Colors.primary} />
-            <Text style={styles.location}>{displayLocation}</Text>
-          </View>
-
-          {/* Tier badge */}
-          <View style={styles.tierBadge}>
-            <View style={[styles.tierBadgeInner, { backgroundColor: tierStyle.bg }]}>
-              <View style={[styles.tierGlass, { backgroundColor: tierStyle.text + '08' }]} />
-              <Ionicons name={tierStyle.icon as any} size={14} color={tierStyle.text} />
+            <View style={[styles.tierBadge, { backgroundColor: tierStyle.bg }]}>
+              <Ionicons name={tierStyle.icon as any} size={13} color={tierStyle.text} />
               <Text style={[styles.tierBadgeText, { color: tierStyle.text }]}>
                 {capitalize(tier)} Member
               </Text>
             </View>
-          </View>
 
-          <View style={styles.completenessContainer}>
-            <Text style={styles.completenessText}>Profile {profileCompleteness}% complete</Text>
-            <View style={styles.completenessBarBg}>
-              <View style={[styles.completenessBarFill, { width: `${profileCompleteness}%` }]} />
+            {user?.bio ? (
+              <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
+            ) : null}
+
+            <View style={styles.completenessContainer}>
+              <View style={styles.completenessHeader}>
+                <Text style={styles.completenessText}>Profile completeness</Text>
+                <Text style={[styles.completenessPercent, profileCompleteness >= 80 ? { color: Colors.success } : profileCompleteness >= 50 ? { color: Colors.accent } : {}]}>
+                  {profileCompleteness}%
+                </Text>
+              </View>
+              <View style={styles.completenessBarBg}>
+                <View style={[styles.completenessBarFill, { width: `${profileCompleteness}%` }, profileCompleteness >= 80 ? { backgroundColor: Colors.success } : profileCompleteness >= 50 ? { backgroundColor: Colors.accent } : {}]} />
+              </View>
+            </View>
+
+            <View style={styles.profileActions}>
+              <Pressable style={styles.editProfileBtn} onPress={() => router.push('/profile/edit')}>
+                <Ionicons name="create-outline" size={16} color={Colors.textInverse} />
+                <Text style={styles.editProfileText}>Edit Profile</Text>
+              </Pressable>
             </View>
           </View>
 
           {nextTierInfo && (
-            <Pressable style={[styles.upgradeCta, { backgroundColor: nextTierInfo.color + '10', borderColor: nextTierInfo.color + '25' }]}>
-              <Ionicons name="arrow-up-circle" size={18} color={nextTierInfo.color} />
-              <Text style={[styles.upgradeCtaText, { color: nextTierInfo.color }]}>
-                Upgrade to {nextTierInfo.name} for more perks
-              </Text>
-              <Ionicons name="chevron-forward" size={16} color={nextTierInfo.color} />
+            <Pressable style={[styles.upgradeCta, { backgroundColor: nextTierInfo.color + '08', borderColor: nextTierInfo.color + '20' }]}>
+              <View style={[styles.upgradeIconWrap, { backgroundColor: nextTierInfo.color + '15' }]}>
+                <Ionicons name="arrow-up-circle" size={20} color={nextTierInfo.color} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.upgradeCtaTitle, { color: nextTierInfo.color }]}>
+                  Upgrade to {nextTierInfo.name}
+                </Text>
+                <Text style={styles.upgradeCtaSub}>Unlock more perks and benefits</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={nextTierInfo.color} />
             </Pressable>
           )}
 
-          {user?.bio ? (
-            <Text style={styles.bio} numberOfLines={2}>
-              {user.bio}
-            </Text>
-          ) : null}
-
-          <Pressable style={styles.editProfileBtn} onPress={() => router.push('/profile/edit')}>
-            <Ionicons name="create-outline" size={17} color={Colors.primary} />
-            <Text style={styles.editProfileText}>Edit Profile</Text>
-          </Pressable>
-
           <View style={styles.quickActionRow}>
-            <Pressable style={styles.quickActionChip} onPress={handleShare}>
-              <Ionicons name="share-social-outline" size={16} color={Colors.primary} />
-              <Text style={styles.quickActionText}>Share Profile</Text>
-            </Pressable>
             <Pressable
               style={styles.quickActionChip}
-              onPress={() => router.push('/profile/public')}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/profile/public');
+              }}
             >
-              <Ionicons name="eye-outline" size={16} color={Colors.primary} />
+              <View style={[styles.quickActionIcon, { backgroundColor: Colors.secondary + '12' }]}>
+                <Ionicons name="eye-outline" size={18} color={Colors.secondary} />
+              </View>
               <Text style={styles.quickActionText}>View Public</Text>
             </Pressable>
             <Pressable
@@ -377,8 +383,22 @@ export default function ProfileScreen() {
                 router.push('/profile/qr');
               }}
             >
-              <Ionicons name="qr-code-outline" size={16} color={Colors.primary} />
-              <Text style={styles.quickActionText}>My QR</Text>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#8B5CF6' + '12' }]}>
+                <Ionicons name="qr-code-outline" size={18} color="#8B5CF6" />
+              </View>
+              <Text style={styles.quickActionText}>My QR ID</Text>
+            </Pressable>
+            <Pressable
+              style={styles.quickActionChip}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                handleShare();
+              }}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: Colors.accent + '12' }]}>
+                <Ionicons name="share-social-outline" size={18} color={Colors.accent} />
+              </View>
+              <Text style={styles.quickActionText}>Share</Text>
             </Pressable>
           </View>
         </Animated.View>
@@ -674,38 +694,59 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.card,
   },
-  profileHeader: { alignItems: 'center', paddingBottom: 20 },
+  profileHeader: { alignItems: 'center', paddingBottom: 12 },
+  heroCard: {
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 12,
+    backgroundColor: Colors.card,
+    borderRadius: 20,
+    paddingTop: 28,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    overflow: 'hidden',
+    ...Colors.shadow.medium,
+  },
+  heroCardAccent: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: Colors.primary,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
   avatarSection: {
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
   },
   avatarGlow: {
     position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: Colors.primaryGlow,
-    top: -22,
+    top: -14,
   },
   avatarRow: { zIndex: 1 },
   avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: Colors.primary + '10',
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: Colors.primary + '08',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: Colors.primary + '25',
-    marginBottom: 12,
+    borderColor: Colors.primary + '20',
+    marginBottom: 10,
     ...Colors.shadow.medium,
   },
   tierIcon: {
     position: 'absolute',
-    bottom: -2,
-    right: -2,
+    bottom: 6,
+    right: -4,
     width: 28,
     height: 28,
     borderRadius: 14,
@@ -714,38 +755,54 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     ...Colors.shadow.small,
   },
-  name: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  name: { fontSize: 21, fontFamily: 'Poppins_700Bold', color: Colors.text },
   username: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Poppins_400Regular',
     color: Colors.textSecondary,
     marginTop: 1,
   },
-  cpidRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  cpidText: {
-    fontFamily: 'Poppins_500Medium',
-    fontSize: 12,
-    color: Colors.primary,
-    letterSpacing: 1,
+  idLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  location: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  tierBadge: { marginTop: 10 },
-  tierBadgeInner: {
+  cpidChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.primary + '08',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  cpidText: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 11,
+    color: Colors.primary,
+    letterSpacing: 0.8,
+  },
+  locationChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.secondary + '08',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  locationChipText: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.secondary },
+  tierBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingVertical: 6,
     borderRadius: 14,
-    overflow: 'hidden',
-    borderWidth: 0.5,
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  tierGlass: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 14,
-    opacity: 0.5,
+    marginTop: 10,
   },
   tierBadgeText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold' },
   bio: {
@@ -753,24 +810,61 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
     color: Colors.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 40,
-    marginTop: 8,
-    lineHeight: 18,
+    paddingHorizontal: 12,
+    marginTop: 10,
+    lineHeight: 19,
+  },
+  completenessContainer: {
+    width: '100%',
+    marginTop: 14,
+    paddingHorizontal: 8,
+  },
+  completenessHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  completenessText: {
+    fontSize: 11,
+    fontFamily: 'Poppins_500Medium',
+    color: Colors.textTertiary,
+  },
+  completenessPercent: {
+    fontSize: 12,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.primary,
+  },
+  completenessBarBg: {
+    width: '100%',
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: Colors.border + '80',
+    overflow: 'hidden',
+  },
+  completenessBarFill: {
+    height: '100%',
+    borderRadius: 3,
+    backgroundColor: Colors.primary,
+  },
+  profileActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 16,
+    width: '100%',
   },
   editProfileBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 7,
-    marginTop: 14,
-    backgroundColor: Colors.primary + '10',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: Colors.primary + '18',
+    backgroundColor: Colors.primary,
+    paddingVertical: 11,
+    borderRadius: 14,
     ...Colors.shadow.small,
   },
-  editProfileText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  editProfileText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.textInverse },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 8, marginBottom: 24 },
   statCard: {
     flex: 1,
@@ -870,64 +964,59 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
-  completenessContainer: {
-    alignItems: 'center',
-    marginTop: 8,
-    paddingHorizontal: 50,
-    width: '100%',
-  },
-  completenessText: {
-    fontSize: 11,
-    fontFamily: 'Poppins_500Medium',
-    color: Colors.textTertiary,
-    marginBottom: 4,
-  },
-  completenessBarBg: {
-    width: '100%',
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.border,
-    overflow: 'hidden',
-  },
-  completenessBarFill: {
-    height: '100%',
-    borderRadius: 2,
-    backgroundColor: Colors.primary,
-  },
   upgradeCta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
+    marginHorizontal: 20,
     marginTop: 12,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 14,
+    paddingVertical: 14,
+    borderRadius: 16,
     borderWidth: 1,
   },
-  upgradeCtaText: {
-    flex: 1,
-    fontSize: 13,
+  upgradeIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  upgradeCtaTitle: {
+    fontSize: 14,
     fontFamily: 'Poppins_600SemiBold',
+  },
+  upgradeCtaSub: {
+    fontSize: 11,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textTertiary,
+    marginTop: 1,
   },
   quickActionRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
+    gap: 10,
+    marginTop: 16,
+    paddingHorizontal: 20,
   },
   quickActionChip: {
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    gap: 6,
+    paddingVertical: 14,
+    borderRadius: 16,
     backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    ...Colors.shadow.small,
+  },
+  quickActionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   quickActionText: {
-    fontSize: 12,
-    fontFamily: 'Poppins_500Medium',
+    fontSize: 11,
+    fontFamily: 'Poppins_600SemiBold',
     color: Colors.text,
   },
   activityCard: {
