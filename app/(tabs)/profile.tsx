@@ -365,14 +365,20 @@ export default function ProfileScreen() {
             </Pressable>
             <Pressable
               style={styles.quickActionChip}
-              onPress={() => user?.id && router.push(`/profile/${user.id}`)}
+              onPress={() => router.push('/profile/public')}
             >
               <Ionicons name="eye-outline" size={16} color={Colors.primary} />
               <Text style={styles.quickActionText}>View Public</Text>
             </Pressable>
-            <Pressable style={styles.quickActionChip}>
+            <Pressable
+              style={styles.quickActionChip}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/profile/qr');
+              }}
+            >
               <Ionicons name="qr-code-outline" size={16} color={Colors.primary} />
-              <Text style={styles.quickActionText}>Scan QR</Text>
+              <Text style={styles.quickActionText}>My QR</Text>
             </Pressable>
           </View>
         </Animated.View>
