@@ -164,6 +164,27 @@ export default function PerksTabScreen() {
           </View>
         </Animated.View>
 
+        {membership?.tier === 'free' && (
+          <Animated.View entering={FadeInDown.delay(150).duration(400)}>
+            <Pressable
+              style={styles.upgradePrompt}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/membership/upgrade');
+              }}
+            >
+              <View style={styles.upgradePromptIcon}>
+                <Ionicons name="star" size={18} color="#2E86C1" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.upgradePromptTitle}>Unlock Exclusive Perks</Text>
+                <Text style={styles.upgradePromptSub}>CulturePass+ members get access to members-only deals</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#2E86C1" />
+            </Pressable>
+          </Animated.View>
+        )}
+
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <FilterChipRow items={filterItems} selectedId={selectedCategory} onSelect={setSelectedCategory} size="small" />
         </Animated.View>
@@ -393,4 +414,26 @@ const styles = StyleSheet.create({
   redeemBtnDisabled: { backgroundColor: Colors.backgroundSecondary },
   redeemBtnText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
   redeemBtnTextDisabled: { color: Colors.textTertiary },
+  upgradePrompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    backgroundColor: '#EBF5FB',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#D6EAF8',
+  },
+  upgradePromptIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#D6EAF8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  upgradePromptTitle: { fontSize: 14, fontWeight: '600', color: '#1A5276' },
+  upgradePromptSub: { fontSize: 12, color: '#5D6D7E', marginTop: 1 },
 });

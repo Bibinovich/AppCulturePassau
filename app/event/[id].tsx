@@ -96,6 +96,13 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
   const [quantity, setQuantity] = useState(1);
 
   const usersQuery = useQuery<any[]>({ queryKey: ['/api/users'] });
+  const demoUserId = usersQuery.data?.[0]?.id;
+
+  const { data: membership } = useQuery<{ tier: string; cashbackMultiplier?: number }>({
+    queryKey: [`/api/membership/${demoUserId}`],
+    enabled: !!demoUserId,
+  });
+  const isPlus = membership?.tier === 'plus';
 
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -147,6 +154,7 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
   const selectedTier = event.tiers[selectedTierIndex];
   const maxQty = Math.min(10, selectedTier?.available ?? 1);
   const totalPrice = (selectedTier?.price ?? 0) * quantity;
+  const cashbackAmount = isPlus ? totalPrice * 0.02 : 0;
 
   const handlePurchase = useCallback(() => {
     const users = usersQuery.data;
@@ -634,6 +642,25 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
                   {totalPrice === 0 ? 'Free' : `A$${totalPrice.toFixed(2)}`}
                 </Text>
               </View>
+
+              {isPlus && totalPrice > 0 && (
+                <View style={modalStyles.cashbackNote}>
+                  <Ionicons name="star" size={14} color="#2E86C1" />
+                  <Text style={modalStyles.cashbackNoteText}>
+                    You'll earn ${cashbackAmount.toFixed(2)} cashback with CulturePass+
+                  </Text>
+                </View>
+              )}
+
+              {!isPlus && totalPrice > 0 && (
+                <Pressable style={modalStyles.upgradeNote} onPress={() => { setTicketModalVisible(false); router.push('/membership/upgrade'); }}>
+                  <Ionicons name="star-outline" size={14} color="#2E86C1" />
+                  <Text style={modalStyles.upgradeNoteText}>
+                    CulturePass+ members earn 2% cashback on tickets
+                  </Text>
+                  <Ionicons name="chevron-forward" size={12} color="#2E86C1" />
+                </Pressable>
+              )}
 
               <Pressable
                 style={({ pressed }) => [
@@ -1142,5 +1169,37 @@ const modalStyles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins_600SemiBold',
     color: '#FFF',
+  },
+  cashbackNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EBF5FB',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    gap: 6,
+  },
+  cashbackNoteText: {
+    fontSize: 13,
+    color: '#1A5276',
+    fontWeight: '500',
+    flex: 1,
+  },
+  upgradeNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EBF5FB',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#D6EAF8',
+  },
+  upgradeNoteText: {
+    fontSize: 12,
+    color: '#2E86C1',
+    fontWeight: '500',
+    flex: 1,
   },
 });
