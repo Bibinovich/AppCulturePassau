@@ -47,10 +47,28 @@ Shared types between frontend and backend ensure type consistency. Path aliases 
 - Dashboard sections: Overview (stats, charts), Tickets management, Events, Users, Perks, Analytics
 - Login endpoint: `POST /api/dashboard/login`
 
+### Stripe Payment Integration (Feb 2026)
+- Replaced wallet-based payment with Stripe Checkout for ticket purchases
+- Server creates Stripe Checkout Session, frontend opens it via `expo-web-browser`
+- On payment success, ticket status updated to confirmed via redirect callback
+- Stripe refund support for ticket cancellations via `/api/stripe/refund`
+- Stripe initialization on server startup with `stripe-replit-sync` for schema and webhook management
+- `server/stripeClient.ts` handles Stripe credential fetching from Replit connectors API
+- `server/webhookHandlers.ts` processes Stripe webhooks for data sync
+- Tickets table extended with `stripePaymentIntentId`, `stripeRefundId`, `paymentStatus` columns
+- Free tickets bypass Stripe and are created directly via `/api/tickets`
+
 ### API Endpoints Added
 - `POST /api/dashboard/login` - Dashboard admin authentication
 - `GET /api/tickets/:id/wallet/apple` - Apple Wallet pass data
 - `GET /api/tickets/:id/wallet/google` - Google Wallet pass data
+- `GET /api/stripe/publishable-key` - Get Stripe publishable key
+- `POST /api/stripe/create-payment-intent` - Create Stripe Payment Intent
+- `POST /api/stripe/create-checkout-session` - Create Stripe Checkout Session (used by frontend)
+- `POST /api/stripe/confirm-payment` - Confirm payment status
+- `POST /api/stripe/refund` - Refund and cancel ticket
+- `GET /api/stripe/checkout-success` - Checkout success redirect handler
+- `GET /api/stripe/checkout-cancel` - Checkout cancel redirect handler
 
 ## External Dependencies
 

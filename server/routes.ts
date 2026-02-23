@@ -538,9 +538,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      await storage.updateTicketPayment(ticket.id, {
-        stripePaymentIntentId: session.payment_intent as string || session.id,
-      });
+      if (session.payment_intent) {
+        await storage.updateTicketPayment(ticket.id, {
+          stripePaymentIntentId: session.payment_intent as string,
+        });
+      }
 
       res.json({
         checkoutUrl: session.url,
