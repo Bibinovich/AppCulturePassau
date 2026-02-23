@@ -7,6 +7,7 @@ import {
   Platform,
   Alert,
   Share,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,7 +17,7 @@ import * as Haptics from 'expo-haptics';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient, getQueryFn } from '@/lib/query-client';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Ticket } from '@shared/schema';
 
 function formatDate(dateStr: string | null) {
@@ -34,29 +35,11 @@ function formatDate(dateStr: string | null) {
 function getStatusInfo(status: string | null) {
   switch (status) {
     case 'confirmed': return { color: Colors.success, bg: Colors.success + '12', label: 'Confirmed', icon: 'checkmark-circle' as const };
-    case 'used': return { color: Colors.textTertiary, bg: Colors.textTertiary + '12', label: 'Used', icon: 'checkmark-done' as const };
+    case 'used': return { color: '#8E8E93', bg: '#8E8E93' + '12', label: 'Scanned', icon: 'checkmark-done' as const };
     case 'cancelled': return { color: Colors.error, bg: Colors.error + '12', label: 'Cancelled', icon: 'close-circle' as const };
     case 'expired': return { color: Colors.warning, bg: Colors.warning + '12', label: 'Expired', icon: 'time' as const };
     default: return { color: Colors.textSecondary, bg: Colors.textSecondary + '12', label: status || 'Unknown', icon: 'help-circle' as const };
   }
-}
-
-function generateQRPattern(code: string) {
-  const size = 11;
-  const grid: boolean[][] = [];
-  let hash = 0;
-  for (let i = 0; i < code.length; i++) {
-    hash = ((hash << 5) - hash + code.charCodeAt(i)) | 0;
-  }
-  for (let r = 0; r < size; r++) {
-    const row: boolean[] = [];
-    for (let c = 0; c < size; c++) {
-      const val = Math.abs((hash * (r + 1) * (c + 1) + r * 31 + c * 17) % 100);
-      row.push(val > 40);
-    }
-    grid.push(row);
-  }
-  return grid;
 }
 
 export default function TicketDetailScreen() {
@@ -144,11 +127,6 @@ export default function TicketDetailScreen() {
     );
   }, [ticket]);
 
-  const qrGrid = useMemo(
-    () => (ticket?.ticketCode ? generateQRPattern(ticket.ticketCode) : null),
-    [ticket?.ticketCode],
-  );
-
   if (isLoading) {
     return (
       <View style={[styles.container, { paddingTop: topInset }]}>
@@ -190,6 +168,7 @@ export default function TicketDetailScreen() {
 
   const statusInfo = getStatusInfo(ticket.status);
   const isActive = ticket.status === 'confirmed';
+  const isScanned = ticket.status === 'used';
 
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
@@ -278,26 +257,32 @@ export default function TicketDetailScreen() {
               </View>
             </View>
 
-            {ticket.ticketCode && isActive && qrGrid && (
+            {ticket.ticketCode && (
               <>
                 <View style={styles.divider} />
                 <View style={styles.qrSection}>
-                  <Text style={styles.qrTitle}>Scan at Entry</Text>
-                  <View style={styles.qrContainer}>
-                    {qrGrid.map((row, ri) => (
-                      <View key={ri} style={styles.qrRow}>
-                        {row.map((cell, ci) => (
-                          <View
-                            key={ci}
-                            style={[
-                              styles.qrCell,
-                              { backgroundColor: cell ? Colors.text : 'transparent' },
-                            ]}
-                          />
-                        ))}
-                      </View>
-                    ))}
-                  </View>
+                  <Text style={styles.qrTitle}>
+                    {isScanned ? 'Ticket Scanned' : isActive ? 'Scan at Entry' : 'Ticket Code'}
+                  </Text>
+                  {ticket.qrCode && isActive ? (
+                    <View style={styles.qrImageContainer}>
+                      <Image
+                        source={{ uri: ticket.qrCode }}
+                        style={styles.qrImage}
+                        resizeMode="contain"
+                      />
+                    </View>
+                  ) : isScanned ? (
+                    <View style={styles.scannedOverlay}>
+                      <Ionicons name="checkmark-circle" size={48} color="#8E8E93" />
+                      <Text style={styles.scannedText}>Checked In</Text>
+                      {ticket.scannedAt && (
+                        <Text style={styles.scannedTime}>
+                          {new Date(ticket.scannedAt).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}
+                        </Text>
+                      )}
+                    </View>
+                  ) : null}
                   <Text style={styles.ticketCode}>{ticket.ticketCode}</Text>
                 </View>
               </>
@@ -450,15 +435,32 @@ const styles = StyleSheet.create({
   detailValue: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.text },
   qrSection: { alignItems: 'center', gap: 12 },
   qrTitle: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.textSecondary },
-  qrContainer: {
+  qrImageContainer: {
     padding: 12,
     backgroundColor: '#FFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.borderLight,
   },
-  qrRow: { flexDirection: 'row' },
-  qrCell: { width: 8, height: 8, margin: 1, borderRadius: 1 },
+  qrImage: {
+    width: 200,
+    height: 200,
+  },
+  scannedOverlay: {
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 16,
+  },
+  scannedText: {
+    fontSize: 16,
+    fontFamily: 'Poppins_700Bold',
+    color: '#8E8E93',
+  },
+  scannedTime: {
+    fontSize: 13,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textTertiary,
+  },
   ticketCode: {
     fontSize: 18,
     fontFamily: 'Poppins_700Bold',

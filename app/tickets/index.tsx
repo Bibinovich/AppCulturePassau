@@ -40,7 +40,7 @@ function formatDate(dateStr: string | null) {
 function getStatusStyle(status: string | null) {
   switch (status) {
     case 'confirmed': return { bg: Colors.success + '15', color: Colors.success, label: 'Confirmed' };
-    case 'used': return { bg: Colors.textTertiary + '15', color: Colors.textTertiary, label: 'Used' };
+    case 'used': return { bg: '#8E8E93' + '15', color: '#8E8E93', label: 'Scanned' };
     case 'cancelled': return { bg: Colors.error + '15', color: Colors.error, label: 'Cancelled' };
     case 'expired': return { bg: Colors.warning + '15', color: Colors.warning, label: 'Expired' };
     default: return { bg: Colors.textTertiary + '15', color: Colors.textTertiary, label: status || 'Unknown' };
