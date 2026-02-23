@@ -56,118 +56,118 @@ export type ColorTheme = {
 };
 
 const base = {
-  primary: '#00D4AA',
-  primaryLight: '#33DDBB',
-  primaryDark: '#00A882',
-  primaryGlow: 'rgba(0, 212, 170, 0.15)',
-  primarySoft: 'rgba(0, 212, 170, 0.07)',
+  primary: '#007AFF',
+  primaryLight: '#409CFF',
+  primaryDark: '#0056CC',
+  primaryGlow: 'rgba(0, 122, 255, 0.12)',
+  primarySoft: 'rgba(0, 122, 255, 0.06)',
 
-  secondary: '#7C3AED',
-  secondaryLight: '#9F67FF',
-  secondaryDark: '#5B21B6',
+  secondary: '#5856D6',
+  secondaryLight: '#7A79E0',
+  secondaryDark: '#3634A3',
 
-  accent: '#FF6B35',
-  accentLight: '#FFB347',
+  accent: '#FF9500',
+  accentLight: '#FFBF66',
 
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+  success: '#34C759',
+  warning: '#FF9F0A',
+  error: '#FF3B30',
+  info: '#5AC8FA',
 
-  overlay: 'rgba(0,0,0,0.44)',
+  overlay: 'rgba(0,0,0,0.4)',
 } as const;
 
 export const light: ColorTheme = {
   ...base,
 
-  background: '#F8F9FA',
-  backgroundSecondary: '#F0F2F5',
+  background: '#F2F2F7',
+  backgroundSecondary: '#EFEFF4',
 
   surface: '#FFFFFF',
-  surfaceElevated: '#F0F2F5',
-  surfaceSecondary: '#F8F9FA',
+  surfaceElevated: '#FFFFFF',
+  surfaceSecondary: '#F2F2F7',
 
-  border: '#E2E8F0',
-  borderLight: '#EDF2F7',
-  divider: '#E2E8F0',
+  border: '#D1D1D6',
+  borderLight: '#E5E5EA',
+  divider: '#C6C6C8',
 
-  text: '#0D0F14',
-  textSecondary: '#64748B',
-  textTertiary: '#94A3B8',
+  text: '#000000',
+  textSecondary: '#8E8E93',
+  textTertiary: '#AEAEB2',
   textInverse: '#FFFFFF',
 
   card: '#FFFFFF',
-  cardBorder: '#E2E8F0',
+  cardBorder: '#E5E5EA',
 
-  tabBar: '#FFFFFF',
-  tabBarBorder: '#E2E8F0',
-  tabIconDefault: '#94A3B8',
-  tabIconSelected: '#00D4AA',
+  tabBar: '#F9F9F9',
+  tabBarBorder: '#D1D1D6',
+  tabIconDefault: '#8E8E93',
+  tabIconSelected: '#007AFF',
 
-  tint: '#00D4AA',
+  tint: '#007AFF',
 };
 
 export const dark: ColorTheme = {
   ...base,
 
-  background: '#0D0F14',
-  backgroundSecondary: '#161B27',
+  background: '#000000',
+  backgroundSecondary: '#1C1C1E',
 
-  surface: '#161B27',
-  surfaceElevated: '#1E2535',
-  surfaceSecondary: '#1E2535',
+  surface: '#1C1C1E',
+  surfaceElevated: '#2C2C2E',
+  surfaceSecondary: '#2C2C2E',
 
-  border: '#2D3748',
-  borderLight: '#374151',
-  divider: '#2D3748',
+  border: '#38383A',
+  borderLight: '#48484A',
+  divider: '#38383A',
 
-  text: '#F1F5F9',
-  textSecondary: '#94A3B8',
-  textTertiary: '#475569',
-  textInverse: '#0D0F14',
+  text: '#FFFFFF',
+  textSecondary: '#8E8E93',
+  textTertiary: '#636366',
+  textInverse: '#000000',
 
-  card: '#1E2535',
-  cardBorder: '#2D3748',
+  card: '#1C1C1E',
+  cardBorder: '#38383A',
 
-  tabBar: '#161B27',
-  tabBarBorder: '#2D3748',
-  tabIconDefault: '#475569',
-  tabIconSelected: '#00D4AA',
+  tabBar: '#1C1C1E',
+  tabBarBorder: '#38383A',
+  tabIconDefault: '#636366',
+  tabIconSelected: '#0A84FF',
 
-  tint: '#00D4AA',
+  tint: '#0A84FF',
 };
 
 export const shadows = {
   small: {
-    shadowColor: Platform.select({ ios: '#0D0F14', default: '#000' }),
-    shadowOffset: { width: 0, height: 1.5 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3.5,
-    elevation: 2.5,
+    shadowColor: Platform.select({ ios: '#000', default: '#000' }),
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 2,
   } satisfies ShadowStyle,
 
   medium: {
-    shadowColor: Platform.select({ ios: '#0D0F14', default: '#000' }),
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowColor: Platform.select({ ios: '#000', default: '#000' }),
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 4,
   } satisfies ShadowStyle,
 
   large: {
-    shadowColor: Platform.select({ ios: '#0D0F14', default: '#000' }),
-    shadowOffset: { width: 0, height: 9 },
-    shadowOpacity: 0.14,
-    shadowRadius: 18,
-    elevation: 10,
+    shadowColor: Platform.select({ ios: '#000', default: '#000' }),
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
   } satisfies ShadowStyle,
 
   heavy: {
-    shadowColor: Platform.select({ ios: '#0D0F14', default: '#000' }),
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.22,
-    shadowRadius: 32,
-    elevation: 16,
+    shadowColor: Platform.select({ ios: '#000', default: '#000' }),
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.16,
+    shadowRadius: 24,
+    elevation: 12,
   } satisfies ShadowStyle,
 };
 
