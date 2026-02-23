@@ -37,11 +37,11 @@ function useDemoUserId() {
 }
 
 const PERK_TYPE_INFO: Record<string, { icon: string; color: string; label: string }> = {
-  discount_percent: { icon: 'pricetag', color: '#E85D3A', label: '% Off' },
-  discount_fixed: { icon: 'cash', color: '#1A7A6D', label: '$ Off' },
-  free_ticket: { icon: 'ticket', color: '#9B59B6', label: 'Free' },
-  early_access: { icon: 'time', color: '#3498DB', label: 'Early' },
-  vip_upgrade: { icon: 'star', color: '#F2A93B', label: 'VIP' },
+  discount_percent: { icon: 'pricetag', color: '#FF3B30', label: '% Off' },
+  discount_fixed: { icon: 'cash', color: '#34C759', label: '$ Off' },
+  free_ticket: { icon: 'ticket', color: '#AF52DE', label: 'Free' },
+  early_access: { icon: 'time', color: '#007AFF', label: 'Early' },
+  vip_upgrade: { icon: 'star', color: '#FF9F0A', label: 'VIP' },
   cashback: { icon: 'wallet', color: '#34C759', label: 'Cash' },
 };
 
@@ -138,7 +138,7 @@ export default function PerksTabScreen() {
       >
         <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.heroBanner}>
           <View style={styles.heroIconWrap}>
-            <Ionicons name="gift" size={28} color="#FFF" />
+            <Ionicons name="gift" size={26} color="#FFF" />
           </View>
           <Text style={styles.heroTitle}>Exclusive Perks</Text>
           <Text style={styles.heroSub}>{activePerkCount} perks available for you</Text>
@@ -164,6 +164,12 @@ export default function PerksTabScreen() {
           <FilterChipRow items={filterItems} selectedId={selectedCategory} onSelect={setSelectedCategory} size="small" />
         </Animated.View>
 
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>
+            {selectedCategory === 'All' ? 'All Perks' : CATEGORIES.find(c => c.id === selectedCategory)?.label || 'Perks'}
+          </Text>
+        </View>
+
         <View style={styles.list}>
           {isLoading ? (
             <View style={styles.emptyState}>
@@ -183,9 +189,8 @@ export default function PerksTabScreen() {
               return (
                 <Animated.View key={perk.id} entering={FadeInDown.delay(250 + i * 60).duration(400)}>
                   <View style={styles.perkCard}>
-                    <View style={[styles.perkCardStripe, { backgroundColor: typeInfo.color }]} />
                     <View style={styles.perkTop}>
-                      <View style={[styles.perkBadge, { backgroundColor: typeInfo.color + '15' }]}>
+                      <View style={[styles.perkBadge, { backgroundColor: typeInfo.color + '12' }]}>
                         <Ionicons name={typeInfo.icon as any} size={22} color={typeInfo.color} />
                       </View>
                       <View style={styles.perkInfo}>
@@ -196,7 +201,7 @@ export default function PerksTabScreen() {
                         </View>
                       </View>
                       <View style={styles.perkValueWrap}>
-                        <View style={[styles.perkValue, { backgroundColor: typeInfo.color + '15' }]}>
+                        <View style={[styles.perkValue, { backgroundColor: typeInfo.color + '12' }]}>
                           <Text style={[styles.perkValueText, { color: typeInfo.color }]}>{formatValue(perk)}</Text>
                         </View>
                         <Pressable hitSlop={8} onPress={() => handleSharePerk(perk)} style={styles.perkShareBtn}>
@@ -209,9 +214,9 @@ export default function PerksTabScreen() {
 
                     <View style={styles.perkMeta}>
                       {perk.isMembershipRequired && (
-                        <View style={[styles.metaTag, { backgroundColor: '#9B59B615' }]}>
-                          <Ionicons name="diamond" size={12} color="#9B59B6" />
-                          <Text style={[styles.metaTagText, { color: '#9B59B6' }]}>{perk.requiredMembershipTier || 'Premium'} Only</Text>
+                        <View style={[styles.metaTag, { backgroundColor: '#AF52DE10' }]}>
+                          <Ionicons name="diamond" size={12} color="#AF52DE" />
+                          <Text style={[styles.metaTagText, { color: '#AF52DE' }]}>{perk.requiredMembershipTier || 'Premium'} Only</Text>
                         </View>
                       )}
                       {perk.usageLimit && (
@@ -264,9 +269,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 16,
   },
-  headerTitle: { fontSize: 24, fontFamily: 'Poppins_700Bold', color: Colors.text },
+  headerTitle: {
+    fontSize: 34,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+    letterSpacing: 0.37,
+  },
   addBtn: {
     width: 40,
     height: 40,
@@ -275,39 +285,107 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroBanner: { marginHorizontal: 20, marginBottom: 24, backgroundColor: Colors.primary, borderRadius: 24, padding: 28, alignItems: 'center', ...Colors.shadow.medium },
-  heroIconWrap: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  heroTitle: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: '#FFFFFF', marginBottom: 6 },
-  heroSub: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: 'rgba(255,255,255,0.9)', marginBottom: 20 },
-  heroStats: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 18, paddingVertical: 14, paddingHorizontal: 24, gap: 18, width: '100%', justifyContent: 'center' },
+  heroBanner: {
+    marginHorizontal: 20,
+    marginBottom: 28,
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    ...Colors.shadow.small,
+  },
+  heroIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  heroTitle: {
+    fontSize: 20,
+    fontFamily: 'Poppins_700Bold',
+    color: '#FFFFFF',
+    marginBottom: 6,
+  },
+  heroSub: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: 'rgba(255,255,255,0.85)',
+    marginBottom: 20,
+  },
+  heroStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    gap: 18,
+    width: '100%',
+    justifyContent: 'center',
+  },
   heroStat: { alignItems: 'center' },
-  heroStatNum: { fontSize: 19, fontFamily: 'Poppins_700Bold', color: '#FFFFFF' },
-  heroStatLabel: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: 'rgba(255,255,255,0.8)' },
-  heroStatDivider: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.25)' },
+  heroStatNum: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: '#FFFFFF' },
+  heroStatLabel: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: 'rgba(255,255,255,0.75)' },
+  heroStatDivider: { width: 1, height: 28, backgroundColor: 'rgba(255,255,255,0.2)' },
+  sectionHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 14,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+    letterSpacing: 0.35,
+  },
   list: { paddingHorizontal: 20 },
-  emptyState: { alignItems: 'center', paddingTop: 60, gap: 12 },
-  emptyText: { fontSize: 14, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  perkCard: { backgroundColor: Colors.surface, borderRadius: 20, padding: 18, borderWidth: 1, borderColor: Colors.border, marginBottom: 14, overflow: 'hidden', ...Colors.shadow.small, position: 'relative' as any },
-  perkCardStripe: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: Colors.primary },
-  perkTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 10 },
-  perkBadge: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  emptyState: { alignItems: 'center', paddingTop: 60, gap: 14 },
+  emptyText: { fontSize: 15, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
+  perkCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    ...Colors.shadow.small,
+  },
+  perkTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, marginBottom: 12 },
+  perkBadge: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   perkInfo: { flex: 1 },
-  perkTitle: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.text, lineHeight: 20 },
-  providerRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  perkProvider: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
-  perkValueWrap: { alignItems: 'flex-end', gap: 6 },
-  perkValue: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  perkTitle: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.text, lineHeight: 22 },
+  providerRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  perkProvider: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  perkValueWrap: { alignItems: 'flex-end', gap: 8 },
+  perkValue: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
   perkValueText: { fontSize: 13, fontFamily: 'Poppins_700Bold' },
-  perkShareBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.backgroundSecondary, alignItems: 'center', justifyContent: 'center' },
-  perkDesc: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginBottom: 10, lineHeight: 18 },
-  perkMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  metaTag: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: Colors.backgroundSecondary, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
+  perkShareBtn: { width: 30, height: 30, borderRadius: 15, backgroundColor: Colors.backgroundSecondary, alignItems: 'center', justifyContent: 'center' },
+  perkDesc: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, marginBottom: 14, lineHeight: 20 },
+  perkMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
+  metaTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: Colors.backgroundSecondary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
   metaTagText: { fontSize: 12, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
-  progressWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
-  progressBar: { flex: 1, height: 8, backgroundColor: Colors.backgroundSecondary, borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 4 },
-  progressText: { fontSize: 10, fontFamily: 'Poppins_500Medium', color: Colors.textTertiary, width: 70, textAlign: 'right' },
-  redeemBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 14 },
+  progressWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  progressBar: { flex: 1, height: 4, backgroundColor: Colors.backgroundSecondary, borderRadius: 2, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 2 },
+  progressText: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: Colors.textTertiary, width: 70, textAlign: 'right' },
+  redeemBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+  },
   redeemBtnDisabled: { backgroundColor: Colors.backgroundSecondary },
   redeemBtnText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
   redeemBtnTextDisabled: { color: Colors.textTertiary },

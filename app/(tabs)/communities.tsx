@@ -28,16 +28,15 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { FilterChipRow, FilterItem } from '@/components/FilterChip';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const TYPE_COLORS: Record<string, string> = {
-  community: '#00D4AA',
-  organisation: '#7C3AED',
-  venue: '#3B82F6',
-  council: '#10B981',
-  government: '#5B21B6',
-  artist: '#FF6B35',
-  business: '#FFB347',
+  community: '#007AFF',
+  organisation: '#5856D6',
+  venue: '#34C759',
+  council: '#FF9500',
+  government: '#AF52DE',
+  artist: '#FF2D55',
+  business: '#5AC8FA',
 };
 
 const TYPE_ICONS: Record<string, string> = {
@@ -73,16 +72,10 @@ function FeaturedBanner({ profile, onPress }: { profile: Profile; onPress: () =>
   return (
     <Animated.View entering={FadeInRight.delay(100).duration(500)}>
       <Pressable onPress={onPress} style={styles.featuredCard}>
-        <LinearGradient
-          colors={['#0D0F14', '#1a0533', '#0a2a2a']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.featuredGradient}
-        >
-          <View style={styles.featuredGlowDot} />
+        <View style={styles.featuredInner}>
           <View style={styles.featuredContent}>
             <View style={styles.featuredBadge}>
-              <Ionicons name="star" size={10} color="#FFB347" />
+              <Ionicons name="star" size={10} color={Colors.accent} />
               <Text style={styles.featuredBadgeText}>Featured</Text>
             </View>
             <Text style={styles.featuredName} numberOfLines={1}>{profile.name}</Text>
@@ -92,26 +85,26 @@ function FeaturedBanner({ profile, onPress }: { profile: Profile; onPress: () =>
                 <Ionicons name="people" size={12} color={Colors.primary} />
                 <Text style={styles.featuredStatText}>{formatNumber(profile.membersCount ?? 0)}</Text>
               </View>
-              <View style={[styles.featuredDot, { backgroundColor: color }]} />
+              <View style={[styles.featuredDot, { backgroundColor: Colors.textTertiary }]} />
               <View style={styles.featuredStatItem}>
-                <Ionicons name="heart" size={12} color="#FF6B35" />
+                <Ionicons name="heart" size={12} color={Colors.error} />
                 <Text style={styles.featuredStatText}>{formatNumber(profile.followersCount ?? 0)}</Text>
               </View>
               {profile.rating != null && (
                 <>
-                  <View style={[styles.featuredDot, { backgroundColor: '#FFB347' }]} />
+                  <View style={[styles.featuredDot, { backgroundColor: Colors.textTertiary }]} />
                   <View style={styles.featuredStatItem}>
-                    <Ionicons name="star" size={12} color="#FFB347" />
+                    <Ionicons name="star" size={12} color={Colors.accent} />
                     <Text style={styles.featuredStatText}>{profile.rating.toFixed(1)}</Text>
                   </View>
                 </>
               )}
             </View>
           </View>
-          <View style={[styles.featuredIcon, { backgroundColor: color + '20' }]}>
+          <View style={[styles.featuredIcon, { backgroundColor: color + '14' }]}>
             <Ionicons name={(TYPE_ICONS[profile.entityType] ?? 'people') as any} size={32} color={color} />
           </View>
-        </LinearGradient>
+        </View>
       </Pressable>
     </Animated.View>
   );
@@ -166,16 +159,9 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
         onPressIn={() => { scale.value = withSpring(0.98, { damping: 15 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
       >
-        <LinearGradient
-          colors={[color, color + 'CC']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.cardAccentStrip}
-        />
-
         <View style={styles.cardTop}>
           <View style={[styles.communityIcon, { backgroundColor: color + '12' }]}>
-            <Ionicons name={icon as any} size={26} color={color} />
+            <Ionicons name={icon as any} size={24} color={color} />
           </View>
 
           <View style={styles.cardInfo}>
@@ -189,12 +175,9 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
             </View>
 
             <View style={styles.typeBadgeRow}>
-              <LinearGradient
-                colors={[color + '18', color + '08']}
-                style={styles.typeBadge}
-              >
+              <View style={[styles.typeBadge, { backgroundColor: color + '14' }]}>
                 <Text style={[styles.typeBadgeText, { color }]}>{profile.entityType}</Text>
-              </LinearGradient>
+              </View>
               {profile.category ? (
                 <Text style={styles.cardCategory} numberOfLines={1}>{profile.category}</Text>
               ) : null}
@@ -216,7 +199,7 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
               <Ionicons
                 name={s.icon}
                 size={13}
-                color={s.icon === 'star' ? Colors.accentLight : s.icon === 'heart' ? Colors.accent : color}
+                color={s.icon === 'star' ? Colors.accent : s.icon === 'heart' ? Colors.error : color}
               />
               <Text style={styles.statChipText}>{s.text}</Text>
               <Text style={styles.statChipLabel}>{s.label}</Text>
@@ -230,7 +213,7 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
               key={i}
               style={[
                 styles.avatarCircle,
-                { backgroundColor: c + '18', borderColor: Colors.surface, marginLeft: i === 0 ? 0 : -8 },
+                { backgroundColor: c + '14', borderColor: Colors.surface, marginLeft: i === 0 ? 0 : -8 },
               ]}
             >
               <Ionicons name="person" size={11} color={c} />
@@ -261,18 +244,10 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
           <Pressable
             style={[
               styles.joinButton,
-              joined ? styles.joinedButton : undefined,
+              joined ? styles.joinedButton : styles.joinButtonActive,
             ]}
             onPress={handleJoin}
           >
-            {!joined && (
-              <LinearGradient
-                colors={[Colors.primary, Colors.secondary]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={StyleSheet.absoluteFill}
-              />
-            )}
             <Ionicons
               name={joined ? 'checkmark' : 'add'}
               size={18}
@@ -363,10 +338,7 @@ export default function CommunitiesScreen() {
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.title}>Community</Text>
-          <Text style={styles.subtitle}>Connect with your culture</Text>
-        </View>
+        <Text style={styles.title}>Community</Text>
         <Pressable
           style={styles.headerBtn}
           onPress={() => {
@@ -374,12 +346,9 @@ export default function CommunitiesScreen() {
             router.push('/submit' as any);
           }}
         >
-          <LinearGradient
-            colors={[Colors.primary + '15', Colors.secondary + '10']}
-            style={styles.headerBtnGradient}
-          >
+          <View style={styles.headerBtnInner}>
             <Ionicons name="add" size={22} color={Colors.primary} />
-          </LinearGradient>
+          </View>
         </Pressable>
       </View>
 
@@ -452,7 +421,7 @@ export default function CommunitiesScreen() {
           {filteredProfiles.length === 0 && (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconWrap}>
-                <Ionicons name="search-outline" size={36} color={Colors.primary} />
+                <Ionicons name="search" size={36} color={Colors.primary} />
               </View>
               <Text style={styles.emptyTitle}>No results found</Text>
               <Text style={styles.emptySubtext}>Try adjusting your search or filters</Text>
@@ -479,55 +448,46 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 16,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerLeft: { flex: 1 },
   title: {
-    fontSize: 30,
+    fontSize: 34,
     fontFamily: 'Poppins_700Bold',
     color: Colors.text,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-    color: Colors.textSecondary,
-    marginTop: -2,
+    letterSpacing: 0.37,
   },
   headerBtn: {},
-  headerBtnGradient: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+  headerBtnInner: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.primary + '20',
+    backgroundColor: Colors.primary + '12',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: 14,
+    backgroundColor: Colors.surfaceSecondary,
+    borderRadius: 10,
     marginHorizontal: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    gap: 10,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    marginBottom: 12,
-    ...Colors.shadows.small,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.borderLight,
+    marginBottom: 14,
   },
   searchContainerFocused: {
-    borderColor: Colors.primary + '60',
-    backgroundColor: Colors.primary + '04',
+    borderColor: Colors.primary,
+    backgroundColor: Colors.surface,
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Poppins_400Regular',
     color: Colors.text,
     padding: 0,
@@ -538,36 +498,28 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
     color: Colors.textTertiary,
   },
-  grid: { paddingHorizontal: 20, gap: 14 },
+  grid: { paddingHorizontal: 20, gap: 16 },
 
   featuredCard: {
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 4,
-    ...Colors.shadows.large,
+    backgroundColor: Colors.surface,
+    ...Colors.shadows.medium,
   },
-  featuredGradient: {
+  featuredInner: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
     minHeight: 140,
-    overflow: 'hidden',
-  },
-  featuredGlowDot: {
-    position: 'absolute',
-    top: -30,
-    right: -30,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: Colors.primary + '12',
+    backgroundColor: Colors.primary + '08',
   },
   featuredContent: { flex: 1, marginRight: 16 },
   featuredBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#FFB347' + '20',
+    backgroundColor: Colors.accent + '18',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -577,20 +529,20 @@ const styles = StyleSheet.create({
   featuredBadgeText: {
     fontSize: 10,
     fontFamily: 'Poppins_700Bold',
-    color: '#FFB347',
+    color: Colors.accent,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   featuredName: {
     fontSize: 18,
     fontFamily: 'Poppins_700Bold',
-    color: '#FFF',
+    color: Colors.text,
     marginBottom: 4,
   },
   featuredDesc: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Poppins_400Regular',
-    color: '#94A3B8',
+    color: Colors.textSecondary,
     lineHeight: 18,
     marginBottom: 10,
   },
@@ -607,7 +559,7 @@ const styles = StyleSheet.create({
   featuredStatText: {
     fontSize: 12,
     fontFamily: 'Poppins_600SemiBold',
-    color: '#E2E8F0',
+    color: Colors.textSecondary,
   },
   featuredDot: {
     width: 3,
@@ -617,7 +569,7 @@ const styles = StyleSheet.create({
   featuredIcon: {
     width: 64,
     height: 64,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -647,30 +599,23 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 14,
     overflow: 'hidden',
-    paddingTop: 0,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.border + '80',
-    gap: 10,
-    ...Colors.shadows.medium,
-  },
-  cardAccentStrip: {
-    height: 3.5,
-    width: '100%',
-    marginBottom: 14,
+    padding: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.borderLight,
+    gap: 12,
+    ...Colors.shadows.small,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   communityIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 15,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardInfo: { flex: 1, gap: 3 },
+  cardInfo: { flex: 1, gap: 4 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   verifiedWrap: {},
   cardName: {
@@ -682,13 +627,13 @@ const styles = StyleSheet.create({
   },
   typeBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   typeBadge: {
-    paddingHorizontal: 9,
-    paddingVertical: 2.5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   typeBadgeText: {
     fontSize: 10,
-    fontFamily: 'Poppins_700Bold',
+    fontFamily: 'Poppins_600SemiBold',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -701,8 +646,8 @@ const styles = StyleSheet.create({
   shareBtn: {
     width: 34,
     height: 34,
-    borderRadius: 12,
-    backgroundColor: Colors.backgroundSecondary,
+    borderRadius: 17,
+    backgroundColor: Colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -719,12 +664,12 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
-    backgroundColor: Colors.backgroundSecondary,
+    borderRadius: 8,
+    backgroundColor: Colors.surfaceSecondary,
   },
   statChipText: {
     fontSize: 13,
-    fontFamily: 'Poppins_700Bold',
+    fontFamily: 'Poppins_600SemiBold',
     color: Colors.text,
   },
   statChipLabel: {
@@ -737,10 +682,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: Colors.surfaceSecondary,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   locationPillText: {
     fontSize: 11,
@@ -750,7 +695,7 @@ const styles = StyleSheet.create({
   tagPill: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   tagPillText: {
     fontSize: 11,
@@ -779,7 +724,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 2,
+    marginTop: 4,
   },
   joinButton: {
     flex: 1,
@@ -788,25 +733,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
     borderRadius: 12,
-    paddingVertical: 13,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     overflow: 'hidden',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
+  },
+  joinButtonActive: {
+    backgroundColor: Colors.primary,
   },
   joinedButton: {
     backgroundColor: Colors.primary + '0C',
-    borderWidth: 1.5,
-    borderColor: Colors.primary + '30',
-    shadowOpacity: 0,
-    elevation: 0,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.primary + '40',
   },
   joinText: {
     fontSize: 14,
-    fontFamily: 'Poppins_700Bold',
+    fontFamily: 'Poppins_600SemiBold',
     color: '#FFF',
   },
   joinedText: {

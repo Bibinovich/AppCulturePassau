@@ -26,20 +26,6 @@ function formatDateKey(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
-function getEventAccentColor(event: EventData): string {
-  // Map event categories to accent colors
-  const categoryColorMap: Record<string, string> = {
-    Festivals: Colors.primary,
-    'Food & Cooking': Colors.accent,
-    Arts: Colors.secondary,
-    Music: Colors.primaryLight,
-    Sports: Colors.secondary,
-    Education: Colors.primary,
-    Community: Colors.secondary,
-  };
-  return categoryColorMap[event.category] || Colors.primary;
-}
-
 export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
@@ -86,17 +72,17 @@ export default function CalendarScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + webTopInset }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         <Text style={styles.headerTitle}>Calendar</Text>
 
         <View style={styles.calendarCard}>
           <View style={styles.monthNav}>
             <Pressable onPress={prevMonth} hitSlop={12}>
-              <Ionicons name="chevron-back" size={24} color={Colors.text} />
+              <Ionicons name="chevron-back" size={22} color={Colors.textSecondary} />
             </Pressable>
             <Text style={styles.monthText}>{MONTHS[currentMonth]} {currentYear}</Text>
             <Pressable onPress={nextMonth} hitSlop={12}>
-              <Ionicons name="chevron-forward" size={24} color={Colors.text} />
+              <Ionicons name="chevron-forward" size={22} color={Colors.textSecondary} />
             </Pressable>
           </View>
 
@@ -153,7 +139,7 @@ export default function CalendarScreen() {
             </Text>
             {selectedEvents.length === 0 ? (
               <View style={styles.noEvents}>
-                <Ionicons name="calendar-outline" size={48} color={Colors.primary} />
+                <Ionicons name="calendar-outline" size={44} color={Colors.textTertiary} />
                 <Text style={styles.noEventsText}>No events on this day</Text>
               </View>
             ) : (
@@ -166,19 +152,16 @@ export default function CalendarScreen() {
                   }}
                   style={styles.eventRow}
                 >
-                  <View style={[styles.eventRowAccentBar, { backgroundColor: getEventAccentColor(event) }]} />
-                  <View style={styles.eventRowContent}>
-                    <Image source={{ uri: event.imageUrl }} style={styles.eventRowImage} contentFit="cover" />
-                    <View style={styles.eventRowInfo}>
-                      <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
-                      <Text style={styles.eventRowTime}>{event.time}</Text>
-                      <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
-                    </View>
-                    <View style={styles.eventRowPrice}>
-                      <Text style={styles.eventRowPriceText}>
-                        {event.price === 0 ? 'Free' : `$${event.price}`}
-                      </Text>
-                    </View>
+                  <Image source={{ uri: event.imageUrl }} style={styles.eventRowImage} contentFit="cover" />
+                  <View style={styles.eventRowInfo}>
+                    <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
+                    <Text style={styles.eventRowTime}>{event.time}</Text>
+                    <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
+                  </View>
+                  <View style={styles.eventRowPrice}>
+                    <Text style={styles.eventRowPriceText}>
+                      {event.price === 0 ? 'Free' : `$${event.price}`}
+                    </Text>
                   </View>
                 </Pressable>
               ))
@@ -198,18 +181,15 @@ export default function CalendarScreen() {
                 }}
                 style={styles.eventRow}
               >
-                <View style={[styles.eventRowAccentBar, { backgroundColor: getEventAccentColor(event) }]} />
-                <View style={styles.eventRowContent}>
-                  <Image source={{ uri: event.imageUrl }} style={styles.eventRowImage} contentFit="cover" />
-                  <View style={styles.eventRowInfo}>
-                    <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
-                    <Text style={styles.eventRowTime}>
-                      {new Date(event.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} {event.time}
-                    </Text>
-                    <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={18} color={Colors.textSecondary} />
+                <Image source={{ uri: event.imageUrl }} style={styles.eventRowImage} contentFit="cover" />
+                <View style={styles.eventRowInfo}>
+                  <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
+                  <Text style={styles.eventRowTime}>
+                    {new Date(event.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} {event.time}
+                  </Text>
+                  <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
                 </View>
+                <Ionicons name="chevron-forward" size={16} color={Colors.textTertiary} />
               </Pressable>
             ))}
           </View>
@@ -226,47 +206,43 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontFamily: 'Poppins_700Bold',
-    fontSize: 32,
-    fontWeight: '800',
+    fontSize: 34,
     color: Colors.text,
+    letterSpacing: 0.37,
     paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
   },
   calendarCard: {
     backgroundColor: Colors.surface,
     marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 16,
-    ...Colors.shadow.medium,
+    borderRadius: 16,
+    padding: 18,
+    ...Colors.shadow.small,
   },
   monthNav: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+    paddingHorizontal: 4,
   },
   monthText: {
-    fontFamily: 'Poppins_700Bold',
-    fontSize: 22,
-    fontWeight: '700',
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 17,
     color: Colors.text,
   },
   dayHeaders: {
     flexDirection: 'row',
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 12,
+    marginBottom: 8,
+    paddingVertical: 8,
   },
   dayHeaderText: {
     flex: 1,
     textAlign: 'center',
     fontFamily: 'Poppins_600SemiBold',
     fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textSecondary,
+    color: Colors.textTertiary,
   },
   daysGrid: {
     flexDirection: 'row',
@@ -277,53 +253,49 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 14,
+    borderRadius: 12,
     marginVertical: 2,
   },
   dayCellSelected: {
     backgroundColor: Colors.primary,
-    ...Colors.shadow.medium,
-    transform: [{ scale: 1.15 }],
+    transform: [{ scale: 1.05 }],
   },
   dayCellToday: {
     backgroundColor: Colors.primaryGlow,
-    borderWidth: 2,
-    borderColor: Colors.primary,
   },
   dayText: {
-    fontFamily: 'Poppins_600SemiBold',
+    fontFamily: 'Poppins_500Medium',
     fontSize: 15,
-    fontWeight: '600',
     color: Colors.text,
   },
   dayTextSelected: {
-    color: Colors.surface,
-    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'Poppins_600SemiBold',
   },
   dayTextToday: {
     color: Colors.primary,
-    fontWeight: '700',
+    fontFamily: 'Poppins_600SemiBold',
   },
   eventDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
     backgroundColor: Colors.primary,
     marginTop: 3,
   },
   eventDotSelected: {
-    backgroundColor: Colors.surface,
+    backgroundColor: '#FFFFFF',
   },
   eventsSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 28,
+    paddingHorizontal: 24,
+    paddingTop: 32,
   },
   eventsSectionTitle: {
     fontFamily: 'Poppins_700Bold',
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
     color: Colors.text,
-    marginBottom: 18,
+    letterSpacing: 0.35,
+    marginBottom: 20,
   },
   noEvents: {
     alignItems: 'center',
@@ -333,7 +305,6 @@ const styles = StyleSheet.create({
   noEventsText: {
     fontFamily: 'Poppins_500Medium',
     fontSize: 15,
-    fontWeight: '500',
     color: Colors.textSecondary,
     textAlign: 'center',
   },
@@ -341,26 +312,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: 20,
-    marginBottom: 14,
-    overflow: 'hidden',
-    ...Colors.shadow.small,
-  },
-  eventRowAccentBar: {
-    width: 3,
-    height: '100%',
-  },
-  eventRowContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    borderRadius: 12,
+    marginBottom: 12,
     padding: 14,
     gap: 14,
+    ...Colors.shadow.small,
   },
   eventRowImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 14,
+    width: 56,
+    height: 56,
+    borderRadius: 12,
   },
   eventRowInfo: {
     flex: 1,
@@ -368,13 +329,11 @@ const styles = StyleSheet.create({
   eventRowTitle: {
     fontFamily: 'Poppins_600SemiBold',
     fontSize: 15,
-    fontWeight: '600',
     color: Colors.text,
   },
   eventRowTime: {
     fontFamily: 'Poppins_500Medium',
     fontSize: 13,
-    fontWeight: '500',
     color: Colors.primary,
     marginTop: 3,
   },
@@ -387,13 +346,12 @@ const styles = StyleSheet.create({
   eventRowPrice: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 10,
-    backgroundColor: Colors.backgroundSecondary,
+    borderRadius: 8,
+    backgroundColor: Colors.primarySoft,
   },
   eventRowPriceText: {
     fontFamily: 'Poppins_600SemiBold',
     fontSize: 13,
-    fontWeight: '600',
     color: Colors.primary,
   },
 });
