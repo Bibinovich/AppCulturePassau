@@ -1,18 +1,17 @@
- import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  Platform,
-  Alert,
-  Switch,
-  Share,
-  RefreshControl,
+import {
+ View,
+ Text,
+ Pressable,
+ StyleSheet,
+ ScrollView,
+ Platform,
+ Alert,
+ Switch,
+ Share,
+ RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useSaved } from '@/contexts/SavedContext';
@@ -26,10 +25,7 @@ import { queryClient } from '@/lib/query-client';
 import type { Wallet, User, Membership } from '@shared/schema';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function formatDate(dateStr: string): string {
-  // Parse manually to avoid UTC/local timezone shifting the date
   const [year, month, day] = dateStr.split('-').map(Number);
   if (!year || !month || !day) return dateStr;
   const d = new Date(year, month - 1, day);
@@ -40,22 +36,15 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const TIER_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
   free: { bg: Colors.textTertiary + '15', text: Colors.textSecondary, icon: 'shield-outline' },
   plus: { bg: '#3498DB15', text: '#3498DB', icon: 'star' },
   premium: { bg: '#F39C1215', text: '#F39C12', icon: 'diamond' },
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
 function SectionTitle({ title }: { title: string }) {
   return (
-    <View style={styles.sectionTitleRow}>
-      <View style={styles.sectionAccent} />
-      <Text style={styles.sectionTitle}>{title}</Text>
-    </View>
+    <Text style={styles.sectionTitle}>{title}</Text>
   );
 }
 
@@ -82,7 +71,7 @@ function MenuItem({
     <>
       <Pressable style={styles.menuItem} onPress={onPress}>
         <View style={[styles.menuIcon, { backgroundColor: (color ?? Colors.primary) + '12' }]}>
-          <Ionicons name={icon as any} size={20} color={color ?? Colors.primary} />
+          <Ionicons name={icon as any} size={18} color={color ?? Colors.primary} />
         </View>
         <Text style={styles.menuLabel}>{label}</Text>
         {badge != null && badge > 0 && (
@@ -91,7 +80,7 @@ function MenuItem({
           </View>
         )}
         {value ? <Text style={styles.menuValue}>{value}</Text> : null}
-        <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
+        <Ionicons name="chevron-forward" size={16} color={Colors.textTertiary} />
       </Pressable>
       {showDivider && <View style={styles.divider} />}
     </>
@@ -119,7 +108,7 @@ function ToggleItem({
     <>
       <View style={styles.menuItem}>
         <View style={[styles.menuIcon, { backgroundColor: (color ?? Colors.primary) + '12' }]}>
-          <Ionicons name={icon as any} size={20} color={color ?? Colors.primary} />
+          <Ionicons name={icon as any} size={18} color={color ?? Colors.primary} />
         </View>
         <Text style={styles.menuLabel}>{label}</Text>
         <Switch
@@ -134,8 +123,6 @@ function ToggleItem({
   );
 }
 
-// ─── ProfileScreen ────────────────────────────────────────────────────────────
-
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const topInset = Platform.OS === 'web' ? 67 : insets.top;
@@ -148,7 +135,6 @@ export default function ProfileScreen() {
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
-  // ── API queries ──────────────────────────────────────────────────────────────
   const { data: usersData } = useQuery<User[]>({ queryKey: ['/api/users'] });
   const user = usersData?.[0];
   const userId = user?.id;
@@ -173,7 +159,6 @@ export default function ProfileScreen() {
     enabled: !!userId,
   });
 
-  // ── Derived values ───────────────────────────────────────────────────────────
   const savedEventsList = useMemo(
     () => sampleEvents.filter(e => savedEvents.includes(e.id)),
     [savedEvents],
@@ -206,21 +191,18 @@ export default function ProfileScreen() {
     return null;
   }, [tier]);
 
-  // Guard against "Sydney, undefined" when country is missing
   const displayLocation = useMemo(() => {
     if (user?.city && user?.country) return `${user.city}, ${user.country}`;
     if (state.city && state.country) return `${state.city}, ${state.country}`;
     return state.city ?? '';
   }, [user?.city, user?.country, state.city, state.country]);
 
-  // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleShare = useCallback(async () => {
     try {
       await Share.share({
         message: `Check out my CulturePass profile! ${displayName} from ${displayLocation}. Download CulturePass to connect with cultural communities!`,
       });
     } catch {
-      // Silently ignore share cancellation / errors
     }
   }, [displayName, displayLocation]);
 
@@ -266,213 +248,204 @@ export default function ProfileScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} colors={[Colors.primary]} />}
       >
         <Animated.View entering={FadeInDown.duration(400)} style={styles.profileHeader}>
-          <View style={styles.heroCard}>
-            <LinearGradient
-              colors={[Colors.primary, Colors.primaryDark || '#B8431F', Colors.secondary]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.heroBanner}
-            >
-              <View style={styles.heroBannerOverlay}>
-                <View style={styles.heroBannerActions}>
-                  <Pressable style={styles.heroBannerBtn} onPress={handleShare}>
-                    <Ionicons name="share-outline" size={18} color="#FFF" />
-                  </Pressable>
-                  <Text style={styles.heroLabel}>Profile</Text>
-                  <Pressable style={styles.heroBannerBtn} onPress={() => router.push('/notifications')}>
-                    <Ionicons name="notifications-outline" size={18} color="#FFF" />
-                    {unreadCount > 0 && <View style={styles.notifDot} />}
-                  </Pressable>
-                </View>
-                <View style={styles.heroBannerPattern}>
-                  {[0, 1, 2, 3, 4].map(i => (
-                    <View key={i} style={[styles.patternCircle, { opacity: 0.06 + i * 0.02, left: 30 + i * 55, top: 10 + (i % 2) * 20 }]} />
-                  ))}
-                </View>
-              </View>
-            </LinearGradient>
+          <View style={styles.headerTopBar}>
+            <Pressable style={styles.headerBtn} onPress={handleShare}>
+              <Ionicons name="share-outline" size={20} color={Colors.primary} />
+            </Pressable>
+            <Text style={styles.headerTitle}>Profile</Text>
+            <Pressable style={styles.headerBtn} onPress={() => router.push('/notifications')}>
+              <Ionicons name="notifications-outline" size={20} color={Colors.primary} />
+              {unreadCount > 0 && <View style={styles.notifDot} />}
+            </Pressable>
+          </View>
 
-            <View style={styles.avatarContainer}>
-              {user?.avatarUrl ? (
-                <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} contentFit="cover" />
-              ) : (
-                <View style={styles.avatarFallback}>
-                  <Text style={styles.avatarInitials}>
-                    {(displayName || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-                  </Text>
-                </View>
-              )}
-              <View style={[styles.tierIcon, { backgroundColor: tierStyle.bg, borderColor: '#FFF' }]}>
-                <Ionicons name={tierStyle.icon as any} size={12} color={tierStyle.text} />
+          <View style={styles.avatarContainer}>
+            {user?.avatarUrl ? (
+              <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} contentFit="cover" />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarInitials}>
+                  {(displayName || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                </Text>
               </View>
-            </View>
-
-            <View style={styles.heroBody}>
-              <View style={styles.nameRow}>
-                <Text style={styles.name}>{displayName}</Text>
-                {user?.isVerified && (
-                  <Ionicons name="checkmark-circle" size={18} color={Colors.secondary} />
-                )}
-              </View>
-              {user?.username ? (
-                <Text style={styles.username}>@{user.username}</Text>
-              ) : null}
-
-              <View style={styles.idLocationRow}>
-                {user?.culturePassId ? (
-                  <View style={styles.cpidChip}>
-                    <Ionicons name="finger-print" size={12} color={Colors.primary} />
-                    <Text style={styles.cpidText}>{user.culturePassId}</Text>
-                  </View>
-                ) : null}
-                {displayLocation ? (
-                  <View style={styles.locationChip}>
-                    <Ionicons name="location" size={12} color={Colors.secondary} />
-                    <Text style={styles.locationChipText}>{displayLocation}</Text>
-                  </View>
-                ) : null}
-                <View style={[styles.tierBadge, { backgroundColor: tierStyle.bg }]}>
-                  <Ionicons name={tierStyle.icon as any} size={11} color={tierStyle.text} />
-                  <Text style={[styles.tierBadgeText, { color: tierStyle.text }]}>
-                    {capitalize(tier)}
-                  </Text>
-                </View>
-              </View>
-
-              {user?.bio ? (
-                <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
-              ) : null}
-
-              <View style={styles.completenessContainer}>
-                <View style={styles.completenessHeader}>
-                  <Text style={styles.completenessText}>Profile completeness</Text>
-                  <Text style={[styles.completenessPercent, profileCompleteness >= 80 ? { color: Colors.success } : profileCompleteness >= 50 ? { color: Colors.accent } : {}]}>
-                    {profileCompleteness}%
-                  </Text>
-                </View>
-                <View style={styles.completenessBarBg}>
-                  <View style={[styles.completenessBarFill, { width: `${profileCompleteness}%` as any }, profileCompleteness >= 80 ? { backgroundColor: Colors.success } : profileCompleteness >= 50 ? { backgroundColor: Colors.accent } : {}]} />
-                </View>
-              </View>
-
-              <View style={styles.profileActions}>
-                <Pressable style={styles.editProfileBtn} onPress={() => router.push('/profile/edit')}>
-                  <Ionicons name="create-outline" size={16} color="#FFF" />
-                  <Text style={styles.editProfileText}>Edit Profile</Text>
-                </Pressable>
-              </View>
+            )}
+            <View style={[styles.tierIcon, { backgroundColor: tierStyle.bg }]}>
+              <Ionicons name={tierStyle.icon as any} size={12} color={tierStyle.text} />
             </View>
           </View>
 
-          {nextTierInfo && (
-            <Pressable style={[styles.upgradeCta, { backgroundColor: nextTierInfo.color + '08', borderColor: nextTierInfo.color + '20' }]}>
-              <View style={[styles.upgradeIconWrap, { backgroundColor: nextTierInfo.color + '15' }]}>
-                <Ionicons name="arrow-up-circle" size={20} color={nextTierInfo.color} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.upgradeCtaTitle, { color: nextTierInfo.color }]}>
-                  Upgrade to {nextTierInfo.name}
-                </Text>
-                <Text style={styles.upgradeCtaSub}>Unlock more perks and benefits</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={nextTierInfo.color} />
-            </Pressable>
-          )}
+          <View style={styles.heroBody}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{displayName}</Text>
+              {user?.isVerified && (
+                <Ionicons name="checkmark-circle" size={18} color={Colors.primary} />
+              )}
+            </View>
+            {user?.username ? (
+              <Text style={styles.username}>@{user.username}</Text>
+            ) : null}
 
-          <View style={styles.quickActionRow}>
-            <Pressable
-              style={styles.quickActionChip}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push('/profile/public');
-              }}
-            >
-              <View style={[styles.quickActionIcon, { backgroundColor: Colors.secondary + '12' }]}>
-                <Ionicons name="eye-outline" size={18} color={Colors.secondary} />
+            <View style={styles.idLocationRow}>
+              {user?.culturePassId ? (
+                <View style={styles.cpidChip}>
+                  <Ionicons name="finger-print" size={12} color={Colors.primary} />
+                  <Text style={styles.cpidText}>{user.culturePassId}</Text>
+                </View>
+              ) : null}
+              {displayLocation ? (
+                <View style={styles.locationChip}>
+                  <Ionicons name="location" size={12} color={Colors.textSecondary} />
+                  <Text style={styles.locationChipText}>{displayLocation}</Text>
+                </View>
+              ) : null}
+              <View style={[styles.tierBadge, { backgroundColor: tierStyle.bg }]}>
+                <Ionicons name={tierStyle.icon as any} size={11} color={tierStyle.text} />
+                <Text style={[styles.tierBadgeText, { color: tierStyle.text }]}>
+                  {capitalize(tier)}
+                </Text>
               </View>
-              <Text style={styles.quickActionText}>View Public</Text>
-            </Pressable>
-            <Pressable
-              style={styles.quickActionChip}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push('/profile/qr');
-              }}
-            >
-              <View style={[styles.quickActionIcon, { backgroundColor: '#8B5CF6' + '12' }]}>
-                <Ionicons name="qr-code-outline" size={18} color="#8B5CF6" />
+            </View>
+
+            {user?.bio ? (
+              <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
+            ) : null}
+
+            <View style={styles.completenessContainer}>
+              <View style={styles.completenessHeader}>
+                <Text style={styles.completenessText}>Profile completeness</Text>
+                <Text style={[styles.completenessPercent, profileCompleteness >= 80 ? { color: Colors.success } : profileCompleteness >= 50 ? { color: Colors.accent } : {}]}>
+                  {profileCompleteness}%
+                </Text>
               </View>
-              <Text style={styles.quickActionText}>My QR ID</Text>
-            </Pressable>
-            <Pressable
-              style={styles.quickActionChip}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                handleShare();
-              }}
-            >
-              <View style={[styles.quickActionIcon, { backgroundColor: Colors.accent + '12' }]}>
-                <Ionicons name="share-social-outline" size={18} color={Colors.accent} />
+              <View style={styles.completenessBarBg}>
+                <View style={[styles.completenessBarFill, { width: `${profileCompleteness}%` as any }, profileCompleteness >= 80 ? { backgroundColor: Colors.success } : profileCompleteness >= 50 ? { backgroundColor: Colors.accent } : {}]} />
               </View>
-              <Text style={styles.quickActionText}>Share</Text>
-            </Pressable>
+            </View>
+
+            <View style={styles.profileActions}>
+              <Pressable style={styles.editProfileBtn} onPress={() => router.push('/profile/edit')}>
+                <Ionicons name="create-outline" size={16} color="#FFF" />
+                <Text style={styles.editProfileText}>Edit Profile</Text>
+              </Pressable>
+            </View>
           </View>
         </Animated.View>
 
-        {/* Stats row */}
+        {nextTierInfo && (
+          <Pressable style={[styles.upgradeCta, { backgroundColor: nextTierInfo.color + '08' }]}>
+            <View style={[styles.upgradeIconWrap, { backgroundColor: nextTierInfo.color + '12' }]}>
+              <Ionicons name="arrow-up-circle" size={20} color={nextTierInfo.color} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.upgradeCtaTitle, { color: nextTierInfo.color }]}>
+                Upgrade to {nextTierInfo.name}
+              </Text>
+              <Text style={styles.upgradeCtaSub}>Unlock more perks and benefits</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={nextTierInfo.color} />
+          </Pressable>
+        )}
+
+        <View style={styles.quickActionRow}>
+          <Pressable
+            style={styles.quickActionChip}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/profile/public');
+            }}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: Colors.secondary + '12' }]}>
+              <Ionicons name="eye-outline" size={18} color={Colors.secondary} />
+            </View>
+            <Text style={styles.quickActionText}>View Public</Text>
+          </Pressable>
+          <Pressable
+            style={styles.quickActionChip}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/profile/qr');
+            }}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: Colors.secondary + '12' }]}>
+              <Ionicons name="qr-code-outline" size={18} color={Colors.secondary} />
+            </View>
+            <Text style={styles.quickActionText}>My QR ID</Text>
+          </Pressable>
+          <Pressable
+            style={styles.quickActionChip}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleShare();
+            }}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: Colors.accent + '12' }]}>
+              <Ionicons name="share-social-outline" size={18} color={Colors.accent} />
+            </View>
+            <Text style={styles.quickActionText}>Share</Text>
+          </Pressable>
+        </View>
+
         <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.statsRow}>
           <Pressable style={styles.statCard} onPress={() => router.push('/(tabs)/communities')}>
             <Text style={styles.statNum}>{joinedCommunities.length}</Text>
             <Text style={styles.statLabel}>Communities</Text>
           </Pressable>
+          <View style={styles.statDivider} />
           <Pressable style={styles.statCard} onPress={() => router.push('/(tabs)/explore')}>
             <Text style={styles.statNum}>{savedEvents.length}</Text>
             <Text style={styles.statLabel}>Saved</Text>
           </Pressable>
+          <View style={styles.statDivider} />
           <Pressable style={styles.statCard} onPress={() => router.push('/tickets')}>
             <Text style={styles.statNum}>{tickets}</Text>
             <Text style={styles.statLabel}>Tickets</Text>
           </Pressable>
+          <View style={styles.statDivider} />
           <Pressable style={styles.statCard} onPress={() => router.push('/payment/wallet')}>
             <Text style={styles.statNum}>${walletBalance.toFixed(0)}</Text>
-            <Text style={styles.statLabel}>T. Wallet</Text>
+            <Text style={styles.statLabel}>Wallet</Text>
           </Pressable>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.activityCard}>
-          <Text style={styles.activityTitle}>Recent Activity</Text>
-          <View style={styles.activityRow}>
-            <Ionicons name="calendar-outline" size={16} color={Colors.primary} />
-            <Text style={styles.activityText}>{savedEvents.length} events saved this month</Text>
-          </View>
-          <View style={styles.activityRow}>
-            <Ionicons name="people-outline" size={16} color={Colors.secondary} />
-            <Text style={styles.activityText}>{joinedCommunities.length} communities active</Text>
+        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.section}>
+          <View style={styles.activityCard}>
+            <Text style={styles.activityTitle}>Recent Activity</Text>
+            <View style={styles.activityRow}>
+              <Ionicons name="calendar-outline" size={16} color={Colors.primary} />
+              <Text style={styles.activityText}>{savedEvents.length} events saved this month</Text>
+            </View>
+            <View style={styles.activityRow}>
+              <Ionicons name="people-outline" size={16} color={Colors.secondary} />
+              <Text style={styles.activityText}>{joinedCommunities.length} communities active</Text>
+            </View>
           </View>
         </Animated.View>
 
-        {/* My Communities */}
         {joinedCommunitiesList.length > 0 && (
           <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.section}>
             <SectionTitle title="My Communities" />
-            {joinedCommunitiesList.slice(0, 3).map(c => (
-              <Pressable
-                key={c.id}
-                style={styles.miniCard}
-                onPress={() =>
-                  router.push({ pathname: '/community/[id]', params: { id: c.id } })
-                }
-              >
-                <View style={[styles.miniIcon, { backgroundColor: c.color + '15' }]}>
-                  <Ionicons name={c.icon as any} size={20} color={c.color} />
+            <View style={styles.menuCard}>
+              {joinedCommunitiesList.slice(0, 3).map((c, idx) => (
+                <View key={c.id}>
+                  <Pressable
+                    style={styles.miniCard}
+                    onPress={() =>
+                      router.push({ pathname: '/community/[id]', params: { id: c.id } })
+                    }
+                  >
+                    <View style={[styles.miniIcon, { backgroundColor: c.color + '12' }]}>
+                      <Ionicons name={c.icon as any} size={18} color={c.color} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.miniTitle}>{c.name}</Text>
+                      <Text style={styles.miniSub}>{c.members.toLocaleString()} members</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={Colors.textTertiary} />
+                  </Pressable>
+                  {idx < Math.min(joinedCommunitiesList.length, 3) - 1 && <View style={styles.divider} />}
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.miniTitle}>{c.name}</Text>
-                  <Text style={styles.miniSub}>{c.members.toLocaleString()} members</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
-              </Pressable>
-            ))}
+              ))}
+            </View>
             {joinedCommunitiesList.length > 3 && (
               <Pressable
                 style={styles.seeAllBtn}
@@ -486,34 +459,36 @@ export default function ProfileScreen() {
           </Animated.View>
         )}
 
-        {/* Saved Events */}
         {savedEventsList.length > 0 && (
           <Animated.View entering={FadeInDown.delay(250).duration(400)} style={styles.section}>
             <SectionTitle title="Saved Events" />
-            {savedEventsList.slice(0, 3).map(e => (
-              <Pressable
-                key={e.id}
-                style={styles.miniCard}
-                onPress={() =>
-                  router.push({ pathname: '/event/[id]', params: { id: e.id } })
-                }
-              >
-                <View style={[styles.miniIcon, { backgroundColor: e.imageColor + '15' }]}>
-                  <Ionicons name="calendar" size={20} color={e.imageColor} />
+            <View style={styles.menuCard}>
+              {savedEventsList.slice(0, 3).map((e, idx) => (
+                <View key={e.id}>
+                  <Pressable
+                    style={styles.miniCard}
+                    onPress={() =>
+                      router.push({ pathname: '/event/[id]', params: { id: e.id } })
+                    }
+                  >
+                    <View style={[styles.miniIcon, { backgroundColor: e.imageColor + '12' }]}>
+                      <Ionicons name="calendar" size={18} color={e.imageColor} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.miniTitle} numberOfLines={1}>
+                        {e.title}
+                      </Text>
+                      <Text style={styles.miniSub}>{formatDate(e.date)}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={Colors.textTertiary} />
+                  </Pressable>
+                  {idx < Math.min(savedEventsList.length, 3) - 1 && <View style={styles.divider} />}
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.miniTitle} numberOfLines={1}>
-                    {e.title}
-                  </Text>
-                  <Text style={styles.miniSub}>{formatDate(e.date)}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
-              </Pressable>
-            ))}
+              ))}
+            </View>
           </Animated.View>
         )}
 
-        {/* Location & Preferences */}
         <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.section}>
           <SectionTitle title="Location & Preferences" />
           <View style={styles.menuCard}>
@@ -547,14 +522,13 @@ export default function ProfileScreen() {
           </View>
         </Animated.View>
 
-        {/* Tickets & Wallet */}
         <Animated.View entering={FadeInDown.delay(350).duration(400)} style={styles.section}>
           <SectionTitle title="Tickets & Wallet" />
           <View style={styles.menuCard}>
             <MenuItem
               icon="ticket-outline"
               label="My Tickets"
-              color="#E74C3C"
+              color="#FF3B30"
               badge={tickets}
               onPress={() => router.push('/tickets')}
             />
@@ -562,7 +536,7 @@ export default function ProfileScreen() {
               icon="wallet-outline"
               label="Ticket Wallet"
               value={`$${walletBalance.toFixed(2)}`}
-              color="#2ECC71"
+              color="#34C759"
               onPress={() => router.push('/payment/wallet')}
             />
             <MenuItem
@@ -575,48 +549,45 @@ export default function ProfileScreen() {
           </View>
         </Animated.View>
 
-        {/* Payment & Billing */}
         <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.section}>
           <SectionTitle title="Payment & Billing" />
           <View style={styles.menuCard}>
             <MenuItem
               icon="card-outline"
               label="Payment Methods"
-              color="#3498DB"
+              color="#007AFF"
               onPress={() => router.push('/payment/methods')}
             />
             <MenuItem
               icon="receipt-outline"
               label="Transaction History"
-              color="#9B59B6"
+              color="#5856D6"
               onPress={() => router.push('/payment/transactions')}
               showDivider={false}
             />
           </View>
         </Animated.View>
 
-        {/* Notifications */}
         <Animated.View entering={FadeInDown.delay(450).duration(400)} style={styles.section}>
           <SectionTitle title="Notifications" />
           <View style={styles.menuCard}>
             <MenuItem
               icon="notifications-outline"
               label="View Notifications"
-              color="#FF9F0A"
+              color="#FF9500"
               badge={unreadCount}
               onPress={() => router.push('/notifications')}
             />
             <MenuItem
               icon="options-outline"
               label="Notification Preferences"
-              color="#FF2D55"
+              color="#FF3B30"
               onPress={() => router.push('/settings/notifications')}
               showDivider={false}
             />
           </View>
         </Animated.View>
 
-        {/* Settings */}
         <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.section}>
           <SectionTitle title="Settings" />
           <View style={styles.menuCard}>
@@ -631,11 +602,11 @@ export default function ProfileScreen() {
               label="Submit a Listing"
               color={Colors.secondary}
               onPress={() => router.push('/submit')}
+              showDivider={false}
             />
           </View>
         </Animated.View>
 
-        {/* Help & Support */}
         <Animated.View entering={FadeInDown.delay(550).duration(400)} style={styles.section}>
           <SectionTitle title="Help & Support" />
           <View style={styles.menuCard}>
@@ -661,10 +632,9 @@ export default function ProfileScreen() {
           </View>
         </Animated.View>
 
-        {/* Bottom actions */}
         <Animated.View entering={FadeInDown.delay(550).duration(400)} style={styles.bottomActions}>
           <Pressable style={styles.logoutBtn} onPress={handleSignOut}>
-            <Ionicons name="log-out-outline" size={18} color={Colors.primary} />
+            <Ionicons name="log-out-outline" size={18} color={Colors.error} />
             <Text style={styles.logoutText}>Sign Out</Text>
           </Pressable>
           <Pressable style={styles.resetButton} onPress={handleResetPress}>
@@ -679,79 +649,49 @@ export default function ProfileScreen() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  profileHeader: { paddingBottom: 12 },
-  heroCard: {
-    marginHorizontal: 20,
-    marginTop: 12,
-    backgroundColor: Colors.surface,
-    borderRadius: 28,
-    overflow: 'hidden',
-    ...Colors.shadow.large,
-  },
-  heroBanner: {
-    height: 110,
-    width: '100%',
-  },
-  heroBannerOverlay: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  heroBannerActions: {
+  profileHeader: { paddingBottom: 16 },
+  headerTopBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
-  heroBannerBtn: {
+  headerBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroLabel: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
-  heroBannerPattern: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  patternCircle: {
-    position: 'absolute',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#FFF',
+  headerTitle: {
+    fontSize: 17,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.text,
+    letterSpacing: -0.4,
   },
   notifDot: {
     position: 'absolute',
-    top: 5,
-    right: 5,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#FF3B30',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)',
+    top: 6,
+    right: 6,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: Colors.error,
   },
   avatarContainer: {
     alignSelf: 'center',
-    marginTop: -48,
-    marginBottom: 14,
+    marginTop: 8,
+    marginBottom: 16,
     position: 'relative',
   },
   avatarImage: {
     width: 90,
     height: 90,
     borderRadius: 45,
-    borderWidth: 4,
-    borderColor: Colors.surface,
+    ...Colors.shadow.medium,
   },
   avatarFallback: {
     width: 90,
@@ -760,9 +700,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 4,
-    borderColor: Colors.surface,
-    ...Colors.shadow.large,
+    ...Colors.shadow.medium,
   },
   avatarInitials: {
     fontSize: 32,
@@ -779,31 +717,31 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
+    backgroundColor: Colors.surface,
     ...Colors.shadow.small,
   },
   heroBody: {
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: 24,
+    paddingBottom: 8,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-  name: { fontSize: 26, fontFamily: 'Poppins_700Bold', color: Colors.text, letterSpacing: -0.3 },
+  name: { fontSize: 24, fontFamily: 'Poppins_700Bold', color: Colors.text, letterSpacing: 0.35 },
   username: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Poppins_400Regular',
     color: Colors.textSecondary,
-    marginTop: 1,
+    marginTop: 2,
   },
   idLocationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 10,
+    gap: 8,
+    marginTop: 12,
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
@@ -813,8 +751,8 @@ const styles = StyleSheet.create({
     gap: 4,
     backgroundColor: Colors.primary + '0D',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
   },
   cpidText: {
     fontFamily: 'Poppins_600SemiBold',
@@ -826,68 +764,67 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: Colors.secondary + '0D',
+    backgroundColor: Colors.backgroundSecondary,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
   },
-  locationChipText: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: Colors.secondary },
+  locationChipText: { fontSize: 11, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   tierBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 12,
+    gap: 4,
+    paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 12,
-    ...Colors.shadow.small,
+    borderRadius: 8,
   },
-  tierBadgeText: { fontSize: 12, fontFamily: 'Poppins_700Bold', letterSpacing: 0.2 },
+  tierBadgeText: { fontSize: 12, fontFamily: 'Poppins_600SemiBold', letterSpacing: 0.2 },
   bio: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Poppins_400Regular',
     color: Colors.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 12,
-    marginTop: 10,
-    lineHeight: 19,
+    paddingHorizontal: 16,
+    marginTop: 12,
+    lineHeight: 20,
   },
   completenessContainer: {
     width: '100%',
-    marginTop: 14,
-    paddingHorizontal: 8,
+    marginTop: 16,
+    paddingHorizontal: 4,
   },
   completenessHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 6,
   },
   completenessText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: 'Poppins_500Medium',
-    color: Colors.textTertiary,
+    color: Colors.textSecondary,
   },
   completenessPercent: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Poppins_700Bold',
     color: Colors.primary,
   },
   completenessBarBg: {
     width: '100%',
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: Colors.border + '80',
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.backgroundSecondary,
     overflow: 'hidden',
   },
   completenessBarFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 2,
     backgroundColor: Colors.primary,
   },
   profileActions: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 16,
+    marginTop: 20,
     width: '100%',
   },
   editProfileBtn: {
@@ -897,95 +834,115 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     backgroundColor: Colors.primary,
-    paddingVertical: 13,
-    borderRadius: 16,
-    ...Colors.shadow.medium,
+    paddingVertical: 12,
+    borderRadius: 12,
   },
-  editProfileText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: Colors.textInverse },
-  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 28 },
-  statCard: {
-    flex: 1,
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 18,
-    padding: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+  editProfileText: { fontSize: 15, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+  statsRow: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingVertical: 16,
     ...Colors.shadow.small,
   },
-  statNum: { fontSize: 24, fontFamily: 'Poppins_700Bold', color: Colors.primary, letterSpacing: -0.5 },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statDivider: {
+    width: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.divider,
+    marginVertical: 4,
+  },
+  statNum: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text, letterSpacing: -0.5 },
   statLabel: {
     fontSize: 11,
-    fontFamily: 'Poppins_600SemiBold',
+    fontFamily: 'Poppins_500Medium',
     color: Colors.textSecondary,
-    marginTop: 4,
+    marginTop: 2,
   },
-  section: { paddingHorizontal: 20, marginBottom: 28 },
-  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
-  sectionAccent: { width: 5, height: 22, borderRadius: 2.5, backgroundColor: Colors.primary },
-  sectionTitle: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text, letterSpacing: -0.3 },
+  section: { paddingHorizontal: 20, marginBottom: 24 },
+  sectionTitle: {
+    fontSize: 22,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+    letterSpacing: 0.35,
+    marginBottom: 12,
+    paddingLeft: 4,
+  },
   miniCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
-    gap: 12,
-    ...Colors.shadow.small,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 14,
   },
-  miniIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  miniTitle: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
-  miniSub: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
-  seeAllBtn: { alignItems: 'center', paddingVertical: 10 },
-  seeAllText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  miniIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  miniTitle: { fontSize: 15, fontFamily: 'Poppins_500Medium', color: Colors.text },
+  miniSub: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  seeAllBtn: { alignItems: 'center', paddingVertical: 12 },
+  seeAllText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
   menuCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 12,
     overflow: 'hidden',
-    ...Colors.shadow.medium,
+    ...Colors.shadow.small,
   },
-  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18, paddingHorizontal: 18, gap: 14, minHeight: 56 },
-  menuIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  menuLabel: { flex: 1, fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    gap: 14,
+    minHeight: 52,
+  },
+  menuIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  menuLabel: { flex: 1, fontSize: 15, fontFamily: 'Poppins_500Medium', color: Colors.text },
   menuValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Poppins_400Regular',
     color: Colors.textSecondary,
     marginRight: 4,
   },
   badge: {
-    minWidth: 22,
-    height: 22,
-    borderRadius: 11,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: Colors.error,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 6,
     marginRight: 4,
-    ...Colors.shadow.small,
   },
   badgeText: { fontSize: 11, fontFamily: 'Poppins_700Bold', color: '#FFF' },
-  divider: { height: 1, backgroundColor: Colors.border, marginLeft: 76 },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.divider,
+    marginLeft: 66,
+  },
   bottomActions: { paddingHorizontal: 20, marginBottom: 24, gap: 12 },
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 16,
-    paddingVertical: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingVertical: 14,
     ...Colors.shadow.small,
   },
-  logoutText: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  logoutText: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.error },
   resetButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 16,
-    paddingVertical: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingVertical: 14,
     ...Colors.shadow.small,
   },
   resetText: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: Colors.error },
@@ -1001,34 +958,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
     marginHorizontal: 20,
-    marginTop: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    borderRadius: 18,
-    borderWidth: 1.5,
+    marginBottom: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
     ...Colors.shadow.small,
   },
   upgradeIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   upgradeCtaTitle: {
     fontSize: 15,
-    fontFamily: 'Poppins_700Bold',
+    fontFamily: 'Poppins_600SemiBold',
   },
   upgradeCtaSub: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Poppins_400Regular',
     color: Colors.textSecondary,
-    marginTop: 2,
+    marginTop: 1,
   },
   quickActionRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 20,
+    gap: 10,
+    marginBottom: 24,
     paddingHorizontal: 20,
   },
   quickActionChip: {
@@ -1036,47 +992,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 18,
-    paddingHorizontal: 12,
-    borderRadius: 18,
-    backgroundColor: Colors.backgroundSecondary,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: Colors.surface,
     ...Colors.shadow.small,
   },
   quickActionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   quickActionText: {
     fontSize: 12,
-    fontFamily: 'Poppins_600SemiBold',
+    fontFamily: 'Poppins_500Medium',
     color: Colors.text,
     textAlign: 'center',
   },
   activityCard: {
-    marginHorizontal: 20,
-    marginBottom: 28,
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 18,
-    padding: 18,
-    gap: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    padding: 16,
+    gap: 10,
     ...Colors.shadow.small,
   },
   activityTitle: {
-    fontSize: 14,
-    fontFamily: 'Poppins_700Bold',
+    fontSize: 15,
+    fontFamily: 'Poppins_600SemiBold',
     color: Colors.text,
     marginBottom: 2,
   },
   activityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   activityText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Poppins_400Regular',
     color: Colors.textSecondary,
   },

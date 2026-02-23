@@ -214,7 +214,7 @@ export default function HomeScreen() {
             hitSlop={8}
             onPress={() => router.push('/notifications')}
           >
-            <Ionicons name="bell" size={22} color={Colors.text} />
+            <Ionicons name="notifications" size={22} color={Colors.text} />
             <View style={styles.notifDot} />
           </Pressable>
         </View>

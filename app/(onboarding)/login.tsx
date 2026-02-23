@@ -13,10 +13,12 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
 
   const isValid = email.includes('@') && password.length >= 6;
 
   const handleLogin = () => {
+    setError('');
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.push('/(onboarding)/location');
   };
@@ -30,11 +32,13 @@ export default function LoginScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
           <View style={styles.logoRow}>
-            <View style={styles.logoCircle}><Ionicons name="globe-outline" size={36} color={Colors.primary} /></View>
+            <View style={styles.logoCircle}><Ionicons name="globe-outline" size={34} color={Colors.primary} /></View>
           </View>
 
           <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>Sign in to continue your cultural journey.</Text>
+
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
           <View style={styles.form}>
             <View style={styles.inputGroup}>
@@ -78,7 +82,7 @@ export default function LoginScreen() {
 
           <View style={styles.socialDivider}>
             <View style={styles.divLine} />
-            <Text style={styles.divText}>or continue with</Text>
+            <Text style={styles.divText}>or</Text>
             <View style={styles.divLine} />
           </View>
 
@@ -88,7 +92,7 @@ export default function LoginScreen() {
               <Text style={styles.socialBtnText}>Google</Text>
             </Pressable>
             <Pressable style={styles.socialButton} onPress={() => router.push('/(onboarding)/location')}>
-              <Ionicons name="logo-apple" size={20} color="#000" />
+              <Ionicons name="logo-apple" size={20} color={Colors.text} />
               <Text style={styles.socialBtnText}>Apple</Text>
             </Pressable>
           </View>
@@ -103,33 +107,34 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1, backgroundColor: Colors.surface },
   header: { paddingHorizontal: 20, paddingVertical: 12 },
   scrollContent: { paddingHorizontal: 24, paddingBottom: 40 },
-  logoRow: { alignItems: 'center', marginBottom: 24 },
-  logoCircle: { width: 72, height: 72, borderRadius: 36, backgroundColor: Colors.primary + '12', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 28, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 8 },
-  subtitle: { fontSize: 15, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, lineHeight: 22, marginBottom: 28 },
-  form: { gap: 20, marginBottom: 28 },
+  logoRow: { alignItems: 'center', marginTop: 12, marginBottom: 28 },
+  logoCircle: { width: 68, height: 68, borderRadius: 34, backgroundColor: Colors.primaryGlow, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 34, fontWeight: '700' as const, color: Colors.text, textAlign: 'center', marginBottom: 8, letterSpacing: 0.37 },
+  subtitle: { fontSize: 15, fontWeight: '400' as const, color: Colors.textSecondary, lineHeight: 22, textAlign: 'center', marginBottom: 32 },
+  errorText: { fontSize: 14, fontWeight: '500' as const, color: Colors.error, textAlign: 'center', marginBottom: 16 },
+  form: { gap: 20, marginBottom: 20 },
   inputGroup: { gap: 6 },
-  label: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  label: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
   labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  forgotText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
-  inputWrap: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Colors.card, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 14, borderWidth: 1.5, borderColor: Colors.cardBorder },
-  input: { flex: 1, fontSize: 15, fontFamily: 'Poppins_400Regular', color: Colors.text },
-  submitBtn: { backgroundColor: Colors.primary, borderRadius: 16, paddingVertical: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 24 },
-  submitText: { fontSize: 17, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
-  socialDivider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
-  divLine: { flex: 1, height: 1, backgroundColor: Colors.border },
-  divText: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
-  socialRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  socialButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.card, borderRadius: 14, paddingVertical: 14, borderWidth: 1.5, borderColor: Colors.cardBorder },
-  socialBtnText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.text },
+  forgotText: { fontSize: 13, fontWeight: '600' as const, color: Colors.primary },
+  inputWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: Colors.surfaceSecondary, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 14, borderWidth: StyleSheet.hairlineWidth, borderColor: Colors.borderLight },
+  input: { flex: 1, fontSize: 16, fontWeight: '400' as const, color: Colors.text },
+  submitBtn: { backgroundColor: Colors.primary, borderRadius: 12, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 28 },
+  submitText: { fontSize: 17, fontWeight: '600' as const, color: '#FFFFFF' },
+  socialDivider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
+  divLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: Colors.borderLight },
+  divText: { fontSize: 13, fontWeight: '400' as const, color: Colors.textSecondary },
+  socialRow: { flexDirection: 'row', gap: 12, marginBottom: 28 },
+  socialButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.surface, borderRadius: 12, paddingVertical: 14, borderWidth: StyleSheet.hairlineWidth, borderColor: Colors.borderLight },
+  socialBtnText: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
   switchRow: { alignItems: 'center' },
-  switchText: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
-  switchLink: { color: Colors.primary, fontFamily: 'Poppins_600SemiBold' },
+  switchText: { fontSize: 14, fontWeight: '400' as const, color: Colors.textSecondary },
+  switchLink: { color: Colors.primary, fontWeight: '600' as const },
   rememberRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 },
-  rememberCheckbox: { width: 20, height: 20, borderRadius: 5, borderWidth: 2, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
+  rememberCheckbox: { width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, borderColor: Colors.borderLight, alignItems: 'center', justifyContent: 'center' },
   rememberChecked: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  rememberText: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  rememberText: { fontSize: 14, fontWeight: '400' as const, color: Colors.textSecondary },
 });
