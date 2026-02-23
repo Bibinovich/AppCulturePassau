@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./storage";
 import { generateCpid, lookupCpid, getAllRegistryEntries } from "./cpid";
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
 function p(val: string | string[]): string { return Array.isArray(val) ? val[0] : val; }
 
@@ -445,6 +446,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tickets/backfill-qr", async (_req: Request, res: Response) => {
     const count = await storage.backfillQRCodes();
     res.json({ message: `Backfilled ${count} tickets with QR codes` });
+  });
+
+  // === Stripe Payment Integration ===
+  app.get("/api/stripe/publishable-key", async (_req: Request, res: Response) => {
+    try {
+      const publishableKey = await getStripePublishableKey();
+      res.json({ publishableKey });
+    } catch (e: any) {
+      res.status(500).json({ error: "Failed to get Stripe publishable key" });
+    }
+  });
+
+  app.post("/api/stripe/create-payment-intent", async (req: Request, res: Response) => {
+    try {
+      const { amount, currency, ticketData } = req.body;
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ error: "Valid amount is required" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const amountInCents = Math.round(amount * 100);
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: (currency || 'aud').toLowerCase(),
+        metadata: {
+          eventId: ticketData?.eventId || '',
+          eventTitle: ticketData?.eventTitle || '',
+          tierName: ticketData?.tierName || '',
+          quantity: String(ticketData?.quantity || 1),
+          userId: ticketData?.userId || '',
+        },
+      });
+
+      const ticket = await storage.createTicket({
+        ...ticketData,
+        stripePaymentIntentId: paymentIntent.id,
+        paymentStatus: 'pending',
+        status: 'pending',
+      });
+
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+        ticketId: ticket.id,
+        ticketCode: ticket.ticketCode,
+      });
+    } catch (e: any) {
+      console.error('Create payment intent error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/stripe/confirm-payment", async (req: Request, res: Response) => {
+    try {
+      const { paymentIntentId, ticketId } = req.body;
+      if (!paymentIntentId || !ticketId) {
+        return res.status(400).json({ error: "paymentIntentId and ticketId required" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      if (paymentIntent.status === 'succeeded') {
+        const ticket = await storage.updateTicketPayment(ticketId, {
+          paymentStatus: 'paid',
+          status: 'confirmed',
+        });
+        return res.json({ success: true, ticket });
+      }
+
+      return res.json({
+        success: false,
+        status: paymentIntent.status,
+        message: `Payment status: ${paymentIntent.status}`,
+      });
+    } catch (e: any) {
+      console.error('Confirm payment error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/stripe/refund", async (req: Request, res: Response) => {
+    try {
+      const { ticketId } = req.body;
+      if (!ticketId) {
+        return res.status(400).json({ error: "ticketId is required" });
+      }
+
+      const ticket = await storage.getTicket(ticketId);
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      if (ticket.status === 'cancelled') {
+        return res.status(400).json({ error: "Ticket is already cancelled" });
+      }
+
+      if (ticket.status === 'used') {
+        return res.status(400).json({ error: "Cannot refund a scanned/used ticket" });
+      }
+
+      if (!ticket.stripePaymentIntentId) {
+        const cancelled = await storage.cancelTicket(ticketId);
+        return res.json({
+          success: true,
+          message: "Ticket cancelled (no Stripe payment to refund)",
+          ticket: cancelled,
+        });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const refund = await stripe.refunds.create({
+        payment_intent: ticket.stripePaymentIntentId,
+      });
+
+      const updated = await storage.updateTicketPayment(ticketId, {
+        status: 'cancelled',
+        paymentStatus: 'refunded',
+        stripeRefundId: refund.id,
+      });
+
+      return res.json({
+        success: true,
+        message: "Payment refunded and ticket cancelled",
+        refundId: refund.id,
+        ticket: updated,
+      });
+    } catch (e: any) {
+      console.error('Refund error:', e);
+      res.status(500).json({ error: e.message });
+    }
   });
 
   app.get("/api/dashboard/stats", async (_req: Request, res: Response) => {

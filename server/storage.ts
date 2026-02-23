@@ -487,6 +487,16 @@ export class DatabaseStorage {
     return t;
   }
 
+  async updateTicketPayment(id: string, data: Partial<{
+    paymentStatus: string;
+    status: string;
+    stripePaymentIntentId: string;
+    stripeRefundId: string;
+  }>): Promise<Ticket | undefined> {
+    const [t] = await db.update(tickets).set(data).where(eq(tickets.id, id)).returning();
+    return t;
+  }
+
   async getTicketByCode(code: string): Promise<Ticket | undefined> {
     const [t] = await db.select().from(tickets).where(eq(tickets.ticketCode, code));
     return t;

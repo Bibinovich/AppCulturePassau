@@ -458,6 +458,9 @@ export const tickets = pgTable(
     platformFee: doublePrecision("platform_fee"),
     stripeFee: doublePrecision("stripe_fee"),
     organizerAmount: doublePrecision("organizer_amount"),
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+    stripeRefundId: text("stripe_refund_id"),
+    paymentStatus: text("payment_status").default("pending"),
     culturePassId: varchar("culture_pass_id").unique(),
     createdAt: timestamp("created_at").defaultNow(),
   }
