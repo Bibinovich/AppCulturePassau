@@ -40,6 +40,7 @@ export const userRoleEnum = pgEnum("user_role", [
 
 export const membershipTierEnum = pgEnum("membership_tier", [
   "free",
+  "plus",
   "pro",
   "vip",
 ]);
@@ -232,12 +233,20 @@ export const memberships = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
 
-    tier: membershipTierEnum("tier").default("free"),
+    tier: text("tier").default("free"),
+
+    stripeSubscriptionId: varchar("stripe_subscription_id"),
+    stripeCustomerId: varchar("stripe_customer_id"),
+
+    status: text("status").default("active"),
 
     startDate: timestamp("start_date").defaultNow(),
     endDate: timestamp("end_date"),
 
-    status: statusEnum("status").default("active"),
+    cashbackMultiplier: doublePrecision("cashback_multiplier").default(1.0),
+    badgeType: varchar("badge_type").default("none"),
+    billingPeriod: varchar("billing_period").default("monthly"),
+    priceCents: integer("price_cents").default(0),
 
     createdAt: timestamp("created_at").defaultNow(),
   },

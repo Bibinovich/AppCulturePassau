@@ -412,6 +412,68 @@ export class DatabaseStorage {
     return m;
   }
 
+  async getMembershipByStripeSubscription(subscriptionId: string): Promise<Membership | undefined> {
+    const [m] = await db.select().from(memberships).where(eq(memberships.stripeSubscriptionId, subscriptionId));
+    return m;
+  }
+
+  async cancelMembership(userId: string): Promise<Membership | undefined> {
+    const existing = await this.getMembership(userId);
+    if (!existing) return undefined;
+    const [m] = await db.update(memberships).set({
+      status: "cancelled",
+      tier: "free",
+      cashbackMultiplier: 1.0,
+      badgeType: "none",
+    }).where(eq(memberships.id, existing.id)).returning();
+    return m;
+  }
+
+  async activatePlusMembership(userId: string, data: {
+    stripeSubscriptionId?: string;
+    stripeCustomerId?: string;
+    billingPeriod: string;
+    priceCents: number;
+    endDate?: Date;
+  }): Promise<Membership> {
+    const existing = await this.getMembership(userId);
+    if (existing) {
+      const [m] = await db.update(memberships).set({
+        tier: "plus",
+        status: "active",
+        stripeSubscriptionId: data.stripeSubscriptionId,
+        stripeCustomerId: data.stripeCustomerId,
+        cashbackMultiplier: 1.02,
+        badgeType: "plus",
+        billingPeriod: data.billingPeriod,
+        priceCents: data.priceCents,
+        endDate: data.endDate,
+        startDate: new Date(),
+      }).where(eq(memberships.id, existing.id)).returning();
+      return m;
+    }
+    const [m] = await db.insert(memberships).values({
+      userId,
+      tier: "plus",
+      status: "active",
+      stripeSubscriptionId: data.stripeSubscriptionId,
+      stripeCustomerId: data.stripeCustomerId,
+      cashbackMultiplier: 1.02,
+      badgeType: "plus",
+      billingPeriod: data.billingPeriod,
+      priceCents: data.priceCents,
+      endDate: data.endDate,
+    } as any).returning();
+    return m;
+  }
+
+  async getMemberCount(): Promise<number> {
+    const result = await db.select().from(memberships).where(
+      and(eq(memberships.status, "active"), sql`${memberships.tier} = 'plus'`)
+    );
+    return result.length;
+  }
+
   // === Notifications ===
   async getNotifications(userId: string): Promise<Notification[]> {
     return db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
