@@ -141,12 +141,13 @@ export default function ExploreScreen() {
   }, [search, selectedCategory, sortMode]);
 
   const handleShareEvent = useCallback(async (event: SampleEvent) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await Share.share({
-        message: `Check out ${event.title} on CulturePass! ${event.venue} - ${formatDate(event.date)}`,
+        title: event.title,
+        message: `Check out ${event.title} on CulturePass! ${event.venue} - ${formatDate(event.date)}. ${event.priceLabel}`,
       });
     } catch {
-      // Silently ignore share cancellation / errors
     }
   }, []);
 

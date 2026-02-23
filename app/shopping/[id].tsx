@@ -1,9 +1,10 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Linking, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Linking, Image, Share } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sampleShopping } from '@/data/mockData';
 import Colors from '@/constants/colors';
+import * as Haptics from 'expo-haptics';
 
 export default function ShoppingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -12,12 +13,22 @@ export default function ShoppingDetailScreen() {
   const store = sampleShopping.find(s => s.id === id);
   if (!store) return <View style={styles.container}><Text>Store not found</Text></View>;
 
+  const handleShare = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await Share.share({
+        title: `${store.name} on CulturePass`,
+        message: `Check out ${store.name} on CulturePass! ${store.category} - ${store.location}. Rating: ${store.rating}/5 (${store.reviews} reviews).${store.deals.length > 0 ? ` ${store.deals.length} deals available!` : ''}`,
+      });
+    } catch {}
+  };
+
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={8}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>{store.name}</Text>
-        <Pressable hitSlop={8}><Ionicons name="share-outline" size={22} color={Colors.text} /></Pressable>
+        <Pressable hitSlop={8} onPress={handleShare}><Ionicons name="share-outline" size={22} color={Colors.text} /></Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>

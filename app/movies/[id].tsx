@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Image, Share } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,16 @@ export default function MovieDetailScreen() {
 
   if (!movie) return <View style={styles.container}><Text>Movie not found</Text></View>;
 
+  const handleShare = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await Share.share({
+        title: movie.title,
+        message: `Check out ${movie.title} on CulturePass! ${movie.genre.join(', ')} - ${movie.duration}. Rating: ${movie.imdbScore}/10. Book tickets now!`,
+      });
+    } catch {}
+  };
+
   const handleBook = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert('Booking Confirmed!', `Your ticket for "${movie.title}" at ${movie.showtimes[selectedCinema].cinema} (${selectedTime}) has been reserved.\n\nTotal: $${movie.showtimes[selectedCinema].price}\n\nA QR code ticket has been sent to your profile.`, [{ text: 'View Ticket', onPress: () => router.back() }]);
@@ -27,7 +37,7 @@ export default function MovieDetailScreen() {
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={8}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>{movie.title}</Text>
-        <Pressable hitSlop={8}><Ionicons name="share-outline" size={22} color={Colors.text} /></Pressable>
+        <Pressable hitSlop={8} onPress={handleShare}><Ionicons name="share-outline" size={22} color={Colors.text} /></Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>

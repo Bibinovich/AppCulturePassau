@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Linking, ActivityIndicator, Share } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -139,8 +139,14 @@ export default function ProfileDetailScreen() {
             </Pressable>
             <Pressable
               style={styles.shareButton}
-              onPress={() => {
+              onPress={async () => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                try {
+                  await Share.share({
+                    title: `${profile.name} on CulturePass`,
+                    message: `Check out ${profile.name} on CulturePass!${profile.category ? ` ${profile.category}.` : ''}${profile.location ? ` ${profile.location}.` : ''} Join and connect with this ${profile.entityType}!`,
+                  });
+                } catch {}
               }}
             >
               <Ionicons name="share-outline" size={20} color="#FFF" />

@@ -30,6 +30,28 @@ Development uses parallel processes for the Expo Metro bundler and the Express A
 
 Shared types between frontend and backend ensure type consistency. Path aliases simplify imports. The application includes a global `ErrorBoundary` for graceful error handling. An onboarding gate manages access to the main application. A `useDemoUserId()` hook facilitates testing with a sample user. Entity types are differentiated with unique colors and icons.
 
+## Recent Changes (Feb 2026)
+
+### Ticket Purchase Flow
+- Full ticket purchase modal on event detail screen (`app/event/[id].tsx`) with tier selection, quantity picker, and wallet payment
+- Ticket detail screen (`app/tickets/[id].tsx`) with QR code visualization, event info, share and wallet save options
+- Enhanced tickets list screen (`app/tickets/index.tsx`) with tappable cards, share buttons, and "Add to Wallet" functionality
+- Server-side Apple Wallet (.pkpass) and Google Wallet pass generation endpoints at `/api/tickets/:id/wallet/apple` and `/api/tickets/:id/wallet/google`
+
+### Share Functionality
+- Fixed Share buttons across 14 screens using React Native `Share.share()` API with proper error handling, haptic feedback, and cross-platform `title` + `message` params
+
+### Web Dashboard
+- Admin dashboard at `/dashboard` route (served from `server/templates/dashboard.html`)
+- Login with username "admin" and password from `ADMIN_USER_PASSWORD` env secret (fallback: "admin123")
+- Dashboard sections: Overview (stats, charts), Tickets management, Events, Users, Perks, Analytics
+- Login endpoint: `POST /api/dashboard/login`
+
+### API Endpoints Added
+- `POST /api/dashboard/login` - Dashboard admin authentication
+- `GET /api/tickets/:id/wallet/apple` - Apple Wallet pass data
+- `GET /api/tickets/:id/wallet/google` - Google Wallet pass data
+
 ## External Dependencies
 
 -   **PostgreSQL Database**: Primary database, configured via `DATABASE_URL`.

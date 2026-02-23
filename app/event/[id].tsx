@@ -7,6 +7,8 @@ import {
   Platform,
   Share,
   Image,
+  Modal,
+  Alert,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +20,8 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/query-client';
 
 type SampleEvent = (typeof sampleEvents)[number];
 
@@ -85,6 +89,65 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
   const saved = isEventSaved(event.id);
 
   const [now, setNow] = useState(() => new Date());
+  const [ticketModalVisible, setTicketModalVisible] = useState(false);
+  const [selectedTierIndex, setSelectedTierIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+
+  const usersQuery = useQuery<any[]>({ queryKey: ['/api/users'] });
+
+  const purchaseMutation = useMutation({
+    mutationFn: async (body: Record<string, unknown>) => {
+      const res = await apiRequest('POST', '/api/tickets', body);
+      return await res.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tickets'] });
+      setTicketModalVisible(false);
+      Alert.alert('Ticket Purchased!', 'Your ticket has been confirmed.', [
+        {
+          text: 'View Ticket',
+          onPress: () => router.push(`/tickets/${data.id}` as any),
+        },
+        { text: 'OK' },
+      ]);
+    },
+    onError: (error: Error) => {
+      Alert.alert('Purchase Failed', error.message);
+    },
+  });
+
+  const selectedTier = event.tiers[selectedTierIndex];
+  const maxQty = Math.min(10, selectedTier?.available ?? 1);
+  const totalPrice = (selectedTier?.price ?? 0) * quantity;
+
+  const handlePurchase = useCallback(() => {
+    const users = usersQuery.data;
+    if (!users || users.length === 0) {
+      Alert.alert('Error', 'Unable to load user data. Please try again.');
+      return;
+    }
+    const userId = users[0].id;
+    purchaseMutation.mutate({
+      userId,
+      eventId: event.id,
+      eventTitle: event.title,
+      eventDate: event.date,
+      eventTime: event.time,
+      eventVenue: event.venue,
+      tierName: selectedTier.name,
+      quantity,
+      totalPrice,
+      currency: 'AUD',
+      imageColor: (event as any).imageColor ?? Colors.primary,
+    });
+  }, [usersQuery.data, event, selectedTier, quantity, totalPrice, purchaseMutation]);
+
+  const openTicketModal = useCallback((tierIdx?: number) => {
+    setSelectedTierIndex(tierIdx ?? 0);
+    setQuantity(1);
+    setTicketModalVisible(true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);
@@ -150,8 +213,8 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
   }, [event.id, toggleSaveEvent]);
 
   const handleGetTickets = useCallback(() => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, []);
+    openTicketModal();
+  }, [openTicketModal]);
 
   return (
     <View style={styles.container}>
@@ -305,15 +368,18 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
         <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.section}>
           <Text style={styles.sectionTitle}>Tickets</Text>
           {event.tiers.map((tier, idx) => (
-            <View key={`${tier.name}-${idx}`} style={styles.tierCard}>
+            <Pressable key={`${tier.name}-${idx}`} style={styles.tierCard} onPress={() => openTicketModal(idx)}>
               <View style={styles.tierInfo}>
                 <Text style={styles.tierName}>{tier.name}</Text>
                 <Text style={styles.tierAvail}>{tier.available} available</Text>
               </View>
-              <Text style={styles.tierPrice}>
-                {tier.price === 0 ? 'Free' : `$${tier.price}`}
-              </Text>
-            </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={styles.tierPrice}>
+                  {tier.price === 0 ? 'Free' : `$${tier.price}`}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={Colors.textTertiary} />
+              </View>
+            </Pressable>
           ))}
         </Animated.View>
 
@@ -420,6 +486,116 @@ function EventDetail({ event, topInset, bottomInset }: EventDetailProps) {
           <Text style={styles.buyText}>Get Tickets</Text>
         </Pressable>
       </View>
+
+      <Modal
+        visible={ticketModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setTicketModalVisible(false)}
+      >
+        <Pressable style={modalStyles.overlay} onPress={() => setTicketModalVisible(false)}>
+          <Pressable style={modalStyles.sheet} onPress={(e) => e.stopPropagation()}>
+            <View style={modalStyles.handle} />
+            <View style={modalStyles.header}>
+              <Text style={modalStyles.headerTitle}>Select Tickets</Text>
+              <Pressable onPress={() => setTicketModalVisible(false)}>
+                <Ionicons name="close-circle" size={28} color={Colors.textTertiary} />
+              </Pressable>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={modalStyles.content}>
+              <Text style={modalStyles.sectionLabel}>Ticket Type</Text>
+              {event.tiers.map((tier, idx) => {
+                const isSelected = idx === selectedTierIndex;
+                return (
+                  <Pressable
+                    key={`modal-tier-${idx}`}
+                    style={[
+                      modalStyles.tierOption,
+                      isSelected && modalStyles.tierOptionSelected,
+                    ]}
+                    onPress={() => {
+                      setSelectedTierIndex(idx);
+                      setQuantity(1);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                  >
+                    <View style={modalStyles.tierOptionLeft}>
+                      <View style={[modalStyles.radioOuter, isSelected && modalStyles.radioOuterSelected]}>
+                        {isSelected && <View style={modalStyles.radioInner} />}
+                      </View>
+                      <View>
+                        <Text style={[modalStyles.tierOptionName, isSelected && { color: Colors.primary }]}>{tier.name}</Text>
+                        <Text style={modalStyles.tierOptionAvail}>{tier.available} available</Text>
+                      </View>
+                    </View>
+                    <Text style={[modalStyles.tierOptionPrice, isSelected && { color: Colors.primary }]}>
+                      {tier.price === 0 ? 'Free' : `$${tier.price.toFixed(2)}`}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+
+              <Text style={[modalStyles.sectionLabel, { marginTop: 24 }]}>Quantity</Text>
+              <View style={modalStyles.quantityRow}>
+                <Pressable
+                  style={[modalStyles.quantityBtn, quantity <= 1 && modalStyles.quantityBtnDisabled]}
+                  onPress={() => {
+                    if (quantity > 1) {
+                      setQuantity(q => q - 1);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                  }}
+                >
+                  <Ionicons name="remove" size={20} color={quantity <= 1 ? Colors.textTertiary : Colors.primary} />
+                </Pressable>
+                <Text style={modalStyles.quantityText}>{quantity}</Text>
+                <Pressable
+                  style={[modalStyles.quantityBtn, quantity >= maxQty && modalStyles.quantityBtnDisabled]}
+                  onPress={() => {
+                    if (quantity < maxQty) {
+                      setQuantity(q => q + 1);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                  }}
+                >
+                  <Ionicons name="add" size={20} color={quantity >= maxQty ? Colors.textTertiary : Colors.primary} />
+                </Pressable>
+              </View>
+
+              <View style={modalStyles.totalRow}>
+                <Text style={modalStyles.totalLabel}>Total</Text>
+                <Text style={modalStyles.totalValue}>
+                  {totalPrice === 0 ? 'Free' : `A$${totalPrice.toFixed(2)}`}
+                </Text>
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [
+                  modalStyles.purchaseBtn,
+                  pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+                  purchaseMutation.isPending && { opacity: 0.6 },
+                ]}
+                onPress={handlePurchase}
+                disabled={purchaseMutation.isPending}
+              >
+                {purchaseMutation.isPending ? (
+                  <Text style={modalStyles.purchaseBtnText}>Processing...</Text>
+                ) : (
+                  <>
+                    <Ionicons name="ticket" size={20} color="#FFF" />
+                    <Text style={modalStyles.purchaseBtnText}>
+                      Purchase {quantity} {quantity === 1 ? 'Ticket' : 'Tickets'}
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+
+              <View style={{ height: bottomInset + 20 }} />
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -728,4 +904,168 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   buyText: { fontSize: 16, fontFamily: 'Poppins_600SemiBold', color: '#FFF' },
+});
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '80%',
+  },
+  handle: {
+    width: 36,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: Colors.textTertiary,
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  sectionLabel: {
+    fontSize: 13,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  tierOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  tierOptionSelected: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary + '08',
+  },
+  tierOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: Colors.textTertiary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioOuterSelected: {
+    borderColor: Colors.primary,
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: Colors.primary,
+  },
+  tierOptionName: {
+    fontSize: 15,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.text,
+  },
+  tierOptionAvail: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textSecondary,
+    marginTop: 1,
+  },
+  tierOptionPrice: {
+    fontSize: 17,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+  },
+  quantityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 24,
+    marginBottom: 24,
+  },
+  quantityBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  quantityBtnDisabled: {
+    opacity: 0.4,
+  },
+  quantityText: {
+    fontSize: 22,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+    minWidth: 40,
+    textAlign: 'center',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+    marginBottom: 16,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontFamily: 'Poppins_600SemiBold',
+    color: Colors.textSecondary,
+  },
+  totalValue: {
+    fontSize: 22,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+  },
+  purchaseBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    width: '100%',
+  },
+  purchaseBtnText: {
+    fontSize: 16,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#FFF',
+  },
 });

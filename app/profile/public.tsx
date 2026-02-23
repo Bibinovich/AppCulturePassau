@@ -208,9 +208,10 @@ export default function PublicProfileScreen() {
   const hasDetails   = !!(locationText || user?.website || user?.phone);
 
   const handleShare = useCallback(async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await Share.share({
+        title: `${displayName} on CulturePass`,
         message: `Check out ${displayName}'s profile on CulturePass!\n\nCPID: ${user?.culturePassId}\n@${user?.username}`,
       });
     } catch { /* noop */ }

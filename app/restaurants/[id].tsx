@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Linking, Image } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Linking, Image, Share } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +14,16 @@ export default function RestaurantDetailScreen() {
 
   if (!rest) return <View style={styles.container}><Text>Restaurant not found</Text></View>;
 
+  const handleShare = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await Share.share({
+        title: `${rest.name} on CulturePass`,
+        message: `Check out ${rest.name} on CulturePass! ${rest.cuisine} - ${rest.priceRange}. ${rest.address}. Rating: ${rest.rating}/5 (${rest.reviews} reviews).`,
+      });
+    } catch {}
+  };
+
   const handleReserve = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert('Reservation Request', `Your reservation request at ${rest.name} has been submitted. You will receive a confirmation shortly.`, [{ text: 'OK' }]);
@@ -24,7 +34,7 @@ export default function RestaurantDetailScreen() {
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={8}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>{rest.name}</Text>
-        <Pressable hitSlop={8}><Ionicons name="share-outline" size={22} color={Colors.text} /></Pressable>
+        <Pressable hitSlop={8} onPress={handleShare}><Ionicons name="share-outline" size={22} color={Colors.text} /></Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>

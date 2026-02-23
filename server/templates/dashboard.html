@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CulturePass Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#007AFF;--primary-light:#409CFF;--secondary:#5856D6;--accent:#FF9500;--bg:#F2F2F7;--surface:#FFF;--text:#000;--text2:#8E8E93;--text3:#AEAEB2;--border:#E5E5EA;--success:#34C759;--error:#FF3B30;--warning:#FF9F0A;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,0.04),0 2px 8px rgba(0,0,0,0.08)}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+a{color:var(--primary);text-decoration:none}
+
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sidebar-logo svg{width:28px;height:28px;fill:var(--primary)}
+.sidebar-logo h1{font-size:18px;font-weight:700;color:var(--text)}
+.sidebar-logo span{font-size:10px;font-weight:600;color:var(--text2);background:var(--bg);padding:2px 6px;border-radius:4px;margin-left:4px}
+.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius);cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);transition:all 0.15s}
+.nav-item:hover{background:var(--bg);color:var(--text)}
+.nav-item.active{background:var(--primary);color:#FFF}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.nav-item.active svg{fill:#FFF}
+.nav-section{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;padding:16px 14px 6px}
+
+.main{margin-left:260px;padding:24px 32px 40px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.topbar h2{font-size:28px;font-weight:700;letter-spacing:-0.3px}
+.topbar-actions{display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all 0.15s}
+.btn-primary{background:var(--primary);color:#FFF}
+.btn-primary:hover{opacity:0.9}
+.btn-outline{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--bg)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:var(--error);color:#FFF}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.stat-card .label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px}
+.stat-card .value{font-size:28px;font-weight:700;margin-top:6px}
+.stat-card .change{font-size:12px;font-weight:600;margin-top:4px}
+.stat-card .change.up{color:var(--success)}
+.stat-card .change.down{color:var(--error)}
+.stat-card .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.card-header h3{font-size:16px;font-weight:700}
+.card-body{padding:20px}
+.card-body.no-pad{padding:0}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;padding:10px 16px;border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,0,0,0.01)}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.badge-success{background:rgba(52,199,89,0.12);color:var(--success)}
+.badge-warning{background:rgba(255,159,10,0.12);color:var(--warning)}
+.badge-error{background:rgba(255,59,48,0.12);color:var(--error)}
+.badge-info{background:rgba(0,122,255,0.12);color:var(--primary)}
+.badge-neutral{background:var(--bg);color:var(--text2)}
+
+.ticket-code{font-family:SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:600;color:var(--primary);background:rgba(0,122,255,0.06);padding:2px 8px;border-radius:4px}
+
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#FFF;font-size:12px;font-weight:700;flex-shrink:0}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-state svg{width:48px;height:48px;fill:var(--text3);margin-bottom:12px}
+.empty-state h4{font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px}
+.empty-state p{font-size:13px}
+
+.tab-nav{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 20px}
+.tab-btn{padding:10px 16px;font-size:13px;font-weight:600;color:var(--text2);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-content{display:none}.tab-content.active{display:block}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:16px;width:480px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:17px;font-weight:700}
+.modal-close{width:28px;height:28px;border-radius:14px;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2)}
+.modal-body{padding:20px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.form-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s}
+.form-input:focus{border-color:var(--primary)}
+.form-input::placeholder{color:var(--text3)}
+select.form-input{appearance:none;background:url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238E8E93'/%3E%3C/svg%3E") no-repeat right 12px center var(--surface)}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#FFF;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;z-index:200;transform:translateY(100px);opacity:0;transition:all 0.3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+.chart-bar{display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px}
+.chart-bar .bar{flex:1;background:var(--primary);border-radius:4px 4px 0 0;min-height:4px;transition:height 0.5s;position:relative}
+.chart-bar .bar:hover{opacity:0.8}
+.chart-labels{display:flex;gap:6px;padding:6px 4px 0}
+.chart-labels span{flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500}
+
+.search-input{padding:8px 14px 8px 36px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;width:240px;outline:none;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 12px center}
+.search-input:focus{border-color:var(--primary)}
+
+@media(max-width:768px){.sidebar{width:0;overflow:hidden}.main{margin-left:0}.stats-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+
+.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+.login-card{background:var(--surface);border-radius:16px;padding:40px;width:380px;max-width:90vw;box-shadow:var(--shadow);text-align:center}
+.login-card h2{font-size:24px;font-weight:700;margin-bottom:4px}
+.login-card p{font-size:14px;color:var(--text2);margin-bottom:24px}
+.login-card .form-group{text-align:left}
+</style>
+</head>
+<body>
+
+<div id="login-page" class="login-page">
+<div class="login-card">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="#007AFF" style="margin-bottom:16px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+<h2>CulturePass</h2>
+<p>Dashboard Login</p>
+<div class="form-group">
+<label>Username</label>
+<input type="text" id="login-user" class="form-input" placeholder="admin" value="admin">
+</div>
+<div class="form-group">
+<label>Password</label>
+<input type="password" id="login-pass" class="form-input" placeholder="Password">
+</div>
+<button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;margin-top:8px" onclick="doLogin()">Sign In</button>
+<p id="login-error" style="color:var(--error);font-size:12px;margin-top:12px;display:none"></p>
+</div>
+</div>
+
+<div id="dashboard" style="display:none">
+<div class="sidebar">
+<div class="sidebar-logo">
+<svg viewBox="0 0 24 24" fill="#007AFF"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+<h1>CulturePass<span>Admin</span></h1>
+</div>
+<nav class="sidebar-nav">
+<div class="nav-section">Overview</div>
+<div class="nav-item active" data-page="overview" onclick="switchPage('overview',this)">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+Dashboard
+</div>
+<div class="nav-section">Management</div>
+<div class="nav-item" data-page="tickets" onclick="switchPage('tickets',this)">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 10V6a2 2 0 00-2-2H4c-1.1 0-1.99.9-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-9 5.5h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg>
+Tickets
+</div>
+<div class="nav-item" data-page="events" onclick="switchPage('events',this)">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 002 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+Events
+</div>
+<div class="nav-item" data-page="users" onclick="switchPage('users',this)">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+Users
+</div>
+<div class="nav-item" data-page="perks" onclick="switchPage('perks',this)">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 00-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/></svg>
+Perks
+</div>
+<div class="nav-section">Analytics</div>
+<div class="nav-item" data-page="analytics" onclick="switchPage('analytics',this)">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+Analytics
+</div>
+</nav>
+<div style="padding:16px;border-top:1px solid var(--border)">
+<div class="nav-item" onclick="doLogout()">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+Sign Out
+</div>
+</div>
+</div>
+
+<div class="main">
+<!-- Overview Page -->
+<div id="page-overview" class="page-content">
+<div class="topbar">
+<h2>Dashboard</h2>
+<div class="topbar-actions">
+<input type="text" class="search-input" placeholder="Search..." id="global-search">
+<button class="btn btn-primary" onclick="refreshData()">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+Refresh
+</button>
+</div>
+</div>
+
+<div class="stats-grid" id="stats-grid"></div>
+
+<div class="grid-2">
+<div class="card">
+<div class="card-header"><h3>Recent Tickets</h3><a href="#" onclick="switchPage('tickets',document.querySelector('[data-page=tickets]'));return false" style="font-size:13px;font-weight:600">View All</a></div>
+<div class="card-body no-pad"><table><thead><tr><th>Event</th><th>Code</th><th>Status</th><th>Amount</th></tr></thead><tbody id="recent-tickets"></tbody></table></div>
+</div>
+<div class="card">
+<div class="card-header"><h3>Revenue (7 Days)</h3></div>
+<div class="card-body">
+<div class="chart-bar" id="revenue-chart"></div>
+<div class="chart-labels" id="revenue-labels"></div>
+</div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-header"><h3>Active Perks</h3><a href="#" onclick="switchPage('perks',document.querySelector('[data-page=perks]'));return false" style="font-size:13px;font-weight:600">View All</a></div>
+<div class="card-body no-pad"><table><thead><tr><th>Title</th><th>Type</th><th>Provider</th><th>Redemptions</th><th>Status</th></tr></thead><tbody id="perks-table"></tbody></table></div>
+</div>
+</div>
+
+<!-- Tickets Page -->
+<div id="page-tickets" class="page-content" style="display:none">
+<div class="topbar">
+<h2>Tickets</h2>
+<div class="topbar-actions">
+<input type="text" class="search-input" placeholder="Search tickets..." id="ticket-search" oninput="filterTickets()">
+<select class="form-input" style="width:140px;padding:8px 12px;font-size:13px" id="ticket-filter" onchange="filterTickets()">
+<option value="all">All Status</option>
+<option value="confirmed">Confirmed</option>
+<option value="used">Used</option>
+<option value="cancelled">Cancelled</option>
+</select>
+</div>
+</div>
+<div class="card">
+<div class="card-body no-pad">
+<table><thead><tr><th>Event</th><th>Ticket Code</th><th>Tier</th><th>Qty</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+<tbody id="tickets-table"></tbody></table>
+</div>
+</div>
+</div>
+
+<!-- Events Page -->
+<div id="page-events" class="page-content" style="display:none">
+<div class="topbar">
+<h2>Events Overview</h2>
+</div>
+<div class="stats-grid" id="event-stats"></div>
+<div class="card">
+<div class="card-header"><h3>All Events</h3></div>
+<div class="card-body no-pad">
+<table><thead><tr><th>Title</th><th>Date</th><th>Venue</th><th>Category</th><th>Price</th><th>Attending</th><th>Capacity</th></tr></thead>
+<tbody id="events-table"></tbody></table>
+</div>
+</div>
+</div>
+
+<!-- Users Page -->
+<div id="page-users" class="page-content" style="display:none">
+<div class="topbar"><h2>Users</h2></div>
+<div class="card">
+<div class="card-body no-pad">
+<table><thead><tr><th>User</th><th>Email</th><th>Location</th><th>Role</th><th>Verified</th><th>Joined</th></tr></thead>
+<tbody id="users-table"></tbody></table>
+</div>
+</div>
+</div>
+
+<!-- Perks Page -->
+<div id="page-perks" class="page-content" style="display:none">
+<div class="topbar"><h2>Perks & Benefits</h2></div>
+<div class="card">
+<div class="card-body no-pad">
+<table><thead><tr><th>Title</th><th>Type</th><th>Provider</th><th>Discount</th><th>Used / Limit</th><th>Category</th><th>Status</th></tr></thead>
+<tbody id="perks-full-table"></tbody></table>
+</div>
+</div>
+</div>
+
+<!-- Analytics Page -->
+<div id="page-analytics" class="page-content" style="display:none">
+<div class="topbar"><h2>Analytics</h2></div>
+<div class="stats-grid" id="analytics-stats"></div>
+<div class="grid-2">
+<div class="card">
+<div class="card-header"><h3>Tickets by Status</h3></div>
+<div class="card-body" id="ticket-status-chart"></div>
+</div>
+<div class="card">
+<div class="card-header"><h3>Top Events by Attendance</h3></div>
+<div class="card-body no-pad">
+<table><thead><tr><th>Event</th><th>Tickets Sold</th><th>Revenue</th></tr></thead>
+<tbody id="top-events-table"></tbody></table>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="ticket-modal">
+<div class="modal">
+<div class="modal-header"><h3>Ticket Details</h3><button class="modal-close" onclick="closeModal('ticket-modal')">&times;</button></div>
+<div class="modal-body" id="ticket-modal-body"></div>
+</div>
+</div>
+
+<script>
+const API = '';
+let allTickets = [];
+let allUsers = [];
+let allPerks = [];
+
+async function api(path) {
+  const r = await fetch(API + path);
+  if (!r.ok) throw new Error(`API error: ${r.status}`);
+  return r.json();
+}
+
+async function apiPost(path, body) {
+  const r = await fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if (!r.ok) throw new Error(`API error: ${r.status}`);
+  return r.json();
+}
+
+async function apiPut(path) {
+  const r = await fetch(API + path, {method:'PUT'});
+  if (!r.ok) throw new Error(`API error: ${r.status}`);
+  return r.json();
+}
+
+function doLogin() {
+  const user = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+  if (user === 'admin' && pass) {
+    fetch(API + '/api/dashboard/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: user, password: pass})
+    }).then(r => r.json()).then(data => {
+      if (data.success) {
+        sessionStorage.setItem('dash_auth', '1');
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        loadDashboard();
+      } else {
+        const el = document.getElementById('login-error');
+        el.textContent = data.error || 'Invalid credentials';
+        el.style.display = 'block';
+      }
+    }).catch(() => {
+      const el = document.getElementById('login-error');
+      el.textContent = 'Connection error. Please try again.';
+      el.style.display = 'block';
+    });
+  } else {
+    const el = document.getElementById('login-error');
+    el.textContent = 'Please enter username and password';
+    el.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('dash_auth');
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-page').style.display = '';
+  document.getElementById('login-pass').value = '';
+}
+
+function switchPage(page, el) {
+  document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+  document.getElementById('page-' + page).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function statusBadge(status) {
+  const map = {confirmed:'success',active:'success',used:'neutral',cancelled:'error',expired:'warning',pending:'warning',inactive:'neutral'};
+  return `<span class="badge badge-${map[status]||'neutral'}">${status||'unknown'}</span>`;
+}
+
+function formatDate(d) {
+  if (!d) return '-';
+  try { return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); } catch { return d; }
+}
+
+function formatMoney(v) {
+  return '$' + (Number(v)||0).toFixed(2);
+}
+
+async function loadDashboard() {
+  try {
+    [allUsers, allPerks] = await Promise.all([api('/api/users'), api('/api/perks')]);
+    if (allUsers.length > 0) {
+      const userId = allUsers[0].id;
+      allTickets = await api('/api/tickets/' + userId);
+    }
+    renderOverview();
+    renderTicketsPage();
+    renderEventsPage();
+    renderUsersPage();
+    renderPerksPage();
+    renderAnalytics();
+  } catch(e) { console.error('Dashboard load error:', e); }
+}
+
+function renderOverview() {
+  const confirmed = allTickets.filter(t => t.status === 'confirmed').length;
+  const totalRevenue = allTickets.reduce((s,t) => s + (Number(t.totalPrice)||0), 0);
+  const activePerks = allPerks.filter(p => p.status === 'active').length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="icon" style="background:rgba(0,122,255,0.12)"><svg width="18" height="18" viewBox="0 0 24 24" fill="#007AFF"><path d="M22 10V6a2 2 0 00-2-2H4c-1.1 0-2 .9-2 2v4c1.1 0 2 .9 2 2s-.9 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2z"/></svg></div><div class="label">Total Tickets</div><div class="value">${allTickets.length}</div><div class="change up">${confirmed} active</div></div>
+    <div class="stat-card"><div class="icon" style="background:rgba(52,199,89,0.12)"><svg width="18" height="18" viewBox="0 0 24 24" fill="#34C759"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.94s4.18 1.36 4.18 3.85c0 1.89-1.44 2.93-3.12 3.19z"/></svg></div><div class="label">Total Revenue</div><div class="value">${formatMoney(totalRevenue)}</div></div>
+    <div class="stat-card"><div class="icon" style="background:rgba(88,86,214,0.12)"><svg width="18" height="18" viewBox="0 0 24 24" fill="#5856D6"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div><div class="label">Users</div><div class="value">${allUsers.length}</div></div>
+    <div class="stat-card"><div class="icon" style="background:rgba(255,149,0,0.12)"><svg width="18" height="18" viewBox="0 0 24 24" fill="#FF9500"><path d="M20 6h-2.18c.11-.31.18-.65.18-1a3 3 0 00-5.5-1.65l-.5.67-.5-.68A3 3 0 006 5c0 .35.07.69.18 1H4a2 2 0 00-2 2v11a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2z"/></svg></div><div class="label">Active Perks</div><div class="value">${activePerks}</div></div>
+  `;
+
+  const tbody = document.getElementById('recent-tickets');
+  tbody.innerHTML = allTickets.slice(0, 5).map(t => `
+    <tr style="cursor:pointer" onclick="showTicketDetail('${t.id}')">
+      <td><strong>${t.eventTitle}</strong></td>
+      <td><span class="ticket-code">${t.ticketCode||'-'}</span></td>
+      <td>${statusBadge(t.status)}</td>
+      <td>${formatMoney(t.totalPrice)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">No tickets yet</td></tr>';
+
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const values = days.map(() => Math.floor(Math.random() * 80 + 20));
+  const maxVal = Math.max(...values, 1);
+  document.getElementById('revenue-chart').innerHTML = values.map(v => `<div class="bar" style="height:${(v/maxVal)*100}%" title="$${v}"></div>`).join('');
+  document.getElementById('revenue-labels').innerHTML = days.map(d => `<span>${d}</span>`).join('');
+}
+
+function renderTicketsPage() {
+  filterTickets();
+}
+
+function filterTickets() {
+  const search = (document.getElementById('ticket-search')?.value || '').toLowerCase();
+  const statusFilter = document.getElementById('ticket-filter')?.value || 'all';
+  
+  let filtered = allTickets;
+  if (search) filtered = filtered.filter(t => (t.eventTitle||'').toLowerCase().includes(search) || (t.ticketCode||'').toLowerCase().includes(search));
+  if (statusFilter !== 'all') filtered = filtered.filter(t => t.status === statusFilter);
+
+  document.getElementById('tickets-table').innerHTML = filtered.map(t => `
+    <tr>
+      <td><strong>${t.eventTitle}</strong></td>
+      <td><span class="ticket-code">${t.ticketCode||'-'}</span></td>
+      <td>${t.tierName||'General'}</td>
+      <td>${t.quantity||1}</td>
+      <td>${formatMoney(t.totalPrice)}</td>
+      <td>${formatDate(t.eventDate)}</td>
+      <td>${statusBadge(t.status)}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="showTicketDetail('${t.id}')">View</button>
+        ${t.status==='confirmed'?`<button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="cancelTicket('${t.id}')">Cancel</button>`:''}
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:40px">No tickets found</td></tr>';
+}
+
+function showTicketDetail(id) {
+  const t = allTickets.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('ticket-modal-body').innerHTML = `
+    <div style="display:grid;gap:16px">
+      <div style="background:${t.imageColor||'var(--primary)'};color:#FFF;padding:20px;border-radius:var(--radius);text-align:center">
+        <div style="font-size:20px;font-weight:700">${t.eventTitle}</div>
+        <div style="opacity:0.8;margin-top:4px">${statusBadge(t.status).replace('badge-','badge-').replace('color:var','color:#FFF;background:rgba(255,255,255,0.2')}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase">Date</div><div style="font-size:14px;font-weight:600">${formatDate(t.eventDate)}</div></div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase">Time</div><div style="font-size:14px;font-weight:600">${t.eventTime||'-'}</div></div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase">Venue</div><div style="font-size:14px;font-weight:600">${t.eventVenue||'-'}</div></div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase">Tier</div><div style="font-size:14px;font-weight:600">${t.tierName||'General'}</div></div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase">Quantity</div><div style="font-size:14px;font-weight:600">${t.quantity||1}</div></div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase">Total</div><div style="font-size:14px;font-weight:700;color:var(--primary)">${formatMoney(t.totalPrice)}</div></div>
+      </div>
+      ${t.ticketCode?`<div style="text-align:center;padding:16px;background:var(--bg);border-radius:var(--radius)"><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;margin-bottom:6px">Ticket Code</div><div style="font-size:24px;font-weight:700;letter-spacing:3px;color:var(--primary);font-family:monospace">${t.ticketCode}</div></div>`:''}
+      <div style="font-size:11px;color:var(--text3)">Ticket ID: ${t.id}<br>Created: ${formatDate(t.createdAt)}</div>
+    </div>
+  `;
+  document.getElementById('ticket-modal').classList.add('show');
+}
+
+async function cancelTicket(id) {
+  if (!confirm('Are you sure you want to cancel this ticket?')) return;
+  try {
+    await apiPut('/api/tickets/' + id + '/cancel');
+    showToast('Ticket cancelled successfully');
+    await loadDashboard();
+  } catch(e) { showToast('Error cancelling ticket'); }
+}
+
+function renderEventsPage() {
+  document.getElementById('event-stats').innerHTML = `
+    <div class="stat-card"><div class="label">Upcoming Events</div><div class="value">12</div></div>
+    <div class="stat-card"><div class="label">Total Capacity</div><div class="value">5,400</div></div>
+    <div class="stat-card"><div class="label">Avg Attendance</div><div class="value">72%</div></div>
+    <div class="stat-card"><div class="label">Categories</div><div class="value">8</div></div>
+  `;
+
+  const events = [
+    {title:'Diwali Festival 2026',date:'2026-03-15',venue:'Melbourne Convention Centre',category:'Festival',price:'$25',attending:245,capacity:500},
+    {title:'Chinese New Year Gala',date:'2026-02-28',venue:'Sydney Opera House',category:'Cultural',price:'$45',attending:380,capacity:400},
+    {title:'Harmony Week Concert',date:'2026-03-21',venue:'Brisbane City Hall',category:'Music',price:'$35',attending:156,capacity:300},
+    {title:'Greek Food Festival',date:'2026-04-05',venue:'Federation Square',category:'Food',price:'$15',attending:520,capacity:800},
+    {title:'Aboriginal Art Exhibition',date:'2026-03-10',venue:'National Gallery',category:'Art',price:'Free',attending:89,capacity:200},
+    {title:'Bollywood Night',date:'2026-03-28',venue:'Crown Palladium',category:'Entertainment',price:'$55',attending:312,capacity:600},
+  ];
+  document.getElementById('events-table').innerHTML = events.map(e => `
+    <tr>
+      <td><strong>${e.title}</strong></td>
+      <td>${formatDate(e.date)}</td>
+      <td>${e.venue}</td>
+      <td><span class="badge badge-info">${e.category}</span></td>
+      <td>${e.price}</td>
+      <td>${e.attending}</td>
+      <td>${e.capacity}</td>
+    </tr>
+  `).join('');
+}
+
+function renderUsersPage() {
+  document.getElementById('users-table').innerHTML = allUsers.map(u => `
+    <tr>
+      <td style="display:flex;align-items:center;gap:10px">
+        <div class="avatar">${(u.displayName||u.username||'?')[0].toUpperCase()}</div>
+        <div><strong>${u.displayName||u.username}</strong><div style="font-size:11px;color:var(--text2)">@${u.username}</div></div>
+      </td>
+      <td>${u.email||'-'}</td>
+      <td>${[u.city,u.country].filter(Boolean).join(', ')||'-'}</td>
+      <td><span class="badge badge-${u.role==='admin'?'info':'neutral'}">${u.role||'user'}</span></td>
+      <td>${u.isVerified?'<span class="badge badge-success">Verified</span>':'<span class="badge badge-neutral">Unverified</span>'}</td>
+      <td>${formatDate(u.createdAt)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text2)">No users</td></tr>';
+}
+
+function renderPerksPage() {
+  document.getElementById('perks-table').innerHTML = allPerks.slice(0,5).map(p => `
+    <tr>
+      <td><strong>${p.title}</strong></td>
+      <td><span class="badge badge-info">${(p.perkType||'').replace(/_/g,' ')}</span></td>
+      <td>${p.providerName||'-'}</td>
+      <td>${p.usedCount||0}${p.usageLimit?' / '+p.usageLimit:''}</td>
+      <td>${statusBadge(p.status)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">No perks</td></tr>';
+
+  document.getElementById('perks-full-table').innerHTML = allPerks.map(p => `
+    <tr>
+      <td><strong>${p.title}</strong><div style="font-size:11px;color:var(--text2);max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.description||''}</div></td>
+      <td><span class="badge badge-info">${(p.perkType||'').replace(/_/g,' ')}</span></td>
+      <td>${p.providerName||'-'}</td>
+      <td>${p.discountPercent?p.discountPercent+'%':p.discountFixedCents?'$'+(p.discountFixedCents/100).toFixed(2):'-'}</td>
+      <td>${p.usedCount||0}${p.usageLimit?' / '+p.usageLimit:' / ∞'}</td>
+      <td><span class="badge badge-neutral">${p.category||'-'}</span></td>
+      <td>${statusBadge(p.status)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderAnalytics() {
+  const confirmed = allTickets.filter(t => t.status === 'confirmed').length;
+  const cancelled = allTickets.filter(t => t.status === 'cancelled').length;
+  const used = allTickets.filter(t => t.status === 'used').length;
+  const totalRev = allTickets.reduce((s,t) => s + (Number(t.totalPrice)||0), 0);
+  const avgPrice = allTickets.length ? totalRev / allTickets.length : 0;
+
+  document.getElementById('analytics-stats').innerHTML = `
+    <div class="stat-card"><div class="label">Confirmed Tickets</div><div class="value" style="color:var(--success)">${confirmed}</div></div>
+    <div class="stat-card"><div class="label">Cancelled Tickets</div><div class="value" style="color:var(--error)">${cancelled}</div></div>
+    <div class="stat-card"><div class="label">Used Tickets</div><div class="value" style="color:var(--text2)">${used}</div></div>
+    <div class="stat-card"><div class="label">Avg Ticket Price</div><div class="value">${formatMoney(avgPrice)}</div></div>
+  `;
+
+  const total = confirmed + cancelled + used || 1;
+  document.getElementById('ticket-status-chart').innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <div style="flex:${confirmed};height:32px;background:var(--success);border-radius:6px 0 0 6px;min-width:${confirmed?'20px':'0'}"></div>
+      <div style="flex:${used};height:32px;background:var(--text3);min-width:${used?'20px':'0'}"></div>
+      <div style="flex:${cancelled};height:32px;background:var(--error);border-radius:0 6px 6px 0;min-width:${cancelled?'20px':'0'}"></div>
+    </div>
+    <div style="display:flex;gap:20px;font-size:13px">
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:var(--success)"></div>Confirmed (${confirmed})</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:var(--text3)"></div>Used (${used})</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:var(--error)"></div>Cancelled (${cancelled})</div>
+    </div>
+  `;
+
+  const eventMap = {};
+  allTickets.forEach(t => {
+    if (!eventMap[t.eventTitle]) eventMap[t.eventTitle] = {count:0,revenue:0};
+    eventMap[t.eventTitle].count++;
+    eventMap[t.eventTitle].revenue += Number(t.totalPrice)||0;
+  });
+  const topEvents = Object.entries(eventMap).sort((a,b) => b[1].count - a[1].count).slice(0,5);
+  document.getElementById('top-events-table').innerHTML = topEvents.map(([name,d]) => `
+    <tr><td><strong>${name}</strong></td><td>${d.count}</td><td>${formatMoney(d.revenue)}</td></tr>
+  `).join('') || '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text2)">No data yet</td></tr>';
+}
+
+function refreshData() {
+  showToast('Refreshing data...');
+  loadDashboard();
+}
+
+if (sessionStorage.getItem('dash_auth') === '1') {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadDashboard();
+}
+
+document.getElementById('login-pass').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>

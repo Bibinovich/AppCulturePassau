@@ -168,6 +168,8 @@ function configureExpoAndLanding(app: express.Application) {
     "landing-page.html",
   );
   const landingPageTemplate = fs.readFileSync(templatePath, "utf-8");
+  const dashboardPath = path.resolve(process.cwd(), "server", "templates", "dashboard.html");
+  const dashboardTemplate = fs.existsSync(dashboardPath) ? fs.readFileSync(dashboardPath, "utf-8") : null;
   const appName = getAppName();
 
   log("Serving static Expo files with dynamic manifest routing");
@@ -175,6 +177,14 @@ function configureExpoAndLanding(app: express.Application) {
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/api")) {
       return next();
+    }
+
+    if (req.path === "/dashboard") {
+      if (dashboardTemplate) {
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        return res.status(200).send(dashboardTemplate);
+      }
+      return res.status(404).send("Dashboard not found");
     }
 
     if (req.path !== "/" && req.path !== "/manifest") {

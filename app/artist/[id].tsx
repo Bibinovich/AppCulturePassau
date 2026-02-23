@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import SocialLinksBar from "@/components/SocialLinksBar";
+import * as Haptics from "expo-haptics";
 import type { Profile } from "@shared/schema";
 
 /* ---------------- API BASE ---------------- */
@@ -44,18 +45,20 @@ export default function ArtistDetailScreen() {
   });
 
   const handleShare = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       const url = `https://culturepass.app/artist/${id}`;
       if (Platform.OS === "web") {
         if (navigator?.share) {
-          await navigator.share({ title: profile?.name ?? "", url });
+          await navigator.share({ title: profile?.name ?? "Artist on CulturePass", url });
         } else if (navigator?.clipboard) {
           await navigator.clipboard.writeText(url);
           Alert.alert("Link Copied", "Link copied to clipboard");
         }
       } else {
         await Share.share({
-          message: `Check out ${profile?.name} on CulturePass! ${url}`,
+          title: `${profile?.name ?? 'Artist'} on CulturePass`,
+          message: `Check out ${profile?.name} on CulturePass!${profile?.category ? ` ${profile.category}.` : ''} ${url}`,
         });
       }
     } catch {}

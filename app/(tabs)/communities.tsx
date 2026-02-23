@@ -122,12 +122,14 @@ function CommunityCard({ profile, index }: { profile: Profile; index: number }) 
   }));
 
   const handleShare = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await Share.share({
-        message: `Check out ${profile.name} on CulturePass! ${profile.description ?? ''}`,
+        title: `${profile.name} on CulturePass`,
+        message: `Check out ${profile.name} on CulturePass! ${profile.description ?? ''} Join this ${profile.entityType} community today!`,
       });
     } catch {}
-  }, [profile.name, profile.description]);
+  }, [profile.name, profile.description, profile.entityType]);
 
   const handleJoin = useCallback(
     (e: any) => {

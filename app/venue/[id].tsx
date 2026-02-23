@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import SocialLinksBar from "@/components/SocialLinksBar";
+import * as Haptics from "expo-haptics";
 import type { Profile } from "@shared/schema";
 
 const getApiBase = () => {
@@ -47,17 +48,22 @@ export default function VenueDetailScreen() {
   });
 
   const handleShare = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       const url = `https://culturepass.replit.app/venue/${id}`;
+      const location = [profile?.city, profile?.country].filter(Boolean).join(", ");
       if (Platform.OS === "web") {
         if (typeof navigator !== "undefined" && navigator.share) {
-          await navigator.share({ title: profile?.name ?? "", url });
+          await navigator.share({ title: profile?.name ?? "Venue on CulturePass", url });
         } else if (typeof navigator !== "undefined" && navigator.clipboard) {
           await navigator.clipboard.writeText(url);
           Alert.alert("Link Copied", "Link copied to clipboard");
         }
       } else {
-        await Share.share({ message: `Check out ${profile?.name} on CulturePass! ${url}` });
+        await Share.share({
+          title: `${profile?.name ?? 'Venue'} on CulturePass`,
+          message: `Check out ${profile?.name} on CulturePass!${location ? ` Located in ${location}.` : ''} ${url}`,
+        });
       }
     } catch {}
   }, [id, profile]);

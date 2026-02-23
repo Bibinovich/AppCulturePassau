@@ -198,8 +198,10 @@ export default function ProfileScreen() {
   }, [user?.city, user?.country, state.city, state.country]);
 
   const handleShare = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await Share.share({
+        title: `${displayName} on CulturePass`,
         message: `Check out my CulturePass profile! ${displayName} from ${displayLocation}. Download CulturePass to connect with cultural communities!`,
       });
     } catch {

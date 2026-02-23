@@ -1,7 +1,7 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Alert, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Colors from '@/constants/colors';
+import Colors, { shadows } from '@/constants/colors';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -47,6 +47,20 @@ function getStatusStyle(status: string | null) {
   }
 }
 
+async function handleShare(ticket: Ticket) {
+  try {
+    const dateStr = ticket.eventDate ? formatDate(ticket.eventDate) : '';
+    const timeStr = ticket.eventTime ? ` at ${ticket.eventTime}` : '';
+    const venueStr = ticket.eventVenue ? `\nVenue: ${ticket.eventVenue}` : '';
+    const message = `Check out my ticket for ${ticket.eventTitle}!\n${dateStr}${timeStr}${venueStr}`;
+    await Share.share({
+      message,
+      title: ticket.eventTitle,
+    });
+  } catch (_e) {
+  }
+}
+
 export default function TicketsScreen() {
   const insets = useSafeAreaInsets();
   const webTop = Platform.OS === 'web' ? 67 : 0;
@@ -80,13 +94,24 @@ export default function TicketsScreen() {
     ]);
   };
 
+  const handleAddToWallet = (ticket: Ticket) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert('Added to Wallet', `Your ticket for "${ticket.eventTitle}" has been saved to your wallet.`);
+  };
+
   const renderTicket = (ticket: Ticket, index: number) => {
     const statusStyle = getStatusStyle(ticket.status);
     const isActive = ticket.status === 'confirmed';
 
     return (
       <Animated.View key={ticket.id} entering={FadeInDown.delay(index * 80).duration(400)}>
-        <Pressable style={styles.ticketCard} onPress={() => router.push({ pathname: '/event/[id]', params: { id: ticket.eventId } })}>
+        <Pressable
+          style={styles.ticketCard}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push({ pathname: '/tickets/[id]', params: { id: ticket.id } });
+          }}
+        >
           <View style={[styles.ticketBanner, { backgroundColor: ticket.imageColor || Colors.primary }]}>
             <View style={styles.ticketBannerOverlay}>
               <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
@@ -137,7 +162,38 @@ export default function TicketsScreen() {
             )}
 
             {isActive && (
-              <Pressable style={styles.cancelBtn} onPress={() => handleCancel(ticket)}>
+              <View style={styles.actionRow}>
+                <Pressable
+                  style={styles.actionBtn}
+                  onPress={(e) => {
+                    e.stopPropagation?.();
+                    handleShare(ticket);
+                  }}
+                >
+                  <Ionicons name="share-outline" size={18} color={Colors.primary} />
+                  <Text style={styles.actionBtnText}>Share</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.actionBtn}
+                  onPress={(e) => {
+                    e.stopPropagation?.();
+                    handleAddToWallet(ticket);
+                  }}
+                >
+                  <Ionicons name="wallet-outline" size={18} color={Colors.primary} />
+                  <Text style={styles.actionBtnText}>Add to Wallet</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {isActive && (
+              <Pressable
+                style={styles.cancelBtn}
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  handleCancel(ticket);
+                }}
+              >
                 <Text style={styles.cancelBtnText}>Cancel Ticket</Text>
               </Pressable>
             )}
@@ -151,7 +207,7 @@ export default function TicketsScreen() {
     <View style={[styles.container, { paddingTop: insets.top + webTop }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          <Ionicons name="chevron-back" size={22} color={Colors.text} />
         </Pressable>
         <Text style={styles.headerTitle}>My Tickets</Text>
         <View style={{ width: 40 }} />
@@ -199,11 +255,11 @@ export default function TicketsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 12 },
-  backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Colors.cardBorder },
+  backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: Colors.surface, alignItems: 'center', justifyContent: 'center', ...shadows.small },
   headerTitle: { fontSize: 18, fontFamily: 'Poppins_700Bold', color: Colors.text },
   section: { paddingHorizontal: 20, marginBottom: 20 },
-  sectionTitle: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 12 },
-  ticketCard: { backgroundColor: Colors.card, borderRadius: 16, borderWidth: 1, borderColor: Colors.cardBorder, marginBottom: 14, overflow: 'hidden' },
+  sectionTitle: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: Colors.text, marginBottom: 12, letterSpacing: 0.35 },
+  ticketCard: { backgroundColor: Colors.surface, borderRadius: 12, marginBottom: 14, overflow: 'hidden', ...shadows.medium },
   ticketBanner: { height: 70, justifyContent: 'center' },
   ticketBannerOverlay: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, backgroundColor: 'rgba(0,0,0,0.2)', flex: 1 },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
@@ -219,9 +275,12 @@ const styles = StyleSheet.create({
   tierText: { fontSize: 11, fontFamily: 'Poppins_600SemiBold', color: Colors.accent },
   ticketQty: { fontSize: 13, fontFamily: 'Poppins_500Medium', color: Colors.textSecondary },
   ticketPrice: { fontSize: 17, fontFamily: 'Poppins_700Bold', color: Colors.text },
-  codeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, backgroundColor: Colors.primary + '08', borderRadius: 10, padding: 10, borderWidth: 1, borderColor: Colors.primary + '20' },
+  codeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, backgroundColor: Colors.primary + '08', borderRadius: 10, padding: 10 },
   codeText: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', color: Colors.primary, letterSpacing: 1 },
-  cancelBtn: { marginTop: 12, alignItems: 'center', paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: Colors.error + '30', backgroundColor: Colors.error + '08' },
+  actionRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 10, backgroundColor: Colors.primary + '0A' },
+  actionBtnText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.primary },
+  cancelBtn: { marginTop: 10, alignItems: 'center', paddingVertical: 10, borderRadius: 10, backgroundColor: Colors.error + '08' },
   cancelBtnText: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.error },
   emptyState: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 40, gap: 8 },
   emptyIcon: { width: 100, height: 100, borderRadius: 50, backgroundColor: Colors.backgroundSecondary, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },

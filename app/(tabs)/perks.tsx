@@ -114,8 +114,12 @@ export default function PerksTabScreen() {
   };
 
   const handleSharePerk = async (perk: Perk) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
-      await Share.share({ message: `Check out this perk on CulturePass: ${perk.title}! ${perk.description || ''}` });
+      await Share.share({
+        title: `${perk.title} - CulturePass Perk`,
+        message: `Check out this perk on CulturePass: ${perk.title}! ${perk.description || ''} ${perk.providerName ? `From ${perk.providerName}.` : ''}`,
+      });
     } catch {}
   };
 
@@ -205,7 +209,7 @@ export default function PerksTabScreen() {
                           <Text style={[styles.perkValueText, { color: typeInfo.color }]}>{formatValue(perk)}</Text>
                         </View>
                         <Pressable hitSlop={8} onPress={() => handleSharePerk(perk)} style={styles.perkShareBtn}>
-                          <Ionicons name="share-social-outline" size={16} color={Colors.textTertiary} />
+                          <Ionicons name="share-outline" size={16} color={Colors.textTertiary} />
                         </Pressable>
                       </View>
                     </View>

@@ -75,9 +75,10 @@ export default function QRScreen() {
   }, [user?.createdAt]);
 
   const handleShare = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await Share.share({
+        title: `${displayName} - CulturePass Digital ID`,
         message: `My CulturePass Digital ID\n\nName: ${displayName}\nCPID: ${cpid}\nUsername: @${username}\nTier: ${capitalize(tier)}\n\nScan my QR code on CulturePass to connect!`,
       });
     } catch {}

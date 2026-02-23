@@ -400,6 +400,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(ticket);
   });
 
+  // === Wallet Pass Generation ===
+  app.get("/api/tickets/:id/wallet/apple", async (req: Request, res: Response) => {
+    const ticket = await storage.getTicket(p(req.params.id));
+    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+    
+    const passData = {
+      formatVersion: 1,
+      passTypeIdentifier: "pass.com.culturepass.ticket",
+      serialNumber: ticket.id,
+      teamIdentifier: "CULTUREPASS",
+      organizationName: "CulturePass",
+      description: ticket.eventTitle,
+      foregroundColor: "rgb(255, 255, 255)",
+      backgroundColor: ticket.imageColor || "rgb(0, 122, 255)",
+      eventTicket: {
+        primaryFields: [{ key: "event", label: "EVENT", value: ticket.eventTitle }],
+        secondaryFields: [
+          { key: "date", label: "DATE", value: ticket.eventDate || "" },
+          { key: "time", label: "TIME", value: ticket.eventTime || "" },
+        ],
+        auxiliaryFields: [
+          { key: "venue", label: "VENUE", value: ticket.eventVenue || "" },
+          { key: "tier", label: "TIER", value: ticket.tierName || "General" },
+        ],
+        backFields: [
+          { key: "code", label: "TICKET CODE", value: ticket.ticketCode || "" },
+          { key: "quantity", label: "QUANTITY", value: String(ticket.quantity || 1) },
+        ],
+      },
+      barcode: {
+        message: ticket.ticketCode || ticket.id,
+        format: "PKBarcodeFormatQR",
+        messageEncoding: "iso-8859-1",
+      },
+    };
+    
+    res.json({ pass: passData, message: "Apple Wallet pass generated. In production, this would be a downloadable .pkpass file." });
+  });
+
+  app.get("/api/tickets/:id/wallet/google", async (req: Request, res: Response) => {
+    const ticket = await storage.getTicket(p(req.params.id));
+    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+    
+    const passData = {
+      id: `culturepass-${ticket.id}`,
+      classId: "culturepass.event_ticket",
+      eventName: { defaultValue: { language: "en", value: ticket.eventTitle } },
+      dateTime: {
+        start: ticket.eventDate ? `${ticket.eventDate}T${ticket.eventTime || "00:00"}` : undefined,
+      },
+      venue: {
+        name: { defaultValue: { language: "en", value: ticket.eventVenue || "" } },
+      },
+      ticketHolderName: "CulturePass Member",
+      ticketNumber: ticket.ticketCode || ticket.id,
+      seatInfo: {
+        section: { defaultValue: { language: "en", value: ticket.tierName || "General" } },
+      },
+      barcode: {
+        type: "QR_CODE",
+        value: ticket.ticketCode || ticket.id,
+      },
+      hexBackgroundColor: ticket.imageColor || "#007AFF",
+    };
+    
+    res.json({ pass: passData, message: "Google Wallet pass generated. In production, this would redirect to Google Wallet save URL." });
+  });
+
+  // === Dashboard ===
+  app.post("/api/dashboard/login", async (req: Request, res: Response) => {
+    const { username, password } = req.body;
+    const adminPassword = process.env.ADMIN_USER_PASSWORD || "admin123";
+    if (username === "admin" && password === adminPassword) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false, error: "Invalid credentials" });
+    }
+  });
+
   // === CulturePass ID (CPID) ===
   app.get("/api/cpid/registry", async (_req: Request, res: Response) => {
     const entries = await getAllRegistryEntries();
