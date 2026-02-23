@@ -214,6 +214,13 @@ export default function HomeScreen() {
           <Pressable
             style={styles.iconButton}
             hitSlop={8}
+            onPress={() => router.push('/saved')}
+          >
+            <Ionicons name="bookmark" size={22} color={Colors.text} />
+          </Pressable>
+          <Pressable
+            style={styles.iconButton}
+            hitSlop={8}
             onPress={() => router.push('/notifications')}
           >
             <Ionicons name="notifications" size={22} color={Colors.text} />
@@ -430,6 +437,28 @@ export default function HomeScreen() {
             );
           })}
         </View>
+
+        <Animated.View entering={FadeInDown.delay(380).duration(500)}>
+          <Pressable
+            style={[styles.plusBanner, Platform.OS === 'web' && { cursor: 'pointer' }]}
+            onPress={() => router.push('/membership/upgrade')}
+          >
+            <View style={styles.plusBannerLeft}>
+              <View style={styles.plusBannerIcon}>
+                <Ionicons name="star" size={20} color="#FFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.plusBannerTitle}>CulturePass+</Text>
+                <Text style={styles.plusBannerSub}>
+                  2% cashback, early access & exclusive perks
+                </Text>
+              </View>
+            </View>
+            <View style={styles.plusBannerCta}>
+              <Text style={styles.plusBannerCtaText}>$7.99/mo</Text>
+            </View>
+          </Pressable>
+        </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(400).duration(500)}>
           <Pressable style={[styles.perksBanner, Platform.OS === 'web' && { cursor: 'pointer' }]} onPress={() => router.push('/perks')}>
@@ -685,6 +714,36 @@ const styles = StyleSheet.create({
   weekPillDot: { width: 8, height: 8, borderRadius: 4 },
   weekPillTitle: { fontSize: 13, fontFamily: 'Poppins_600SemiBold', color: Colors.text, flexShrink: 1 },
   weekPillDate: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  plusBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1A5276',
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    ...Colors.shadow.medium,
+  },
+  plusBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+  plusBannerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#2E86C1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plusBannerTitle: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: '#FFF' },
+  plusBannerSub: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: 'rgba(255,255,255,0.75)', marginTop: 1 },
+  plusBannerCta: {
+    backgroundColor: '#2E86C1',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  plusBannerCtaText: { fontSize: 13, fontFamily: 'Poppins_700Bold', color: '#FFF' },
   exploreCta: {
     flexDirection: 'row',
     alignItems: 'center',

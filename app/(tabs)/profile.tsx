@@ -399,7 +399,7 @@ export default function ProfileScreen() {
             <Text style={styles.statLabel}>Communities</Text>
           </Pressable>
           <View style={styles.statDivider} />
-          <Pressable style={styles.statCard} onPress={() => router.push('/(tabs)/explore')}>
+          <Pressable style={styles.statCard} onPress={() => router.push('/saved')}>
             <Text style={styles.statNum}>{savedEvents.length}</Text>
             <Text style={styles.statLabel}>Saved</Text>
           </Pressable>
@@ -546,6 +546,13 @@ export default function ProfileScreen() {
               value={`$${walletBalance.toFixed(2)}`}
               color="#34C759"
               onPress={() => router.push('/payment/wallet')}
+            />
+            <MenuItem
+              icon="bookmark-outline"
+              label="Saved Items"
+              color="#FF9500"
+              badge={savedEvents.length + joinedCommunities.length}
+              onPress={() => router.push('/saved')}
             />
             <MenuItem
               icon="gift-outline"
