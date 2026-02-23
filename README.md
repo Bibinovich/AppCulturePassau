@@ -154,3 +154,4 @@ The backend provides RESTful endpoints for:
 ## License
 
 All rights reserved.
+# AppCulturePassau
