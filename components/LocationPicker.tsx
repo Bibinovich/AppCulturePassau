@@ -53,8 +53,13 @@ export function LocationPicker() {
 
   const selectedLocation = locations.find(l => l.country === pendingCountry);
 
+  const shortCountry = (c: string) => {
+    const map: Record<string, string> = { 'United Arab Emirates': 'UAE', 'United Kingdom': 'UK', 'New Zealand': 'NZ' };
+    return map[c] || c;
+  };
+
   const locationLabel = state.city
-    ? `${state.city}, ${state.country}`
+    ? `${state.city}, ${shortCountry(state.country)}`
     : state.country || 'Select Location';
 
   return (
