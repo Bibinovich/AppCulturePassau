@@ -16,23 +16,24 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: isDark ? "#888" : Colors.textTertiary,
+        tabBarInactiveTintColor: Colors.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : isDark ? "#000" : "#fff",
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: isDark ? "#333" : Colors.borderLight,
+          backgroundColor: isIOS ? "transparent" : isDark ? Colors.dark.tabBar : Colors.light.tabBar,
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: isDark ? Colors.dark.divider : Colors.light.divider,
           elevation: 0,
           ...(isWeb ? { height: 84 } : {}),
         },
         tabBarLabelStyle: {
           fontFamily: "Poppins_500Medium",
           fontSize: 10,
+          fontWeight: "500",
         },
         tabBarBackground: () =>
           isIOS ? (
             <BlurView
-              intensity={100}
+              intensity={80}
               tint={isDark ? "dark" : "light"}
               style={StyleSheet.absoluteFill}
             />
@@ -40,7 +41,7 @@ export default function TabLayout() {
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { backgroundColor: isDark ? "#000" : "#fff" },
+                { backgroundColor: isDark ? Colors.dark.tabBar : Colors.light.tabBar },
               ]}
             />
           ) : null,
@@ -51,7 +52,7 @@ export default function TabLayout() {
         options={{
           title: "Discover",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="sparkles" size={size} color={color} />
+            <Ionicons name="compass" size={size} color={color} />
           ),
         }}
       />
@@ -60,7 +61,7 @@ export default function TabLayout() {
         options={{
           title: "Calendar",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
+            <Ionicons name="calendar" size={size} color={color} />
           ),
         }}
       />
@@ -69,7 +70,7 @@ export default function TabLayout() {
         options={{
           title: "Community",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people-outline" size={size} color={color} />
+            <Ionicons name="people" size={size} color={color} />
           ),
         }}
       />
@@ -78,7 +79,7 @@ export default function TabLayout() {
         options={{
           title: "Perks",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="gift-outline" size={size} color={color} />
+            <Ionicons name="gift" size={size} color={color} />
           ),
         }}
       />
@@ -99,7 +100,7 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle-outline" size={size} color={color} />
+            <Ionicons name="person.crop.circle" size={size} color={color} />
           ),
         }}
       />
