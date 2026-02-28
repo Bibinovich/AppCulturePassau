@@ -302,12 +302,26 @@ export class DatabaseStorage {
   // Event Sponsors
   async getEventSponsors(eventId: string): Promise<(EventSponsor & { sponsor?: Sponsor })[]> {
     const es = await db.select().from(eventSponsors).where(eq(eventSponsors.eventId, eventId)).orderBy(desc(eventSponsors.logoPriority));
-    const results = [];
-    for (const e of es) {
-      const sponsor = await this.getSponsor(e.sponsorId);
-      results.push({ ...e, sponsor });
+
+    if (es.length === 0) {
+      return [];
     }
-    return results;
+
+    const sponsorIds = es.map(e => e.sponsorId);
+
+    const fetchedSponsors = await db.select()
+      .from(sponsors)
+      .where(inArray(sponsors.id, sponsorIds));
+
+    const sponsorMap = new Map<string, Sponsor>();
+    for (const sponsor of fetchedSponsors) {
+      sponsorMap.set(sponsor.id, sponsor);
+    }
+
+    return es.map(e => ({
+      ...e,
+      sponsor: sponsorMap.get(e.sponsorId)
+    }));
   }
 
   async addEventSponsor(eventId: string, sponsorId: string, tier: string): Promise<EventSponsor> {
