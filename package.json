@@ -13,7 +13,8 @@
     "db:push": "drizzle-kit push",
     "start": "npx expo start",
     "lint": "npx expo lint",
-    "lint:fix": "npx expo lint --fix"
+    "lint:fix": "npx expo lint --fix",
+    "test": "vitest run"
   },
   "dependencies": {
     "@expo-google-fonts/poppins": "^0.4.1",
@@ -75,6 +76,7 @@
     "@types/express": "^5.0.0",
     "@types/node": "^25.3.2",
     "@types/react": "~19.1.10",
+    "@vitest/coverage-v8": "^4.0.18",
     "babel-plugin-react-compiler": "^19.0.0-beta-e993439-20250117",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.31.0",
