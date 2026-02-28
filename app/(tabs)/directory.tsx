@@ -192,7 +192,13 @@ export default function DirectoryScreen() {
 
   // Exclude community profiles — this screen is for directory listings only
   const nonCommunityProfiles = useMemo(
-    () => (allProfiles ?? []).filter(p => p.entityType !== 'community'),
+    () => (allProfiles ?? [])
+      .filter(p => p.entityType !== 'community')
+      .map(p => {
+        const tags = getTags(p);
+        const searchableText = `${p.name} ${p.description ?? ''} ${p.category ?? ''} ${tags.join(' ')}`.toLowerCase();
+        return { ...p, _searchableText: searchableText };
+      }),
     [allProfiles],
   );
 
@@ -205,15 +211,7 @@ export default function DirectoryScreen() {
 
     if (search.trim()) {
       const q = search.toLowerCase();
-      results = results.filter(p => {
-        const tags = getTags(p);
-        return (
-          p.name.toLowerCase().includes(q) ||
-          (p.description ?? '').toLowerCase().includes(q) ||
-          (p.category ?? '').toLowerCase().includes(q) ||
-          tags.some(t => t.toLowerCase().includes(q))
-        );
-      });
+      results = results.filter(p => p._searchableText.includes(q));
     }
 
     return results;
