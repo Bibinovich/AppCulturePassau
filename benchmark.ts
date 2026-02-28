@@ -28,6 +28,11 @@ function runBaseline() {
   return end - start;
 }
 
+function benchmarkOptimized() {
+  const start = performance.now();
+  for (let i = 0; i < 100; i++) {
+    const savedSet = new Set(savedEvents);
+    const list = sampleEvents.filter(e => savedSet.has(e.id));
 function runOptimized() {
   const start = performance.now();
   for (let i = 0; i < 10000; i++) {
@@ -45,6 +50,12 @@ function runOptimized() {
   return end - start;
 }
 
+const baselineTime = benchmarkBaseline();
+const optimizedTime = benchmarkOptimized();
+
+console.log(`Baseline: ${baselineTime.toFixed(2)}ms`);
+console.log(`Optimized: ${optimizedTime.toFixed(2)}ms`);
+console.log(`Improvement: ${((baselineTime - optimizedTime) / baselineTime * 100).toFixed(2)}%`);
 const baselineTime = runBaseline();
 console.log(`Baseline (4 calls per render): ${baselineTime.toFixed(2)}ms`);
 
