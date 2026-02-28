@@ -221,9 +221,9 @@ export default function ArtistDetailScreen() {
         )}
 
         {/* Tags */}
-        {profile.tags?.length > 0 && (
+        {(profile.tags?.length ?? 0) > 0 && (
           <View style={styles.tagsRow}>
-            {profile.tags.map((tag, idx) => (
+            {profile.tags?.map((tag, idx) => (
               <View key={idx} style={styles.tag}>
                 <Text style={styles.tagText}>{tag}</Text>
               </View>

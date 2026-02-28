@@ -238,7 +238,7 @@ export default function ProfileScreen() {
     ]);
   }, []);
 
-  const walletBalance = wallet?.balance ?? 0;
+  const walletBalance = Number(wallet?.balance ?? 0);
   const tickets = ticketCount?.count ?? 0;
   const unreadCount = unreadNotifs?.count ?? 0;
 
