@@ -333,10 +333,20 @@ export class DatabaseStorage {
     const placements = placementType
       ? await query.where(and(eq(sponsorPlacements.placementType, placementType), lte(sponsorPlacements.startDate!, now), gte(sponsorPlacements.endDate!, now))).orderBy(desc(sponsorPlacements.weight))
       : await query.orderBy(desc(sponsorPlacements.weight));
+
+    if (placements.length === 0) return [];
+
+    const sponsorIds = [...new Set(placements.map(p => p.sponsorId))];
+    const fetchedSponsors = await db.select().from(sponsors).where(inArray(sponsors.id, sponsorIds));
+
+    const sponsorMap = new Map<string, Sponsor>();
+    for (const s of fetchedSponsors) {
+      sponsorMap.set(s.id, s);
+    }
+
     const results = [];
     for (const p of placements) {
-      const sponsor = await this.getSponsor(p.sponsorId);
-      results.push({ ...p, sponsor });
+      results.push({ ...p, sponsor: sponsorMap.get(p.sponsorId) });
     }
     return results;
   }
