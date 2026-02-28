@@ -1,6 +1,7 @@
 import { db } from "./db";
 import { eq, and, desc, sql, lte, gte, inArray } from "drizzle-orm";
 import QRCode from "qrcode";
+import bcrypt from "bcryptjs";
 import {
   users, profiles, follows, likes, reviews,
   paymentMethods, transactions, wallets,
@@ -33,13 +34,18 @@ export class DatabaseStorage {
   }
 
   async createUser(data: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(data).returning();
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const [user] = await db.insert(users).values({ ...data, password: hashedPassword }).returning();
     await db.insert(wallets).values({ userId: user.id });
     return user;
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
-    const [user] = await db.update(users).set(data).where(eq(users.id, id)).returning();
+    const updateData = { ...data };
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+    const [user] = await db.update(users).set(updateData).where(eq(users.id, id)).returning();
     return user;
   }
 
@@ -266,11 +272,9 @@ export class DatabaseStorage {
     const followerRecords = await db.select().from(follows).where(eq(follows.targetId, profileId));
     if (followerRecords.length === 0) return [];
     const userIds = followerRecords.map(f => f.followerId);
-    const members: User[] = [];
-    for (const uid of userIds) {
-      const user = await this.getUser(uid);
-      if (user) members.push(user);
-    }
+
+    // Fetch all members in a single query instead of N+1
+    const members = await db.select().from(users).where(inArray(users.id, userIds));
     return members;
   }
 
@@ -302,12 +306,26 @@ export class DatabaseStorage {
   // Event Sponsors
   async getEventSponsors(eventId: string): Promise<(EventSponsor & { sponsor?: Sponsor })[]> {
     const es = await db.select().from(eventSponsors).where(eq(eventSponsors.eventId, eventId)).orderBy(desc(eventSponsors.logoPriority));
-    const results = [];
-    for (const e of es) {
-      const sponsor = await this.getSponsor(e.sponsorId);
-      results.push({ ...e, sponsor });
+
+    if (es.length === 0) {
+      return [];
     }
-    return results;
+
+    const sponsorIds = es.map(e => e.sponsorId);
+
+    const fetchedSponsors = await db.select()
+      .from(sponsors)
+      .where(inArray(sponsors.id, sponsorIds));
+
+    const sponsorMap = new Map<string, Sponsor>();
+    for (const sponsor of fetchedSponsors) {
+      sponsorMap.set(sponsor.id, sponsor);
+    }
+
+    return es.map(e => ({
+      ...e,
+      sponsor: sponsorMap.get(e.sponsorId)
+    }));
   }
 
   async addEventSponsor(eventId: string, sponsorId: string, tier: string): Promise<EventSponsor> {
@@ -327,10 +345,20 @@ export class DatabaseStorage {
     const placements = placementType
       ? await query.where(and(eq(sponsorPlacements.placementType, placementType), lte(sponsorPlacements.startDate!, now), gte(sponsorPlacements.endDate!, now))).orderBy(desc(sponsorPlacements.weight))
       : await query.orderBy(desc(sponsorPlacements.weight));
+
+    if (placements.length === 0) return [];
+
+    const sponsorIds = [...new Set(placements.map(p => p.sponsorId))];
+    const fetchedSponsors = await db.select().from(sponsors).where(inArray(sponsors.id, sponsorIds));
+
+    const sponsorMap = new Map<string, Sponsor>();
+    for (const s of fetchedSponsors) {
+      sponsorMap.set(s.id, s);
+    }
+
     const results = [];
     for (const p of placements) {
-      const sponsor = await this.getSponsor(p.sponsorId);
-      results.push({ ...p, sponsor });
+      results.push({ ...p, sponsor: sponsorMap.get(p.sponsorId) });
     }
     return results;
   }

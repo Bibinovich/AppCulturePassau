@@ -55,6 +55,13 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
 }
 
+function getLocalYYYYMMDD(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function FeaturedEventCard({ event }: { event: SampleEvent }) {
   const { isEventSaved, toggleSaveEvent } = useSaved();
   const saved = isEventSaved(event.id);
@@ -169,11 +176,13 @@ export default function HomeScreen() {
     const now = new Date();
     const weekLater = new Date();
     weekLater.setDate(now.getDate() + 7);
+
+    const nowStr = getLocalYYYYMMDD(now);
+    const weekLaterStr = getLocalYYYYMMDD(weekLater);
+
     return filterByLocation(sampleEvents).filter(e => {
-      const [year, month, day] = e.date.split('-').map(Number);
-      if (!year || !month || !day) return false;
-      const eventDate = new Date(year, month - 1, day);
-      return eventDate >= now && eventDate <= weekLater;
+      if (!e.date) return false;
+      return e.date >= nowStr && e.date <= weekLaterStr;
     });
   }, [filterByLocation]);
 

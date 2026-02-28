@@ -751,6 +751,16 @@ var DatabaseStorage = class {
     for (const p2 of placements) {
       const sponsor = await this.getSponsor(p2.sponsorId);
       results.push({ ...p2, sponsor });
+    if (placements.length === 0) return [];
+    const sponsorIds = [...new Set(placements.map((p2) => p2.sponsorId))];
+    const fetchedSponsors = await db.select().from(sponsors).where(inArray(sponsors.id, sponsorIds));
+    const sponsorMap = /* @__PURE__ */ new Map();
+    for (const s of fetchedSponsors) {
+      sponsorMap.set(s.id, s);
+    }
+    const results = [];
+    for (const p2 of placements) {
+      results.push({ ...p2, sponsor: sponsorMap.get(p2.sponsorId) });
     }
     return results;
   }
@@ -807,6 +817,12 @@ var DatabaseStorage = class {
       ...r,
       perk: perksMap.get(r.perkId)
     }));
+    const results = [];
+    for (const r of redemptions) {
+      const perk = await this.getPerk(r.perkId);
+      results.push({ ...r, perk });
+    }
+    return results;
   }
   // === Memberships ===
   async getMembership(userId) {

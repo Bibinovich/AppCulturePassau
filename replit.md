@@ -63,7 +63,7 @@ Shared types between frontend and backend ensure type consistency. Path aliases 
 
 ### Web Dashboard
 - Admin dashboard at `/dashboard` route (served from `server/templates/dashboard.html`)
-- Login with username "admin" and password from `ADMIN_USER_PASSWORD` env secret (fallback: "admin123")
+- Login with username "admin" and password from `ADMIN_USER_PASSWORD` env secret (this environment variable is required)
 - Dashboard sections: Overview (stats, charts), Tickets management, Events, Users, Perks, Analytics
 - Login endpoint: `POST /api/dashboard/login`
 
