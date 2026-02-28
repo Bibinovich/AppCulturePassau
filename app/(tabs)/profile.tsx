@@ -160,12 +160,18 @@ export default function ProfileScreen() {
   });
 
   const savedEventsList = useMemo(
-    () => sampleEvents.filter(e => savedEvents.includes(e.id)),
+    () => {
+      const savedSet = new Set(savedEvents);
+      return sampleEvents.filter(e => savedSet.has(e.id));
+    },
     [savedEvents],
   );
 
   const joinedCommunitiesList = useMemo(
-    () => sampleCommunities.filter(c => joinedCommunities.includes(c.id)),
+    () => {
+      const joinedSet = new Set(joinedCommunities);
+      return sampleCommunities.filter(c => joinedSet.has(c.id));
+    },
     [joinedCommunities],
   );
 
@@ -238,7 +244,7 @@ export default function ProfileScreen() {
     ]);
   }, []);
 
-  const walletBalance = wallet?.balance ?? 0;
+  const walletBalance = typeof wallet?.balance === 'string' ? parseFloat(wallet.balance) : (wallet?.balance ?? 0);
   const tickets = ticketCount?.count ?? 0;
   const unreadCount = unreadNotifs?.count ?? 0;
 
