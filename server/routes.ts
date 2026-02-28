@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { generateCpid, lookupCpid, getAllRegistryEntries } from "./cpid";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { AppError, ErrorCodes, wrapHandler, rateLimit } from "./errors";
+import bcrypt from "bcryptjs";
 
 function p(val: string | string[]): string { return Array.isArray(val) ? val[0] : val; }
 
@@ -983,8 +984,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/dashboard/login", async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const adminPassword = process.env.ADMIN_USER_PASSWORD || "admin123";
+
+    // Fallback for hardcoded admin login
     if (username === "admin" && password === adminPassword) {
-      res.json({ success: true });
+      return res.json({ success: true });
+    }
+
+    // Look up user in database
+    const user = await storage.getUserByUsername(username);
+    if (!user) {
+      return res.status(401).json({ success: false, error: "Invalid credentials" });
+    }
+
+    // Verify password securely
+    const isValid = await bcrypt.compare(password, user.password);
+    if (isValid) {
+      res.json({ success: true, userId: user.id });
     } else {
       res.status(401).json({ success: false, error: "Invalid credentials" });
     }
