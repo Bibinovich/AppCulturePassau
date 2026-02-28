@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterChipRow handles empty items array without crashing 1`] = `
+<RCTScrollView
+  contentContainerStyle={
+    {
+      "gap": 8,
+      "paddingBottom": 14,
+      "paddingHorizontal": 20,
+    }
+  }
+  horizontal={true}
+  showsHorizontalScrollIndicator={false}
+  style={
+    {
+      "flexGrow": 0,
+    }
+  }
+>
+  <View />
+</RCTScrollView>
+`;
