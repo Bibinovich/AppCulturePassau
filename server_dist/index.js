@@ -478,7 +478,7 @@ var pool = new pg.Pool({
 var db = drizzle(pool, { schema: schema_exports });
 
 // server/storage.ts
-import { eq, and, desc, sql as sql2, lte, gte } from "drizzle-orm";
+import { eq, and, desc, sql as sql2, lte, gte, inArray } from "drizzle-orm";
 import QRCode from "qrcode";
 var DatabaseStorage = class {
   async getUser(id) {
@@ -747,10 +747,16 @@ var DatabaseStorage = class {
     const now = /* @__PURE__ */ new Date();
     let query = db.select().from(sponsorPlacements);
     const placements = placementType ? await query.where(and(eq(sponsorPlacements.placementType, placementType), lte(sponsorPlacements.startDate, now), gte(sponsorPlacements.endDate, now))).orderBy(desc(sponsorPlacements.weight)) : await query.orderBy(desc(sponsorPlacements.weight));
+    if (placements.length === 0) return [];
+    const sponsorIds = [...new Set(placements.map((p2) => p2.sponsorId))];
+    const fetchedSponsors = await db.select().from(sponsors).where(inArray(sponsors.id, sponsorIds));
+    const sponsorMap = /* @__PURE__ */ new Map();
+    for (const s of fetchedSponsors) {
+      sponsorMap.set(s.id, s);
+    }
     const results = [];
     for (const p2 of placements) {
-      const sponsor = await this.getSponsor(p2.sponsorId);
-      results.push({ ...p2, sponsor });
+      results.push({ ...p2, sponsor: sponsorMap.get(p2.sponsorId) });
     }
     return results;
   }
@@ -1915,29 +1921,20 @@ async function registerRoutes(app2) {
       const allTickets = await storage.getAllTickets();
       const allUsers = await storage.getAllUsers();
       const allPerks = await storage.getAllPerks();
-      let totalRevenue = 0;
-      let platformRevenue = 0;
-      let organizerRevenue = 0;
-      let scannedTickets = 0;
-      let confirmedTickets = 0;
-      let cancelledTickets = 0;
+      const totalRevenue = allTickets.reduce((sum, t) => sum + (t.totalPrice || 0), 0);
+      const platformRevenue = allTickets.reduce((sum, t) => sum + (t.platformFee || 0), 0);
+      const organizerRevenue = allTickets.reduce((sum, t) => sum + (t.organizerAmount || 0), 0);
+      const scannedTickets = allTickets.filter((t) => t.status === "used").length;
+      const confirmedTickets = allTickets.filter((t) => t.status === "confirmed").length;
+      const cancelledTickets = allTickets.filter((t) => t.status === "cancelled").length;
       const eventMap = /* @__PURE__ */ new Map();
       for (const t of allTickets) {
-        totalRevenue += t.totalPrice || 0;
-        platformRevenue += t.platformFee || 0;
-        organizerRevenue += t.organizerAmount || 0;
-        if (t.status === "used") scannedTickets++;
-        else if (t.status === "confirmed") confirmedTickets++;
-        else if (t.status === "cancelled") cancelledTickets++;
-        let existing = eventMap.get(t.eventId);
-        if (!existing) {
-          existing = { eventId: t.eventId, eventTitle: t.eventTitle, tickets: 0, revenue: 0, scanned: 0, organizerAmount: 0 };
-          eventMap.set(t.eventId, existing);
-        }
+        const existing = eventMap.get(t.eventId) || { eventId: t.eventId, eventTitle: t.eventTitle, tickets: 0, revenue: 0, scanned: 0, organizerAmount: 0 };
         existing.tickets += t.quantity || 1;
         existing.revenue += t.totalPrice || 0;
         existing.organizerAmount += t.organizerAmount || 0;
         if (t.status === "used") existing.scanned += t.quantity || 1;
+        eventMap.set(t.eventId, existing);
       }
       res.json({
         totalTickets: allTickets.length,

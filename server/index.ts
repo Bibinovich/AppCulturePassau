@@ -65,9 +65,9 @@ function setupCors(app: express.Application) {
 
     const origin = req.header("origin");
 
-    const isLocalhost =
-      origin?.startsWith("http://localhost:") ||
-      origin?.startsWith("http://127.0.0.1:");
+    const isLocalhost = origin
+      ? /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      : false;
 
     if (origin && (origins.has(origin) || isLocalhost)) {
       res.header("Access-Control-Allow-Origin", origin);
