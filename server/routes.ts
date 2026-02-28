@@ -877,21 +877,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allUsers = await storage.getAllUsers();
       const allPerks = await storage.getAllPerks();
 
-      const totalRevenue = allTickets.reduce((sum, t) => sum + (t.totalPrice || 0), 0);
-      const platformRevenue = allTickets.reduce((sum, t) => sum + (t.platformFee || 0), 0);
-      const organizerRevenue = allTickets.reduce((sum, t) => sum + (t.organizerAmount || 0), 0);
-      const scannedTickets = allTickets.filter(t => t.status === 'used').length;
-      const confirmedTickets = allTickets.filter(t => t.status === 'confirmed').length;
-      const cancelledTickets = allTickets.filter(t => t.status === 'cancelled').length;
+      let totalRevenue = 0;
+      let platformRevenue = 0;
+      let organizerRevenue = 0;
+      let scannedTickets = 0;
+      let confirmedTickets = 0;
+      let cancelledTickets = 0;
 
       const eventMap = new Map<string, { eventId: string; eventTitle: string; tickets: number; revenue: number; scanned: number; organizerAmount: number }>();
       for (const t of allTickets) {
-        const existing = eventMap.get(t.eventId) || { eventId: t.eventId, eventTitle: t.eventTitle, tickets: 0, revenue: 0, scanned: 0, organizerAmount: 0 };
+        // Aggregate global totals
+        totalRevenue += (t.totalPrice || 0);
+        platformRevenue += (t.platformFee || 0);
+        organizerRevenue += (t.organizerAmount || 0);
+
+        // Count statuses
+        if (t.status === 'used') scannedTickets++;
+        else if (t.status === 'confirmed') confirmedTickets++;
+        else if (t.status === 'cancelled') cancelledTickets++;
+
+        // Aggregate per-event stats
+        let existing = eventMap.get(t.eventId);
+        if (!existing) {
+          existing = { eventId: t.eventId, eventTitle: t.eventTitle, tickets: 0, revenue: 0, scanned: 0, organizerAmount: 0 };
+          eventMap.set(t.eventId, existing);
+        }
         existing.tickets += (t.quantity || 1);
         existing.revenue += (t.totalPrice || 0);
         existing.organizerAmount += (t.organizerAmount || 0);
         if (t.status === 'used') existing.scanned += (t.quantity || 1);
-        eventMap.set(t.eventId, existing);
       }
 
       res.json({
