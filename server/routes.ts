@@ -980,6 +980,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // === Dashboard ===
   app.post("/api/dashboard/login", async (req: Request, res: Response) => {
     const { username, password } = req.body;
+    const adminPassword = process.env.ADMIN_USER_PASSWORD;
+
+    if (!adminPassword) {
+      console.error("CRITICAL: ADMIN_USER_PASSWORD environment variable is not set.");
+      return res.status(500).json({ success: false, error: "Server configuration error" });
+    }
+
     const adminPassword = process.env.ADMIN_USER_PASSWORD || "admin123";
 
     // Fallback for hardcoded admin login
