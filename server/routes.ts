@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { generateCpid, lookupCpid, getAllRegistryEntries } from "./cpid";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { AppError, ErrorCodes, wrapHandler, rateLimit } from "./errors";
+import { calculateEventBreakdown } from "./services/dashboard";
+import bcrypt from "bcryptjs";
 
 function p(val: string | string[]): string { return Array.isArray(val) ? val[0] : val; }
 
@@ -11,19 +13,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // === Users ===
   app.get("/api/users", async (_req: Request, res: Response) => {
     const users = await storage.getAllUsers();
-    res.json(users);
+    const sanitizedUsers = users.map(({ password, ...rest }) => rest);
+    res.json(sanitizedUsers);
   });
 
   app.get("/api/users/:id", async (req: Request, res: Response) => {
     const user = await storage.getUser(p(req.params.id));
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    const { password, ...sanitizedUser } = user;
+    res.json(sanitizedUser);
   });
 
   app.post("/api/users", async (req: Request, res: Response) => {
     try {
       const user = await storage.createUser(req.body);
-      res.status(201).json(user);
+      const { password, ...sanitizedUser } = user;
+      res.status(201).json(sanitizedUser);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -32,7 +37,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/users/:id", async (req: Request, res: Response) => {
     const user = await storage.updateUser(p(req.params.id), req.body);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    const { password, ...sanitizedUser } = user;
+    res.json(sanitizedUser);
   });
 
   // === Profiles (communities, orgs, venues, businesses, councils, governments, artists) ===
@@ -877,22 +883,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allUsers = await storage.getAllUsers();
       const allPerks = await storage.getAllPerks();
 
-      const totalRevenue = allTickets.reduce((sum, t) => sum + (t.totalPrice || 0), 0);
-      const platformRevenue = allTickets.reduce((sum, t) => sum + (t.platformFee || 0), 0);
-      const organizerRevenue = allTickets.reduce((sum, t) => sum + (t.organizerAmount || 0), 0);
-      const scannedTickets = allTickets.filter(t => t.status === 'used').length;
-      const confirmedTickets = allTickets.filter(t => t.status === 'confirmed').length;
-      const cancelledTickets = allTickets.filter(t => t.status === 'cancelled').length;
+      let totalRevenue = 0;
+      let platformRevenue = 0;
+      let organizerRevenue = 0;
+      let scannedTickets = 0;
+      let confirmedTickets = 0;
+      let cancelledTickets = 0;
 
-      const eventMap = new Map<string, { eventId: string; eventTitle: string; tickets: number; revenue: number; scanned: number; organizerAmount: number }>();
-      for (const t of allTickets) {
-        const existing = eventMap.get(t.eventId) || { eventId: t.eventId, eventTitle: t.eventTitle, tickets: 0, revenue: 0, scanned: 0, organizerAmount: 0 };
-        existing.tickets += (t.quantity || 1);
-        existing.revenue += (t.totalPrice || 0);
-        existing.organizerAmount += (t.organizerAmount || 0);
-        if (t.status === 'used') existing.scanned += (t.quantity || 1);
-        eventMap.set(t.eventId, existing);
-      }
+      const eventBreakdown = calculateEventBreakdown(allTickets);
 
       res.json({
         totalTickets: allTickets.length,
@@ -904,7 +902,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         organizerRevenue: Math.round(organizerRevenue * 100) / 100,
         totalUsers: allUsers.length,
         totalPerks: allPerks.length,
-        eventBreakdown: Array.from(eventMap.values()).sort((a, b) => b.revenue - a.revenue),
+        eventBreakdown,
       });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -989,11 +987,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ success: false, error: "Server configuration error" });
     }
 
+    const adminPassword = process.env.ADMIN_USER_PASSWORD || "admin123";
+
+    // Fallback for hardcoded admin login
     if (username === "admin" && password === adminPassword) {
-      res.json({ success: true });
+      return res.json({ success: true });
+    }
+
+    // Look up user in database
+    const user = await storage.getUserByUsername(username);
+    if (!user) {
+      return res.status(401).json({ success: false, error: "Invalid credentials" });
+    }
+
+    // Verify password securely
+    const isValid = await bcrypt.compare(password, user.password);
+    if (isValid) {
+      res.json({ success: true, userId: user.id });
     } else {
       res.status(401).json({ success: false, error: "Invalid credentials" });
     }
+
+    // Fallback to checking DB users
+    try {
+      const dbUser = await storage.getUserByUsername(username);
+      if (dbUser && dbUser.password) {
+        const bcrypt = await import("bcryptjs");
+        const isValid = await bcrypt.compare(password, dbUser.password);
+        if (isValid) {
+          return res.json({ success: true });
+        }
+      }
+    } catch (e) {
+      console.error("Login fallback error:", e);
+    }
+
+    res.status(401).json({ success: false, error: "Invalid credentials" });
   });
 
   // === CulturePass ID (CPID) ===
@@ -1092,7 +1121,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Seed a demo user
-      const demoPassword = process.env.DEMO_USER_PASSWORD || "demo123";
+      const demoPassword = process.env.DEMO_USER_PASSWORD;
+      if (!demoPassword) {
+        throw new Error("DEMO_USER_PASSWORD environment variable is required for seeding the demo account");
+      }
       const demoUser = await storage.createUser({ username: "demo", password: demoPassword });
       await storage.updateUser(demoUser.id, {
         displayName: "Alex Chen",
