@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { generateCpid, lookupCpid, getAllRegistryEntries } from "./cpid";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { AppError, ErrorCodes, wrapHandler, rateLimit } from "./errors";
+import { calculateEventBreakdown } from "./services/dashboard";
+import bcrypt from "bcryptjs";
 
 function p(val: string | string[]): string { return Array.isArray(val) ? val[0] : val; }
 
@@ -888,15 +890,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const confirmedTickets = allTickets.filter(t => t.status === 'confirmed').length;
       const cancelledTickets = allTickets.filter(t => t.status === 'cancelled').length;
 
-      const eventMap = new Map<string, { eventId: string; eventTitle: string; tickets: number; revenue: number; scanned: number; organizerAmount: number }>();
-      for (const t of allTickets) {
-        const existing = eventMap.get(t.eventId) || { eventId: t.eventId, eventTitle: t.eventTitle, tickets: 0, revenue: 0, scanned: 0, organizerAmount: 0 };
-        existing.tickets += (t.quantity || 1);
-        existing.revenue += (t.totalPrice || 0);
-        existing.organizerAmount += (t.organizerAmount || 0);
-        if (t.status === 'used') existing.scanned += (t.quantity || 1);
-        eventMap.set(t.eventId, existing);
-      }
+      const eventBreakdown = calculateEventBreakdown(allTickets);
 
       res.json({
         totalTickets: allTickets.length,
@@ -908,7 +902,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         organizerRevenue: Math.round(organizerRevenue * 100) / 100,
         totalUsers: allUsers.length,
         totalPerks: allPerks.length,
-        eventBreakdown: Array.from(eventMap.values()).sort((a, b) => b.revenue - a.revenue),
+        eventBreakdown,
       });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -988,8 +982,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { username, password } = req.body;
     const adminPassword = process.env.ADMIN_USER_PASSWORD || "admin123";
 
+    // Fallback for hardcoded admin login
     if (username === "admin" && password === adminPassword) {
       return res.json({ success: true });
+    }
+
+    // Look up user in database
+    const user = await storage.getUserByUsername(username);
+    if (!user) {
+      return res.status(401).json({ success: false, error: "Invalid credentials" });
+    }
+
+    // Verify password securely
+    const isValid = await bcrypt.compare(password, user.password);
+    if (isValid) {
+      res.json({ success: true, userId: user.id });
+    } else {
+      res.status(401).json({ success: false, error: "Invalid credentials" });
     }
 
     // Fallback to checking DB users

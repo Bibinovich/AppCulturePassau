@@ -41,7 +41,11 @@ export class DatabaseStorage {
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
-    const [user] = await db.update(users).set(data).where(eq(users.id, id)).returning();
+    const updateData = { ...data };
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+    const [user] = await db.update(users).set(updateData).where(eq(users.id, id)).returning();
     return user;
   }
 
@@ -268,11 +272,9 @@ export class DatabaseStorage {
     const followerRecords = await db.select().from(follows).where(eq(follows.targetId, profileId));
     if (followerRecords.length === 0) return [];
     const userIds = followerRecords.map(f => f.followerId);
-    const members: User[] = [];
-    for (const uid of userIds) {
-      const user = await this.getUser(uid);
-      if (user) members.push(user);
-    }
+
+    // Fetch all members in a single query instead of N+1
+    const members = await db.select().from(users).where(inArray(users.id, userIds));
     return members;
   }
 
@@ -329,10 +331,20 @@ export class DatabaseStorage {
     const placements = placementType
       ? await query.where(and(eq(sponsorPlacements.placementType, placementType), lte(sponsorPlacements.startDate!, now), gte(sponsorPlacements.endDate!, now))).orderBy(desc(sponsorPlacements.weight))
       : await query.orderBy(desc(sponsorPlacements.weight));
+
+    if (placements.length === 0) return [];
+
+    const sponsorIds = [...new Set(placements.map(p => p.sponsorId))];
+    const fetchedSponsors = await db.select().from(sponsors).where(inArray(sponsors.id, sponsorIds));
+
+    const sponsorMap = new Map<string, Sponsor>();
+    for (const s of fetchedSponsors) {
+      sponsorMap.set(s.id, s);
+    }
+
     const results = [];
     for (const p of placements) {
-      const sponsor = await this.getSponsor(p.sponsorId);
-      results.push({ ...p, sponsor });
+      results.push({ ...p, sponsor: sponsorMap.get(p.sponsorId) });
     }
     return results;
   }
