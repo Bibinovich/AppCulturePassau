@@ -883,12 +883,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allUsers = await storage.getAllUsers();
       const allPerks = await storage.getAllPerks();
 
-      const totalRevenue = allTickets.reduce((sum, t) => sum + (t.totalPrice || 0), 0);
-      const platformRevenue = allTickets.reduce((sum, t) => sum + (t.platformFee || 0), 0);
-      const organizerRevenue = allTickets.reduce((sum, t) => sum + (t.organizerAmount || 0), 0);
-      const scannedTickets = allTickets.filter(t => t.status === 'used').length;
-      const confirmedTickets = allTickets.filter(t => t.status === 'confirmed').length;
-      const cancelledTickets = allTickets.filter(t => t.status === 'cancelled').length;
+      let totalRevenue = 0;
+      let platformRevenue = 0;
+      let organizerRevenue = 0;
+      let scannedTickets = 0;
+      let confirmedTickets = 0;
+      let cancelledTickets = 0;
 
       const eventBreakdown = calculateEventBreakdown(allTickets);
 
