@@ -199,6 +199,8 @@ export default function HomeScreen() {
     [],
   );
 
+  const hasContent = filterByLocation(sampleEvents).length > 0;
+
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
       <View style={[styles.topBar, Platform.OS === 'web' && { maxWidth: 900, alignSelf: 'center', width: '100%' }]}>
@@ -242,7 +244,24 @@ export default function HomeScreen() {
           <Text style={styles.heroTitle}>{firstName}</Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(150).duration(500)}>
+        {!hasContent ? (
+          <View style={styles.emptyStateContainer}>
+            <Ionicons name="location-outline" size={64} color={Colors.textTertiary} />
+            <Text style={styles.emptyStateTitle}>No events found</Text>
+            <Text style={styles.emptyStateSub}>
+              There are no events happening in this location.
+            </Text>
+            <LocationPicker
+              customTrigger={
+                <View style={styles.emptyStateBtn}>
+                  <Text style={styles.emptyStateBtnText}>Choose a different location</Text>
+                </View>
+              }
+            />
+          </View>
+        ) : (
+          <>
+            <Animated.View entering={FadeInDown.delay(150).duration(500)}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -477,21 +496,23 @@ export default function HomeScreen() {
           </Pressable>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(450).duration(500)}>
-          <Pressable
-            style={[styles.exploreCta, Platform.OS === 'web' && { cursor: 'pointer' }]}
-            onPress={() => router.push('/allevents')}
-          >
-            <View style={styles.exploreCtaIcon}>
-              <Ionicons name="compass" size={24} color={Colors.primary} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.exploreCtaTitle}>Explore All Events</Text>
-              <Text style={styles.exploreCtaSub}>Discover what's happening near you</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
-          </Pressable>
-        </Animated.View>
+            <Animated.View entering={FadeInDown.delay(450).duration(500)}>
+              <Pressable
+                style={[styles.exploreCta, Platform.OS === 'web' && { cursor: 'pointer' }]}
+                onPress={() => router.push('/allevents')}
+              >
+                <View style={styles.exploreCtaIcon}>
+                  <Ionicons name="compass" size={24} color={Colors.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.exploreCtaTitle}>Explore All Events</Text>
+                  <Text style={styles.exploreCtaSub}>Discover what's happening near you</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
+              </Pressable>
+            </Animated.View>
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -766,4 +787,35 @@ const styles = StyleSheet.create({
   },
   exploreCtaTitle: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: Colors.text },
   exploreCtaSub: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontFamily: 'Poppins_700Bold',
+    color: Colors.text,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateSub: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  emptyStateBtn: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  emptyStateBtnText: {
+    fontSize: 15,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#FFF',
+  },
 });

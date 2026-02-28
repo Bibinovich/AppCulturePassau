@@ -14,7 +14,7 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { locations } from '@/data/mockData';
 import Colors from '@/constants/colors';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   AU: '🇦🇺',
@@ -24,7 +24,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
   CA: '🇨🇦',
 };
 
-export function LocationPicker() {
+export function LocationPicker({ customTrigger }: { customTrigger?: React.ReactNode }) {
   const { state, updateLocation } = useOnboarding();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<'country' | 'city'>('country');
@@ -64,12 +64,16 @@ export function LocationPicker() {
 
   return (
     <>
-      <Pressable style={styles.trigger} onPress={open}>
-        <View style={styles.triggerDot}>
-          <Ionicons name="location" size={14} color="#FFF" />
-        </View>
-        <Text style={styles.triggerText} numberOfLines={1}>{locationLabel}</Text>
-        <Ionicons name="chevron-down" size={14} color={Colors.textTertiary} />
+      <Pressable onPress={open}>
+        {customTrigger ? customTrigger : (
+          <View style={styles.trigger}>
+            <View style={styles.triggerDot}>
+              <Ionicons name="location" size={14} color="#FFF" />
+            </View>
+            <Text style={styles.triggerText} numberOfLines={1}>{locationLabel}</Text>
+            <Ionicons name="chevron-down" size={14} color={Colors.textTertiary} />
+          </View>
+        )}
       </Pressable>
 
       <Modal
