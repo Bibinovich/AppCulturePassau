@@ -416,12 +416,20 @@ export class DatabaseStorage {
 
   async getUserRedemptions(userId: string): Promise<(PerkRedemption & { perk?: Perk })[]> {
     const redemptions = await db.select().from(perkRedemptions).where(eq(perkRedemptions.userId, userId)).orderBy(desc(perkRedemptions.redeemedAt));
-    const results = [];
-    for (const r of redemptions) {
-      const perk = await this.getPerk(r.perkId);
-      results.push({ ...r, perk });
+    if (redemptions.length === 0) return [];
+
+    const perkIds = Array.from(new Set(redemptions.map((r) => r.perkId)));
+    const fetchedPerks = await db.select().from(perks).where(inArray(perks.id, perkIds));
+
+    const perksMap = new Map<string, Perk>();
+    for (const p of fetchedPerks) {
+      perksMap.set(p.id, p);
     }
-    return results;
+
+    return redemptions.map((r) => ({
+      ...r,
+      perk: perksMap.get(r.perkId)
+    }));
   }
 
   // === Memberships ===

@@ -747,6 +747,10 @@ var DatabaseStorage = class {
     const now = /* @__PURE__ */ new Date();
     let query = db.select().from(sponsorPlacements);
     const placements = placementType ? await query.where(and(eq(sponsorPlacements.placementType, placementType), lte(sponsorPlacements.startDate, now), gte(sponsorPlacements.endDate, now))).orderBy(desc(sponsorPlacements.weight)) : await query.orderBy(desc(sponsorPlacements.weight));
+    const results = [];
+    for (const p2 of placements) {
+      const sponsor = await this.getSponsor(p2.sponsorId);
+      results.push({ ...p2, sponsor });
     if (placements.length === 0) return [];
     const sponsorIds = [...new Set(placements.map((p2) => p2.sponsorId))];
     const fetchedSponsors = await db.select().from(sponsors).where(inArray(sponsors.id, sponsorIds));
@@ -802,6 +806,17 @@ var DatabaseStorage = class {
   }
   async getUserRedemptions(userId) {
     const redemptions = await db.select().from(perkRedemptions).where(eq(perkRedemptions.userId, userId)).orderBy(desc(perkRedemptions.redeemedAt));
+    if (redemptions.length === 0) return [];
+    const perkIds = Array.from(new Set(redemptions.map((r) => r.perkId)));
+    const fetchedPerks = await db.select().from(perks).where(inArray(perks.id, perkIds));
+    const perksMap = /* @__PURE__ */ new Map();
+    for (const p2 of fetchedPerks) {
+      perksMap.set(p2.id, p2);
+    }
+    return redemptions.map((r) => ({
+      ...r,
+      perk: perksMap.get(r.perkId)
+    }));
     const results = [];
     for (const r of redemptions) {
       const perk = await this.getPerk(r.perkId);
