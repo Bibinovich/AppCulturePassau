@@ -36,11 +36,13 @@ export default function CalendarScreen() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const { filterByLocation } = useLocationFilter();
 
+  const filteredEvents = useMemo(() => filterByLocation(sampleEvents), [filterByLocation]);
+
   const eventDates = useMemo(() => {
     const dates = new Set<string>();
-    filterByLocation(sampleEvents).forEach(e => dates.add(e.date));
+    filteredEvents.forEach(e => dates.add(e.date));
     return dates;
-  }, [filterByLocation]);
+  }, [filteredEvents]);
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
@@ -48,7 +50,7 @@ export default function CalendarScreen() {
   for (let i = 0; i < firstDay; i++) days.push(null);
   for (let i = 1; i <= daysInMonth; i++) days.push(i);
 
-  const selectedEvents = selectedDate ? filterByLocation(sampleEvents).filter(e => e.date === selectedDate) : [];
+  const selectedEvents = selectedDate ? filteredEvents.filter(e => e.date === selectedDate) : [];
 
   function prevMonth() {
     Haptics.selectionAsync();
@@ -96,7 +98,7 @@ export default function CalendarScreen() {
           <View style={styles.summaryChip}>
             <Ionicons name="calendar" size={14} color={Colors.primary} />
             <Text style={styles.summaryChipText}>
-              {filterByLocation(sampleEvents).length} events
+              {filteredEvents.length} events
             </Text>
           </View>
           <View style={styles.summaryChip}>
@@ -204,7 +206,7 @@ export default function CalendarScreen() {
         {!selectedDate && (
           <View style={styles.eventsSection}>
             <Text style={styles.eventsSectionTitle}>Upcoming Events</Text>
-            {filterByLocation(sampleEvents).slice(0, 4).map(event => (
+            {filteredEvents.slice(0, 4).map(event => (
               <Pressable
                 key={event.id}
                 onPress={() => {
