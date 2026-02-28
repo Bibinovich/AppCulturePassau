@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
-import { sampleEvents, type EventData } from '@/data/mockData';
+import { sampleEvents } from '@/data/mockData';
 import { useLocationFilter } from '@/hooks/useLocationFilter';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
