@@ -1114,7 +1114,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Seed a demo user
-      const demoPassword = process.env.DEMO_USER_PASSWORD || "demo123";
+      const demoPassword = process.env.DEMO_USER_PASSWORD;
+      if (!demoPassword) {
+        throw new Error("DEMO_USER_PASSWORD environment variable is required for seeding the demo account");
+      }
       const demoUser = await storage.createUser({ username: "demo", password: demoPassword });
       await storage.updateUser(demoUser.id, {
         displayName: "Alex Chen",
