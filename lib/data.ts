@@ -18,6 +18,11 @@ export interface Event {
   ticketsSold?: number;
 }
 
+export interface Order {
+  id: string;
+  [key: string]: any;
+}
+
 export interface Artist {
   id: string;
   name: string;

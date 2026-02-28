@@ -731,3 +731,9 @@ const styles = StyleSheet.create({
   viewQrText: { fontFamily: 'Poppins_600SemiBold', fontSize: 15, color: CP.text },
   viewQrSub:  { fontFamily: 'Poppins_400Regular', fontSize: 12, color: CP.muted, marginTop: 1 },
 });
+
+BrandDots.displayName = 'BrandDots';
+StatItem.displayName = 'StatItem';
+SectionHeader.displayName = 'SectionHeader';
+SocialCard.displayName = 'SocialCard';
+DetailRow.displayName = 'DetailRow';

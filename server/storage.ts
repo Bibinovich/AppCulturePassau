@@ -59,7 +59,7 @@ export class DatabaseStorage {
   }
 
   async getProfilesByType(entityType: string): Promise<Profile[]> {
-    return db.select().from(profiles).where(eq(profiles.entityType, entityType)).orderBy(desc(profiles.createdAt));
+    return db.select().from(profiles).where(eq(profiles.entityType, entityType as any)).orderBy(desc(profiles.createdAt));
   }
 
   async getAllProfiles(): Promise<Profile[]> {
@@ -88,7 +88,7 @@ export class DatabaseStorage {
     );
     if (existing.length > 0) return existing[0];
 
-    const [follow] = await db.insert(follows).values({ followerId, targetId, targetType }).returning();
+    const [follow] = await db.insert(follows).values({ followerId, targetId, targetType: targetType as any }).returning();
     if (targetType === "user") {
       await db.update(users).set({ followersCount: sql`${users.followersCount} + 1` }).where(eq(users.id, targetId));
       await db.update(users).set({ followingCount: sql`${users.followingCount} + 1` }).where(eq(users.id, followerId));
@@ -137,7 +137,7 @@ export class DatabaseStorage {
     );
     if (existing.length > 0) return existing[0];
 
-    const [like] = await db.insert(likes).values({ userId, targetId, targetType }).returning();
+    const [like] = await db.insert(likes).values({ userId, targetId, targetType: targetType as any }).returning();
     if (targetType === "user") {
       await db.update(users).set({ likesCount: sql`${users.likesCount} + 1` }).where(eq(users.id, targetId));
     } else {
@@ -175,7 +175,7 @@ export class DatabaseStorage {
   }
 
   async createReview(data: InsertReview): Promise<Review> {
-    const [review] = await db.insert(reviews).values(data).returning();
+    const [review] = await db.insert(reviews).values(data as any).returning();
     const allReviews = await this.getReviews(data.targetId);
     const avgRating = allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length;
     await db.update(profiles).set({
