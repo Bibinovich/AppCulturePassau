@@ -11,19 +11,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // === Users ===
   app.get("/api/users", async (_req: Request, res: Response) => {
     const users = await storage.getAllUsers();
-    res.json(users);
+    const sanitizedUsers = users.map(({ password, ...rest }) => rest);
+    res.json(sanitizedUsers);
   });
 
   app.get("/api/users/:id", async (req: Request, res: Response) => {
     const user = await storage.getUser(p(req.params.id));
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    const { password, ...sanitizedUser } = user;
+    res.json(sanitizedUser);
   });
 
   app.post("/api/users", async (req: Request, res: Response) => {
     try {
       const user = await storage.createUser(req.body);
-      res.status(201).json(user);
+      const { password, ...sanitizedUser } = user;
+      res.status(201).json(sanitizedUser);
     } catch (e: any) {
       res.status(400).json({ error: e.message });
     }
@@ -32,7 +35,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/users/:id", async (req: Request, res: Response) => {
     const user = await storage.updateUser(p(req.params.id), req.body);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    const { password, ...sanitizedUser } = user;
+    res.json(sanitizedUser);
   });
 
   // === Profiles (communities, orgs, venues, businesses, councils, governments, artists) ===
@@ -983,11 +987,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/dashboard/login", async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const adminPassword = process.env.ADMIN_USER_PASSWORD || "admin123";
+
     if (username === "admin" && password === adminPassword) {
-      res.json({ success: true });
-    } else {
-      res.status(401).json({ success: false, error: "Invalid credentials" });
+      return res.json({ success: true });
     }
+
+    // Fallback to checking DB users
+    try {
+      const dbUser = await storage.getUserByUsername(username);
+      if (dbUser && dbUser.password) {
+        const bcrypt = await import("bcryptjs");
+        const isValid = await bcrypt.compare(password, dbUser.password);
+        if (isValid) {
+          return res.json({ success: true });
+        }
+      }
+    } catch (e) {
+      console.error("Login fallback error:", e);
+    }
+
+    res.status(401).json({ success: false, error: "Invalid credentials" });
   });
 
   // === CulturePass ID (CPID) ===
