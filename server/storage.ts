@@ -1,6 +1,7 @@
 import { db } from "./db";
 import { eq, and, desc, sql, lte, gte, inArray } from "drizzle-orm";
 import QRCode from "qrcode";
+import bcrypt from "bcryptjs";
 import {
   users, profiles, follows, likes, reviews,
   paymentMethods, transactions, wallets,
@@ -33,13 +34,18 @@ export class DatabaseStorage {
   }
 
   async createUser(data: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(data).returning();
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const [user] = await db.insert(users).values({ ...data, password: hashedPassword }).returning();
     await db.insert(wallets).values({ userId: user.id });
     return user;
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
-    const [user] = await db.update(users).set(data).where(eq(users.id, id)).returning();
+    const updateData = { ...data };
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+    const [user] = await db.update(users).set(updateData).where(eq(users.id, id)).returning();
     return user;
   }
 
