@@ -272,11 +272,9 @@ export class DatabaseStorage {
     const followerRecords = await db.select().from(follows).where(eq(follows.targetId, profileId));
     if (followerRecords.length === 0) return [];
     const userIds = followerRecords.map(f => f.followerId);
-    const members: User[] = [];
-    for (const uid of userIds) {
-      const user = await this.getUser(uid);
-      if (user) members.push(user);
-    }
+
+    // Fetch all members in a single query instead of N+1
+    const members = await db.select().from(users).where(inArray(users.id, userIds));
     return members;
   }
 
