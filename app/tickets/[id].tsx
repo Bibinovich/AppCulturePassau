@@ -19,18 +19,7 @@ import { apiRequest, queryClient, getQueryFn } from '@/lib/query-client';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useCallback } from 'react';
 import { Ticket } from '@shared/schema';
-
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return '';
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    const [y, m, d] = parts.map(Number);
-    const date = new Date(y!, m! - 1, d);
-    return date.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  }
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-}
+import { formatDate } from '@shared/utils/date';
 
 function getStatusInfo(status: string | null) {
   switch (status) {
@@ -103,7 +92,7 @@ export default function TicketDetailScreen() {
     try {
       await Share.share({
         title: ticket.eventTitle,
-        message: `I'm going to ${ticket.eventTitle}! 🎫\n${ticket.eventVenue ? `📍 ${ticket.eventVenue}` : ''}\n${ticket.eventDate ? `📅 ${formatDate(ticket.eventDate)}` : ''}\n\nTicket Code: ${ticket.ticketCode || 'N/A'}\n\nGet yours on CulturePass!`,
+        message: `I'm going to ${ticket.eventTitle}! 🎫\n${ticket.eventVenue ? `📍 ${ticket.eventVenue}` : ''}\n${ticket.eventDate ? `📅 ${formatDate(ticket.eventDate, 'weekday-long')}` : ''}\n\nTicket Code: ${ticket.ticketCode || 'N/A'}\n\nGet yours on CulturePass!`,
       });
     } catch {}
   }, [ticket]);
@@ -226,7 +215,7 @@ export default function TicketDetailScreen() {
                   <Ionicons name="calendar" size={16} color={Colors.primary} />
                   <View>
                     <Text style={styles.infoLabel}>Date</Text>
-                    <Text style={styles.infoValue}>{formatDate(ticket.eventDate)}</Text>
+                    <Text style={styles.infoValue}>{formatDate(ticket.eventDate, 'weekday-long')}</Text>
                   </View>
                 </View>
               )}

@@ -7,6 +7,7 @@ import * as Haptics from 'expo-haptics';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/query-client';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { formatDate } from '@shared/utils/date';
 
 interface Ticket {
   id: string;
@@ -31,12 +32,6 @@ function useDemoUserId() {
   return data?.[0]?.id;
 }
 
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
-}
-
 function getStatusStyle(status: string | null) {
   switch (status) {
     case 'confirmed': return { bg: Colors.success + '15', color: Colors.success, label: 'Confirmed' };
@@ -49,7 +44,7 @@ function getStatusStyle(status: string | null) {
 
 async function handleShare(ticket: Ticket) {
   try {
-    const dateStr = ticket.eventDate ? formatDate(ticket.eventDate) : '';
+    const dateStr = ticket.eventDate ? formatDate(ticket.eventDate, 'weekday-short') : '';
     const timeStr = ticket.eventTime ? ` at ${ticket.eventTime}` : '';
     const venueStr = ticket.eventVenue ? `\nVenue: ${ticket.eventVenue}` : '';
     const message = `Check out my ticket for ${ticket.eventTitle}!\n${dateStr}${timeStr}${venueStr}`;
@@ -128,7 +123,7 @@ export default function TicketsScreen() {
               {ticket.eventDate && (
                 <View style={styles.ticketMetaItem}>
                   <Ionicons name="calendar-outline" size={14} color={Colors.textSecondary} />
-                  <Text style={styles.ticketMetaText}>{formatDate(ticket.eventDate)}</Text>
+                  <Text style={styles.ticketMetaText}>{formatDate(ticket.eventDate, 'weekday-short')}</Text>
                 </View>
               )}
               {ticket.eventTime && (

@@ -10,6 +10,7 @@ import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { sampleEvents } from '@/data/mockData';
 import { useLocationFilter } from '@/hooks/useLocationFilter';
+import { formatDate } from '@shared/utils/date';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -169,7 +170,7 @@ export default function CalendarScreen() {
         {selectedDate && (
           <View style={styles.eventsSection}>
             <Text style={styles.eventsSectionTitle}>
-              Events on {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long' })}
+              Events on {formatDate(selectedDate, 'long')}
             </Text>
             {selectedEvents.length === 0 ? (
               <View style={styles.noEvents}>
@@ -219,7 +220,7 @@ export default function CalendarScreen() {
                 <View style={styles.eventRowInfo}>
                   <Text style={styles.eventRowTitle} numberOfLines={1}>{event.title}</Text>
                   <Text style={styles.eventRowTime}>
-                    {new Date(event.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} {event.time}
+                    {formatDate(event.date, 'short')} {event.time}
                   </Text>
                   <Text style={styles.eventRowVenue} numberOfLines={1}>{event.venue}</Text>
                 </View>

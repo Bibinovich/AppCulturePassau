@@ -24,13 +24,7 @@ import { useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/query-client';
 import type { Wallet, User, Membership } from '@shared/schema';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-
-function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  if (!year || !month || !day) return dateStr;
-  const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+import { formatDate } from '@shared/utils/date';
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -492,7 +486,7 @@ export default function ProfileScreen() {
                       <Text style={styles.miniTitle} numberOfLines={1}>
                         {e.title}
                       </Text>
-                      <Text style={styles.miniSub}>{formatDate(e.date)}</Text>
+                      <Text style={styles.miniSub}>{formatDate(e.date, 'short-year')}</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={16} color={Colors.textTertiary} />
                   </Pressable>
