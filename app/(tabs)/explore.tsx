@@ -21,20 +21,13 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FilterChipRow, FilterItem } from '@/components/FilterChip';
 import { useLocationFilter } from '@/hooks/useLocationFilter';
+import { formatDate } from '@shared/utils/date';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type SampleEvent = (typeof sampleEvents)[number];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatDate(dateStr: string): string {
-  // Parse manually to avoid UTC/local timezone shifting the date
-  const [year, month, day] = dateStr.split('-').map(Number);
-  if (!year || !month || !day) return dateStr;
-  const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
-}
 
 function fuzzyMatch(text: string, query: string): number {
   if (!text) return 0;

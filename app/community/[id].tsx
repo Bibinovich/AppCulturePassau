@@ -11,17 +11,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Colors, { shadows } from '@/constants/colors';
 import { useSaved } from '@/contexts/SavedContext';
 import { sampleCommunities, sampleEvents } from '@/data/mockData';
+import { formatDate } from '@shared/utils/date';
 
 function formatNumber(num: number): string {
   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
   return num.toString();
-}
-
-function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  if (!year || !month || !day) return dateStr;
-  const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
 }
 
 export default function CommunityDetailScreen() {
@@ -138,7 +132,7 @@ export default function CommunityDetailScreen() {
                   <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
                   <View style={styles.eventInfo}>
                     <Text style={styles.eventTitle} numberOfLines={1}>{event.title}</Text>
-                    <Text style={styles.eventDate}>{formatDate(event.date)} - {event.time}</Text>
+                    <Text style={styles.eventDate}>{formatDate(event.date, 'short')} - {event.time}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
                 </Pressable>

@@ -8,15 +8,9 @@ import Colors from '@/constants/colors';
 import { useMemo, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { formatDate } from '@shared/utils/date';
 
 type TabKey = 'events' | 'communities';
-
-function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  if (!year || !month || !day) return dateStr;
-  const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
-}
 
 export default function SavedScreen() {
   const insets = useSafeAreaInsets();
@@ -104,7 +98,7 @@ export default function SavedScreen() {
                       <Text style={styles.eventTitle} numberOfLines={2}>{event.title}</Text>
                       <View style={styles.eventMeta}>
                         <Ionicons name="calendar-outline" size={13} color={Colors.textSecondary} />
-                        <Text style={styles.eventMetaText}>{formatDate(event.date)}</Text>
+                        <Text style={styles.eventMetaText}>{formatDate(event.date, 'weekday-short')}</Text>
                       </View>
                       <View style={styles.eventMeta}>
                         <Ionicons name="location-outline" size={13} color={Colors.textSecondary} />

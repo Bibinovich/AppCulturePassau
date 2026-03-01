@@ -33,6 +33,7 @@ import { getQueryFn } from '@/lib/query-client';
 import { useMemo, useCallback, useState } from 'react';
 import { LocationPicker } from '@/components/LocationPicker';
 import { useLocationFilter } from '@/hooks/useLocationFilter';
+import { formatDate } from '@shared/utils/date';
 
 type SampleEvent = (typeof sampleEvents)[number];
 
@@ -47,13 +48,6 @@ const SECTION_ROUTES: Record<string, string> = {
   events: '/(tabs)/explore',
   directory: '/(tabs)/directory',
 };
-
-function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  if (!year || !month || !day) return dateStr;
-  const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
-}
 
 function getLocalYYYYMMDD(d: Date): string {
   const year = d.getFullYear();

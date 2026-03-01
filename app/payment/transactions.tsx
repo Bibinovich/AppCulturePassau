@@ -5,6 +5,7 @@ import Colors from '@/constants/colors';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { formatDate } from '@shared/utils/date';
 
 interface Transaction {
   id: string;
@@ -41,12 +42,6 @@ function getStatusColor(status: string | null): string {
   }
 }
 
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
 function TransactionItem({ item, index }: { item: Transaction; index: number }) {
   const isTopup = item.type === 'topup';
   const color = isTopup ? Colors.success : Colors.error;
@@ -61,7 +56,7 @@ function TransactionItem({ item, index }: { item: Transaction; index: number }) 
           {item.description || (isTopup ? 'Wallet Top Up' : 'Payment')}
         </Text>
         <View style={styles.txMeta}>
-          <Text style={styles.txDate}>{formatDate(item.createdAt)}</Text>
+          <Text style={styles.txDate}>{formatDate(item.createdAt, 'datetime')}</Text>
           {item.category && (
             <>
               <Text style={styles.txDot}>·</Text>
