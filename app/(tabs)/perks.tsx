@@ -129,7 +129,13 @@ export default function PerksTabScreen() {
     <View style={[styles.container, { paddingTop: insets.top + webTop }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Perks & Benefits</Text>
-        <Pressable onPress={() => router.push('/submit')} style={styles.addBtn} hitSlop={8}>
+        <Pressable
+          onPress={() => router.push('/submit')}
+          style={styles.addBtn}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Submit a new perk"
+        >
           <Ionicons name="add" size={22} color={Colors.primary} />
         </Pressable>
       </View>
@@ -229,7 +235,13 @@ export default function PerksTabScreen() {
                         <View style={[styles.perkValue, { backgroundColor: typeInfo.color + '12' }]}>
                           <Text style={[styles.perkValueText, { color: typeInfo.color }]}>{formatValue(perk)}</Text>
                         </View>
-                        <Pressable hitSlop={8} onPress={() => handleSharePerk(perk)} style={styles.perkShareBtn}>
+                        <Pressable
+                          hitSlop={8}
+                          onPress={() => handleSharePerk(perk)}
+                          style={styles.perkShareBtn}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Share ${perk.title}`}
+                        >
                           <Ionicons name="share-outline" size={16} color={Colors.textTertiary} />
                         </Pressable>
                       </View>
